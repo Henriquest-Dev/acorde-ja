@@ -14,7 +14,9 @@ Legenda: ✅ implementado e verificado neste ambiente · 🟡 implementado, veri
 | TypeScript (`tsc --noEmit`) — core e mobile | ✅ sem erros |
 | Edge Function `assistant` — tipos contra `@anthropic-ai/sdk@1.3.0` | ✅ sem erros |
 | Aplicativo na web (Playwright, 390×844) | ✅ os 15 ecrãs da imagem renderizam; capturas em `docs/screenshots/` |
-| Compilação Android (Gradle) | ver secção Android |
+| Kotlin — JUnit (`:acorde-native:testDebugUnitTest`) | ✅ 8 testes (parser/resposta DNS, correspondência de subdomínios, limiares, excepções, horários nocturnos, serialização) |
+| Compilação Android (`:app:assembleDebug`, arm64-v8a) | ✅ `BUILD SUCCESSFUL` — APK de debug gerado; manifesto final verificado (usage stats, overlay, FGS specialUse, VPN, receiver) |
+| `expo lint` | ✅ 0 erros (1 aviso informativo do React Compiler sobre react-hook-form) |
 | Compilação iOS | ⚠️ impossível neste ambiente (Linux, sem Xcode) |
 
 ## Ecrãs da imagem de referência
@@ -41,7 +43,11 @@ Legenda: ✅ implementado e verificado neste ambiente · 🟡 implementado, veri
 
 Implementado: `UsageCalculator`, `EnforcementService` (foreground `specialUse`), `BlockOverlay`,
 `ShieldVpnService` (DNS), `SystemEventsReceiver`, `RuleStore`, `RuleEvaluator`, `Notifier`,
-`AcordeNativeModule` (API tipada). Ver resultado da compilação no relatório da sessão.
+`AcordeNativeModule` (API tipada). Compila e está incluído no APK de debug (ver tabela acima).
+
+Nota de ambiente: neste ambiente de CI o Maven Central devolvia HTTP 429; foi usado localmente um
+*init script* do Gradle (fora do repositório) que aponta para o espelho oficial do Maven Central
+no Google Cloud Storage. Não é necessário em máquinas normais.
 
 Não testado em dispositivo real neste ambiente: medição, sobreposição, VPN e notificações nativas
 exigem um telemóvel/emulador. Testes manuais recomendados: aplicação fechada, reinício do
