@@ -1,5 +1,5 @@
 import { addDays, dayKey, startOfLocalDay, type ExceptionGrant, type OverrideReason, type UsageDailyRow } from '@acorde/core';
-import { getDb } from '@/database/db';
+import { getDb, inTransaction } from '@/database/db';
 
 /** Linha especial com o tempo de ecrã total do dia (todas as aplicações). */
 export const SCREEN_TOTAL_ID = '__screen__';
@@ -17,7 +17,7 @@ export async function upsertUsage(rows: UsageDailyRow[]): Promise<void> {
   if (rows.length === 0) return;
   const db = await getDb();
   const now = Date.now();
-  await db.withExclusiveTransactionAsync(async (tx) => {
+  await inTransaction(db, async (tx) => {
     for (const r of rows) {
       await tx.runAsync(
         `INSERT INTO usage_daily (day, app_id, app_name, used_ms, limit_ms, opens, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -118,7 +118,7 @@ export interface BlockEvent {
 export async function insertEvents(events: BlockEvent[]): Promise<void> {
   if (events.length === 0) return;
   const db = await getDb();
-  await db.withExclusiveTransactionAsync(async (tx) => {
+  await inTransaction(db, async (tx) => {
     for (const e of events) {
       await tx.runAsync(
         'INSERT OR IGNORE INTO block_events (id, app_id, kind, day, meta, created_at) VALUES (?, ?, ?, ?, ?, ?)',

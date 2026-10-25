@@ -73,3 +73,17 @@ export async function scheduleHabitReminders(habit: Habit): Promise<string[]> {
   });
   return [id];
 }
+
+const WEEKLY_ID = 'weekly-summary';
+
+/** Lembrete semanal (domingo, 19:00) para rever o relatório — sem números inventados na notificação. */
+export async function syncWeeklySummary(enabled: boolean): Promise<void> {
+  if (Platform.OS === 'web') return;
+  await Notifications.cancelScheduledNotificationAsync(WEEKLY_ID).catch(() => undefined);
+  if (!enabled || !(await canNotify())) return;
+  await Notifications.scheduleNotificationAsync({
+    identifier: WEEKLY_ID,
+    content: { title: 'O seu resumo semanal', body: 'Veja como correu a semana no Acorde Já.', data: { url: 'acordeja://progress' } },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.WEEKLY, weekday: 1, hour: 19, minute: 0 },
+  });
+}

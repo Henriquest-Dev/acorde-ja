@@ -109,11 +109,12 @@ export async function refreshUsage(now = new Date()): Promise<{ measured: boolea
 /** Envia a configuração actual das regras para o serviço nativo. */
 export async function syncRulesToNative(now = new Date()): Promise<void> {
   const [limits, schedules, exceptions] = await Promise.all([listLimits(), listSchedules(), exceptionsForDay(dayKey(now))]);
-  const { rules } = usePrefs.getState().prefs;
+  const { rules, notifications } = usePrefs.getState().prefs;
   await pushRuleConfig({
     limits: limits.map((l) => ({ appId: l.appId, packageNames: l.packageNames, limitMinutes: l.limitMinutes, enabled: l.enabled })),
     schedules: schedules.map(({ label: _label, ...s }) => s),
     strictMode: rules.strictMode,
+    notify: notifications.limitWarnings,
     exceptions: exceptions.map((e) => ({ appId: e.appId, day: e.day, extraMinutes: e.extraMinutes })),
   });
 }

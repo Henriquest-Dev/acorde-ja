@@ -109,11 +109,11 @@ class EnforcementService : Service() {
       if (prev != ev.state) {
         when (ev.state) {
           "WARNING" -> if (prev == null || prev == "AVAILABLE") {
-            Notifier.warn(this, limit.appId, name, ev.usedMs / 60_000, ev.limitMs / 60_000)
+            if (config.notify) Notifier.warn(this, limit.appId, name, ev.usedMs / 60_000, ev.limitMs / 60_000)
             store.appendEvent("warning", limit.appId, JSONObject().put("usedMs", ev.usedMs))
           }
           "BLOCKED" -> {
-            Notifier.blocked(this, limit.appId, name, ev.limitMs / 60_000)
+            if (config.notify) Notifier.blocked(this, limit.appId, name, ev.limitMs / 60_000)
             store.appendEvent("blocked", limit.appId, JSONObject().put("usedMs", ev.usedMs))
           }
           "SCHEDULED_BLOCK" -> store.appendEvent("scheduled_block", limit.appId)

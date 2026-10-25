@@ -30,6 +30,8 @@ class RuleStore(context: Context) {
     val schedules: List<Schedule>,
     val strictMode: Boolean,
     val exceptions: List<Exception>,
+    /** Notificações de aviso/bloqueio activas (preferência do utilizador). */
+    val notify: Boolean = true,
   )
 
   fun saveConfigJson(json: String) {
@@ -165,7 +167,7 @@ class RuleStore(context: Context) {
           Exception(e.getString("appId"), e.getString("day"), e.getInt("extraMinutes"))
         }
       } ?: emptyList()
-      return Config(limits, schedules, o.optBoolean("strictMode", false), exceptions)
+      return Config(limits, schedules, o.optBoolean("strictMode", false), exceptions, o.optBoolean("notify", true))
     }
 
     fun toJson(c: Config): String {
@@ -179,6 +181,7 @@ class RuleStore(context: Context) {
           .put("days", JSONArray(it.days)).put("appIds", JSONArray(it.appIds))
       }))
       o.put("strictMode", c.strictMode)
+      o.put("notify", c.notify)
       o.put("exceptions", JSONArray(c.exceptions.map {
         JSONObject().put("appId", it.appId).put("day", it.day).put("extraMinutes", it.extraMinutes)
       }))

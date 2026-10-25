@@ -22,6 +22,20 @@ export default function LimitWarning() {
     );
   }
 
+  if (!data?.measured) {
+    return (
+      <AppBlockScreen
+        icon={<BrandIcon appId={app.appId} name={app.name} size={64} />}
+        title="Sem dados de utilização"
+        message={`Não é possível medir o tempo no ${app.name} neste dispositivo, por isso não há aviso a mostrar.`}
+      >
+        <View style={{ alignSelf: 'stretch', marginTop: spacing.xxxl, paddingHorizontal: spacing.xxl }}>
+          <AppButton label="Voltar" variant="subtle" onPress={() => router.replace('/')} />
+        </View>
+      </AppBlockScreen>
+    );
+  }
+
   const used = Math.floor(app.usedMs / MINUTE);
   const percent = Math.min(100, Math.floor(app.ratio * 100));
   const close = async () => {

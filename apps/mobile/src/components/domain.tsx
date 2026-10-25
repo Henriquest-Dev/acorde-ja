@@ -32,7 +32,8 @@ export function AppUsageCard({
 }: {
   appId: string;
   name: string;
-  usedMin: number;
+  /** null = utilização desconhecida (sem permissão / plataforma sem suporte). */
+  usedMin: number | null;
   limitMin: number;
   state: string;
   onPress?: () => void;
@@ -43,12 +44,12 @@ export function AppUsageCard({
       onPress={onPress}
       disabled={!onPress}
       accessibilityRole={onPress ? 'button' : undefined}
-      accessibilityLabel={`${name}: ${usedMin} de ${limitMin} minutos${label ? `, ${label}` : ''}`}
+      accessibilityLabel={`${name}: ${usedMin ?? 'sem dados'} de ${limitMin} minutos${label ? `, ${label}` : ''}`}
       style={styles.usageRow}
     >
       <BrandIcon appId={appId} name={name} size={24} />
       <View style={{ flex: 1, gap: 4 }}>
-        <AppProgressBar progress={limitMin > 0 ? usedMin / limitMin : 0} height={4} />
+        <AppProgressBar progress={limitMin > 0 && usedMin !== null ? usedMin / limitMin : 0} height={4} />
         {label ? (
           <AppText variant="caption" tone="muted" style={{ fontSize: 10, lineHeight: 12 }}>
             {label}
@@ -56,7 +57,7 @@ export function AppUsageCard({
         ) : null}
       </View>
       <AppText variant="caption" tone="secondary" style={styles.usageValue}>
-        {usedMin} / {limitMin} min
+        {usedMin ?? '—'} / {limitMin} min
       </AppText>
     </Pressable>
   );
@@ -134,7 +135,7 @@ export function AppBlockScreen({ icon, title, message, children, footer }: { ico
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
   return (
-    <View style={[styles.block, { backgroundColor: colors.background, paddingTop: insets.top + spacing.huge, paddingBottom: insets.bottom + spacing.xxl }]}>
+    <View style={[styles.block, { backgroundColor: colors.background, paddingTop: insets.top + 110, paddingBottom: insets.bottom + spacing.xxl }]}>
       <Animated.View entering={reduce ? undefined : FadeInDown.duration(380)} style={styles.blockInner}>
         <View style={styles.blockIcon}>{icon}</View>
         <AppText variant="h1" align="center" style={{ marginTop: spacing.xxl, fontSize: 26 }} accessibilityRole="header">

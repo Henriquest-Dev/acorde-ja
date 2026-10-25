@@ -1,6 +1,21 @@
 import * as SQLite from 'expo-sqlite';
 import { MIGRATIONS } from './migrations';
 
+/**
+ * Executa `fn` numa transacção. No nativo usa uma transacção exclusiva (isola
+ * outras escritas concorrentes); na web, onde não existe, usa a normal.
+ */
+export async function inTransaction(
+  db: SQLite.SQLiteDatabase,
+  fn: (tx: Pick<SQLite.SQLiteDatabase, 'runAsync' | 'execAsync'>) => Promise<void>,
+): Promise<void> {
+  if (process.env.EXPO_OS === 'web') {
+    await db.withTransactionAsync(() => fn(db));
+    return;
+  }
+  await db.withExclusiveTransactionAsync((tx) => fn(tx));
+}
+
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 export async function migrate(db: SQLite.SQLiteDatabase): Promise<number> {
@@ -8,7 +23,7 @@ export async function migrate(db: SQLite.SQLiteDatabase): Promise<number> {
   let version = row?.user_version ?? 0;
   while (version < MIGRATIONS.length) {
     const sql = MIGRATIONS[version]!;
-    await db.withExclusiveTransactionAsync(async (tx) => {
+    await inTransaction(db, async (tx) => {
       await tx.execAsync(sql);
       await tx.execAsync(`PRAGMA user_version = ${version + 1}`);
     });
@@ -39,7 +54,7 @@ export async function wipeLocalDatabase(): Promise<void> {
   const tables = await db.getAllAsync<{ name: string }>(
     "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'",
   );
-  await db.withExclusiveTransactionAsync(async (tx) => {
+  await inTransaction(db, async (tx) => {
     for (const t of tables) await tx.execAsync(`DELETE FROM "${t.name}"`);
   });
 }

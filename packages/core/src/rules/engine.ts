@@ -237,7 +237,8 @@ export function summarize(results: AppRuleResult[]) {
     (r) => r.state !== RuleState.PERMISSION_REQUIRED && r.state !== RuleState.UNAVAILABLE,
   );
   const usedMs = measurable.reduce((s, r) => s + r.usedMs, 0);
-  const limitMs = measurable.reduce((s, r) => s + r.limitMs, 0);
+  // O limite total é configuração (não medição): conta sempre.
+  const limitMs = results.reduce((s, r) => s + r.limitMs, 0);
   return {
     usedMs,
     limitMs,

@@ -127,7 +127,7 @@ export default function Dashboard() {
                 key={a.appId}
                 appId={a.appId}
                 name={a.name}
-                usedMin={Math.floor(a.usedMs / MINUTE)}
+                usedMin={snap.measured ? Math.floor(a.usedMs / MINUTE) : null}
                 limitMin={a.limitMinutes}
                 state={a.state}
                 onPress={() => openApp(a.appId, a.state)}

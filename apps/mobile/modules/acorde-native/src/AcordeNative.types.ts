@@ -78,6 +78,8 @@ export interface NativeRuleConfig {
     appIds: string[];
   }[];
   strictMode: boolean;
+  /** Notificações de aviso aos 80% e de bloqueio. */
+  notify: boolean;
   exceptions: { appId: string; day: string; extraMinutes: number }[];
 }
 

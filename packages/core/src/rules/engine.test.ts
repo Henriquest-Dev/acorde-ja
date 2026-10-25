@@ -145,13 +145,13 @@ describe('stateTransition / summarize', () => {
     expect(stateTransition(RuleState.TEMPORARY_EXCEPTION, RuleState.WARNING)).toBeNull();
   });
 
-  it('resumo exclui apps sem dados', () => {
+  it('resumo: utilização só de apps medidas, limite total de todas', () => {
     const s = summarize([
       evaluateApp(input(18, 30), ctx),
       evaluateApp({ ...input(12, 20), appId: 'tiktok' }, ctx),
       evaluateApp({ ...input(null, 40), appId: 'youtube' }, ctx),
     ]);
     expect(s.usedMs).toBe(30 * MINUTE);
-    expect(s.limitMs).toBe(50 * MINUTE);
+    expect(s.limitMs).toBe(90 * MINUTE);
   });
 });

@@ -79,6 +79,21 @@ export default function BlockScreen() {
     );
   }
 
+  if (app.state === RuleState.PERMISSION_REQUIRED || app.state === RuleState.UNAVAILABLE) {
+    return (
+      <AppBlockScreen
+        icon={<BrandIcon appId={app.appId} name={app.name} size={72} monochrome />}
+        title="Sem dados de utilização"
+        message={`Não é possível saber quanto tempo usou o ${app.name} hoje: o acesso aos dados de utilização não está disponível neste dispositivo.`}
+      >
+        <View style={{ alignSelf: 'stretch', marginTop: spacing.xxxl, gap: spacing.md }}>
+          {data?.capabilities.platform === 'android' ? <AppButton label="Verificar permissões" onPress={() => router.replace('/settings/permissions')} /> : null}
+          <AppButton label="Ver sugestões" variant="secondary" onPress={() => setSheet('suggestions')} />
+        </View>
+      </AppBlockScreen>
+    );
+  }
+
   const scheduled = app.state === RuleState.SCHEDULED_BLOCK;
   const blocked = app.state === RuleState.BLOCKED || scheduled;
   const permission = canRequestException(app, rules);

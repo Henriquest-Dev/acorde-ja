@@ -2,7 +2,7 @@ import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, us
 import { QueryClient, QueryClientProvider, focusManager } from '@tanstack/react-query';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as Notifications from 'expo-notifications';
-import { Stack, router } from 'expo-router';
+import { Stack, router, useRootNavigationState, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -105,6 +105,16 @@ function Shell({
   biometricLock: boolean;
 }) {
   const { colors, scheme } = useTheme();
+  const segments = useSegments();
+  const navState = useRootNavigationState();
+
+  // Sem onboarding concluído, qualquer rota (excepto o retorno de autenticação) leva ao onboarding.
+  useEffect(() => {
+    if (!ready || !navState?.key) return;
+    const first = segments[0] as string | undefined;
+    if (!onboardingDone && first !== 'onboarding' && !(first === 'auth' && segments[1] === 'callback')) router.replace('/onboarding');
+  }, [ready, navState?.key, onboardingDone, segments]);
+
   if (bootError) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center' }}>

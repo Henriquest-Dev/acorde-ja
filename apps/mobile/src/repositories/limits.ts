@@ -1,5 +1,5 @@
 import { DEFAULT_APPS, appLimitSchema, type BlockSchedule } from '@acorde/core';
-import { getDb } from '@/database/db';
+import { getDb, inTransaction } from '@/database/db';
 
 export interface AppLimit {
   appId: string;
@@ -40,7 +40,7 @@ export async function ensureDefaultLimits(): Promise<void> {
   const count = await db.getFirstAsync<{ n: number }>('SELECT COUNT(*) AS n FROM app_limits');
   if ((count?.n ?? 0) > 0) return;
   const now = Date.now();
-  await db.withExclusiveTransactionAsync(async (tx) => {
+  await inTransaction(db, async (tx) => {
     for (const [i, app] of DEFAULT_APPS.entries()) {
       await tx.runAsync(
         'INSERT INTO app_limits (app_id, name, package_names, limit_minutes, enabled, sort, updated_at) VALUES (?, ?, ?, ?, 1, ?, ?)',
