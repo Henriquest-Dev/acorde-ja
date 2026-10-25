@@ -1,0 +1,19 @@
+{
+  "name": "acorde-ja",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Acorde Já — Menos tela. Mais vida.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:db": "bash scripts/test-db.sh",
+    "mobile": "npm run start -w @acorde/mobile"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
