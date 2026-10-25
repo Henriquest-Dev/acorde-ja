@@ -2,8 +2,7 @@ import { formatClock } from '@acorde/core';
 import { Feather } from '@expo/vector-icons';
 import { randomUUID } from 'expo-crypto';
 import { goBack } from '@/navigation/goBack';
-import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,10 +20,10 @@ export default function Breathing() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
-  const startedAt = useRef(Date.now());
-  const [now, setNow] = useState(Date.now());
+  const [startedAt] = useState(() => Date.now());
+  const [now, setNow] = useState(startedAt);
   const scale = useSharedValue(0.6);
-  const elapsed = now - startedAt.current;
+  const elapsed = now - startedAt;
   const done = elapsed >= TOTAL_MS;
   const phase = elapsed % (INHALE + EXHALE) < INHALE ? 'in' : 'out';
 
@@ -41,7 +40,7 @@ export default function Breathing() {
   const circle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   const finish = async (outcome: 'helped' | 'partly' | 'not_helped') => {
-    await saveHelpOutcome({ id: randomUUID(), difficulty: 'impulse', strategy: 'breathing', outcome, createdAt: Date.now() });
+    await saveHelpOutcome({ id: randomUUID(), difficulty: 'impulse', strategy: 'breathing', outcome });
     goBack();
   };
 

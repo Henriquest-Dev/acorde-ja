@@ -10,15 +10,7 @@ import { AppBottomSheet } from './overlays';
  * Pausa consciente obrigatória antes de reduzir uma protecção (ex.: desligar
  * o modo restrito). Não pode ser saltada, mas pode ser cancelada.
  */
-export function MindfulPause({
-  visible,
-  seconds = 30,
-  title,
-  message,
-  confirmLabel,
-  onConfirm,
-  onClose,
-}: {
+export function MindfulPause(props: {
   visible: boolean;
   seconds?: number;
   title: string;
@@ -27,24 +19,39 @@ export function MindfulPause({
   onConfirm: () => void;
   onClose: () => void;
 }) {
-  const [startedAt, setStartedAt] = useState<number | null>(null);
-  const [now, setNow] = useState(Date.now());
+  // Montado só quando visível: cada abertura recomeça a contagem.
+  if (!props.visible) return null;
+  return <PauseSheet {...props} />;
+}
+
+function PauseSheet({
+  seconds = 30,
+  title,
+  message,
+  confirmLabel,
+  onConfirm,
+  onClose,
+}: {
+  seconds?: number;
+  title: string;
+  message: string;
+  confirmLabel: string;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  const [startedAt] = useState(() => Date.now());
+  const [now, setNow] = useState(startedAt);
 
   useEffect(() => {
-    if (!visible) {
-      setStartedAt(null);
-      return;
-    }
-    setStartedAt(Date.now());
     const t = setInterval(() => setNow(Date.now()), 250);
     return () => clearInterval(t);
-  }, [visible]);
+  }, []);
 
   const total = seconds * 1000;
-  const remaining = startedAt === null ? total : Math.max(0, total - (now - startedAt));
+  const remaining = Math.max(0, total - (now - startedAt));
 
   return (
-    <AppBottomSheet visible={visible} onClose={onClose} title={title}>
+    <AppBottomSheet visible onClose={onClose} title={title}>
       <View style={{ alignItems: 'center', gap: 16 }}>
         <AppProgressRing progress={1 - remaining / total} size={140} strokeWidth={6}>
           <AppText variant="h2">{formatClock(remaining)}</AppText>

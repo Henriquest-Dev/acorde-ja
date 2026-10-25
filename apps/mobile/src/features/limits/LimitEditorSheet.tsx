@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { View } from 'react-native';
 import { AppBottomSheet, AppButton, AppSlider, AppSwitch, AppText, BrandIcon, toast } from '@/components';
 import { useInvalidate, qk } from '@/hooks/queries';
@@ -10,19 +10,16 @@ import { AcordeNative } from '../../../modules/acorde-native';
 
 /** Folha de edição de um limite diário (5 a 240 minutos, em passos de 5). */
 export function LimitEditorSheet({ limit, onClose, allowDelete }: { limit: AppLimit | null; onClose: () => void; allowDelete?: boolean }) {
-  const [minutes, setMinutes] = useState(limit?.limitMinutes ?? 30);
-  const [enabled, setEnabled] = useState(limit?.enabled ?? true);
+  if (!limit) return null;
+  // `key`: o estado do editor reinicia quando muda a aplicação.
+  return <Editor key={limit.appId} limit={limit} onClose={onClose} allowDelete={allowDelete} />;
+}
+
+function Editor({ limit, onClose, allowDelete }: { limit: AppLimit; onClose: () => void; allowDelete?: boolean }) {
+  const [minutes, setMinutes] = useState(limit.limitMinutes);
+  const [enabled, setEnabled] = useState(limit.enabled);
   const [saving, setSaving] = useState(false);
   const invalidate = useInvalidate();
-
-  useEffect(() => {
-    if (limit) {
-      setMinutes(limit.limitMinutes);
-      setEnabled(limit.enabled);
-    }
-  }, [limit]);
-
-  if (!limit) return null;
 
   const save = async () => {
     setSaving(true);

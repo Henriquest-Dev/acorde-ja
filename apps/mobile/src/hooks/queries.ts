@@ -61,7 +61,6 @@ export function useReport(period: ReportPeriod, reference: Date) {
       const appRows = rows.filter((r) => r.appId !== SCREEN_TOTAL_ID);
       const screenRows = rows.filter((r) => r.appId === SCREEN_TOTAL_ID);
       const report = buildReport(appRows, range);
-      const previous = buildReport(appRows, prevRange);
       const screen = buildReport(screenRows, range);
       const prevScreen = buildReport(screenRows, prevRange);
       const sessions = await focusSessionsBetween(range.start.getTime(), range.end.getTime());

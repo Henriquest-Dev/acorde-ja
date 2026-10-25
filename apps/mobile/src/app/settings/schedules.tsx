@@ -1,5 +1,5 @@
 import { blockScheduleSchema } from '@acorde/core';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppButton, AppCheckbox, AppHeader, AppSlider, AppSwitch, AppText, BrandIcon, Screen, SectionTitle, toast } from '@/components';
 import { qk, useInvalidate, useLimits, useSchedules } from '@/hooks/queries';
@@ -20,12 +20,9 @@ export default function Schedules() {
   const { data: limits } = useLimits();
   const strict = usePrefs((s) => s.prefs.rules.strictMode);
   const invalidate = useInvalidate();
-  const [draft, setDraft] = useState<LabeledSchedule | null>(null);
-
-  useEffect(() => {
-    const night = schedules?.find((s) => s.id === NIGHT_SCHEDULE_ID);
-    if (night && !draft) setDraft(night);
-  }, [schedules, draft]);
+  const [edited, setDraft] = useState<LabeledSchedule | null>(null);
+  // O rascunho parte do horário guardado até o utilizador o alterar.
+  const draft = edited ?? schedules?.find((s) => s.id === NIGHT_SCHEDULE_ID) ?? null;
 
   if (!draft) return <Screen><AppHeader title="Horários de bloqueio" back /></Screen>;
 

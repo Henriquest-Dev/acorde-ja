@@ -20,4 +20,6 @@ android {
 
 dependencies {
   testImplementation 'junit:junit:4.13.2'
+  // org.json real nos testes JVM (no Android é fornecido pela plataforma).
+  testImplementation 'org.json:json:20240303'
 }

@@ -1,5 +1,6 @@
 import type { Habit } from '@acorde/core';
 import * as Notifications from 'expo-notifications';
+import { AndroidImportance } from 'expo-notifications';
 import { Platform } from 'react-native';
 
 let configured = false;
@@ -18,11 +19,11 @@ export function configureNotifications() {
   if (Platform.OS === 'android') {
     void Notifications.setNotificationChannelAsync('focus', {
       name: 'Modo foco',
-      importance: Notifications.AndroidImportance.DEFAULT,
+      importance: AndroidImportance.DEFAULT,
     });
     void Notifications.setNotificationChannelAsync('habits', {
       name: 'Lembretes de hábitos',
-      importance: Notifications.AndroidImportance.DEFAULT,
+      importance: AndroidImportance.DEFAULT,
     });
   }
 }

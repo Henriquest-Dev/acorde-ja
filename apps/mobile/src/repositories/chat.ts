@@ -45,7 +45,8 @@ export interface HelpOutcome {
   createdAt: number;
 }
 
-export async function saveHelpOutcome(o: HelpOutcome): Promise<void> {
+export async function saveHelpOutcome(input: Omit<HelpOutcome, 'createdAt'> & { createdAt?: number }): Promise<void> {
+  const o: HelpOutcome = { ...input, createdAt: input.createdAt ?? Date.now() };
   const db = await getDb();
   await db.runAsync(
     `INSERT INTO help_outcomes (id, difficulty, strategy, outcome, created_at) VALUES (?, ?, ?, ?, ?)

@@ -179,7 +179,7 @@ function ExtraTimeSheet({
   const invalidate = useInvalidate();
   const [reason, setReason] = useState<OverrideReason>('work');
   const [pauseStartedAt, setPauseStartedAt] = useState<number | null>(null);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {

@@ -37,7 +37,7 @@ export default function Focus() {
   const focus = useFocus();
   const { prefs, update } = usePrefs();
   const [tab, setTab] = useState<'timer' | 'activities'>('timer');
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
   const [settings, setSettings] = useState(false);
   const [notes, setNotes] = useState(false);
   const weekStart = startOfWeek(new Date()).getTime();

@@ -58,19 +58,19 @@ export default function HelpNow() {
   const [difficulty, setDifficulty] = useState<Difficulty>('app_urge');
   const [goal, setGoal] = useState<Goal>('resist');
   const [strategy, setStrategy] = useState<Strategy | null>(null);
-  const [outcomeId] = useState(randomUUID());
+  const [outcomeId] = useState(() => randomUUID());
   const preferred = useQuery({ queryKey: ['preferred-strategies'], queryFn: preferredStrategies, enabled: aiMemory });
 
   const choose = async (s: Strategy) => {
     setStrategy(s);
-    await saveHelpOutcome({ id: outcomeId, difficulty, strategy: s, outcome: null, createdAt: Date.now() });
+    await saveHelpOutcome({ id: outcomeId, difficulty, strategy: s, outcome: null });
     if (s === 'breathing') router.push('/breathing');
     if (s === 'focus') router.push({ pathname: '/focus', params: { autostart: '1' } });
     setStep(4);
   };
 
   const record = async (outcome: 'helped' | 'partly' | 'not_helped') => {
-    await saveHelpOutcome({ id: outcomeId, difficulty, strategy: strategy ?? 'none', outcome, createdAt: Date.now() });
+    await saveHelpOutcome({ id: outcomeId, difficulty, strategy: strategy ?? 'none', outcome });
     goBack();
   };
 

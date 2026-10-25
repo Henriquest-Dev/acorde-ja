@@ -27,29 +27,37 @@ const queryClient = new QueryClient({
 
 AppState.addEventListener('change', (s) => focusManager.setFocused(s === 'active'));
 
+/** Arranque: base de dados, preferências, valores por defeito e regras nativas. */
+async function bootSequence(loadPrefs: () => Promise<void>) {
+  await getDb();
+  await loadPrefs();
+  await ensureDefaultLimits();
+  await ensureDefaultSchedule();
+  configureNotifications();
+  await syncRulesToNative().catch(() => undefined);
+}
+
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold });
   const [bootError, setBootError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const { prefs, loaded, load } = usePrefs();
 
-  const boot = useCallback(async () => {
-    setBootError(null);
-    try {
-      await getDb();
-      await load();
-      await ensureDefaultLimits();
-      await ensureDefaultSchedule();
-      configureNotifications();
-      await syncRulesToNative().catch(() => undefined);
-      setReady(true);
-    } catch (e) {
-      setBootError(e instanceof Error ? e.message : String(e));
-    }
+  const boot = useCallback(() => {
+    // Estado só é actualizado depois das operações assíncronas (callbacks .then).
+    void bootSequence(load).then(
+      () => setReady(true),
+      (e: unknown) => setBootError(e instanceof Error ? e.message : String(e)),
+    );
   }, [load]);
 
   useEffect(() => {
-    void boot();
+    boot();
+  }, [boot]);
+
+  const retryBoot = useCallback(() => {
+    setBootError(null);
+    boot();
   }, [boot]);
 
   useEffect(() => {
@@ -92,7 +100,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider preference={prefs.theme}>
           <QueryClientProvider client={queryClient}>
-            <Shell bootError={bootError} onRetry={boot} ready={ready && loaded} onboardingDone={prefs.onboardingDone} biometricLock={prefs.biometricLock} />
+            <Shell bootError={bootError} onRetry={retryBoot} ready={ready && loaded} onboardingDone={prefs.onboardingDone} biometricLock={prefs.biometricLock} />
           </QueryClientProvider>
         </ThemeProvider>
       </SafeAreaProvider>
@@ -158,20 +166,21 @@ function Shell({
 function BiometricGate() {
   const { colors } = useTheme();
   const [locked, setLocked] = useState(true);
-  const lastActive = useRef(Date.now());
+  const lastActive = useRef(0);
 
-  const unlock = useCallback(async () => {
-    const res = await LocalAuthentication.authenticateAsync({ promptMessage: 'Desbloquear o Acorde Já', cancelLabel: 'Cancelar' });
-    if (res.success) setLocked(false);
+  const unlock = useCallback(() => {
+    void LocalAuthentication.authenticateAsync({ promptMessage: 'Desbloquear o Acorde Já', cancelLabel: 'Cancelar' }).then((res) => {
+      if (res.success) setLocked(false);
+    });
   }, []);
 
   useEffect(() => {
-    void unlock();
+    unlock();
     const sub = AppState.addEventListener('change', (s) => {
       if (s === 'background') lastActive.current = Date.now();
       if (s === 'active' && Date.now() - lastActive.current > 60_000) {
         setLocked(true);
-        void unlock();
+        unlock();
       }
     });
     return () => sub.remove();

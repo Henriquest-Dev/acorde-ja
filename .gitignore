@@ -16,3 +16,5 @@ supabase/.temp/
 *.key
 *.mobileprovision
 *.pem
+apps/mobile/modules/*/android/build/
+.gradle/
