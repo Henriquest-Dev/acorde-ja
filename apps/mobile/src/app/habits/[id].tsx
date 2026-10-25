@@ -2,6 +2,7 @@ import { HABIT_SUGGESTIONS, addDays, dayKey, habitFormSchema, isDoneOn, type Hab
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
 import { randomUUID } from 'expo-crypto';
+import { goBack } from '@/navigation/goBack';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -68,7 +69,7 @@ export default function HabitEditor() {
         updated_at: new Date().toISOString(),
       });
       await invalidate(qk.habits, ['habit', base.id]);
-      router.back();
+      goBack('/habits');
     } catch (e) {
       toast(e instanceof Error ? e.message : 'Não foi possível guardar', 'error');
     } finally {
@@ -84,7 +85,7 @@ export default function HabitEditor() {
     await enqueueSync('habits', 'upsert', h.id, { id: h.id, archived_at: new Date().toISOString(), updated_at: new Date().toISOString() });
     await invalidate(qk.habits);
     toast('Hábito arquivado.');
-    router.back();
+    goBack('/habits');
   };
 
   const remove = async () => {
@@ -94,7 +95,7 @@ export default function HabitEditor() {
     await deleteHabit(h.id);
     await enqueueSync('habits', 'delete', h.id, {});
     await invalidate(qk.habits);
-    router.back();
+    goBack('/habits');
   };
 
   const days = Array.from({ length: 28 }, (_, i) => dayKey(addDays(since, i)));

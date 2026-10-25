@@ -9,9 +9,10 @@
   ],
   "scripts": {
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present && npm run test:functions",
     "test:db": "bash scripts/test-db.sh",
-    "mobile": "npm run start -w @acorde/mobile"
+    "mobile": "npm run start -w @acorde/mobile",
+    "test:functions": "vitest run --root tests"
   },
   "engines": {
     "node": ">=20"

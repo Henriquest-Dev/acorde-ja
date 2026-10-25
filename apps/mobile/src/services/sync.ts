@@ -8,15 +8,15 @@ import { getSupabase } from './supabase';
  * Tabelas remotas sincronizáveis e se contêm dados comportamentais sensíveis
  * (exigem o consentimento específico `syncSensitive`).
  */
-const REMOTE_TABLES: Record<string, { sensitive: boolean }> = {
-  app_limits: { sensitive: false },
-  usage_daily: { sensitive: false },
-  focus_sessions: { sensitive: false },
-  block_events: { sensitive: false },
-  override_requests: { sensitive: false },
-  habits: { sensitive: true },
-  habit_entries: { sensitive: true },
-  recovery_checkins: { sensitive: true },
+const REMOTE_TABLES: Record<string, { sensitive: boolean; conflict: string; key: string }> = {
+  app_limits: { sensitive: false, conflict: 'user_id,app_id', key: 'app_id' },
+  usage_daily: { sensitive: false, conflict: 'user_id,device_id,day,app_id', key: 'id' },
+  focus_sessions: { sensitive: false, conflict: 'id', key: 'id' },
+  block_events: { sensitive: false, conflict: 'id', key: 'id' },
+  override_requests: { sensitive: false, conflict: 'id', key: 'id' },
+  habits: { sensitive: true, conflict: 'id', key: 'id' },
+  habit_entries: { sensitive: true, conflict: 'id', key: 'id' },
+  recovery_checkins: { sensitive: true, conflict: 'id', key: 'id' },
 };
 
 export const syncQueue = new SyncQueue(sqliteSyncStore);
@@ -44,12 +44,17 @@ const supabaseTransport: SyncTransport = {
     const results: Awaited<ReturnType<SyncTransport['push']>> = {};
     for (const item of items) {
       let res;
+      const cfg = REMOTE_TABLES[item.table];
+      if (!cfg) {
+        results[item.id] = { ok: false, error: `tabela desconhecida: ${item.table}`, retryable: false };
+        continue;
+      }
       if (item.op === 'delete') {
-        res = await sb.from(item.table).delete().eq('id', item.rowId);
+        res = await sb.from(item.table).delete().eq(cfg.key, item.rowId);
       } else {
-        // `client_event_id` garante idempotência: reenviar o mesmo item não duplica.
+        // A chave única (ou o id gerado no dispositivo) torna o reenvio idempotente.
         const row = { ...item.payload, client_event_id: item.id };
-        res = await sb.from(item.table).upsert(row, { onConflict: item.table === 'usage_daily' ? 'user_id,device_id,day,app_id' : 'id' });
+        res = await sb.from(item.table).upsert(row, { onConflict: cfg.conflict });
       }
       results[item.id] = res.error
         ? { ok: false, error: res.error.message, retryable: isRetryable(res.error.code, res.status) }

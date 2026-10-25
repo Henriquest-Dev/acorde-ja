@@ -1,4 +1,5 @@
 import { emailSchema, passwordSchema } from '@acorde/core';
+import { goBack } from '@/navigation/goBack';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -28,7 +29,7 @@ export default function Forgot() {
       } else {
         await sendPasswordReset(parsed.data);
         toast('Se existir uma conta, receberá um email com instruções.');
-        router.back();
+        goBack('/settings/sync');
       }
     } catch (e) {
       toast(translateAuthError(e), 'error');

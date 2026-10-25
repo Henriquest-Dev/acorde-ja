@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { randomUUID } from 'expo-crypto';
+import { goBack } from '@/navigation/goBack';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Linking, View } from 'react-native';
@@ -70,7 +71,7 @@ export default function HelpNow() {
 
   const record = async (outcome: 'helped' | 'partly' | 'not_helped') => {
     await saveHelpOutcome({ id: outcomeId, difficulty, strategy: strategy ?? 'none', outcome, createdAt: Date.now() });
-    router.back();
+    goBack();
   };
 
   return (

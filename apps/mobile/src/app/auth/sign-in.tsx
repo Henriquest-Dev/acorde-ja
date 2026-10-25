@@ -1,5 +1,6 @@
 import { signInSchema } from '@acorde/core';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { goBack } from '@/navigation/goBack';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -21,7 +22,7 @@ export default function SignIn() {
     try {
       await signIn(v.email, v.password);
       toast('Sessão iniciada.');
-      router.back();
+      goBack('/settings/sync');
     } catch (e) {
       toast(translateAuthError(e), 'error');
     } finally {
@@ -31,7 +32,7 @@ export default function SignIn() {
 
   const oauth = async (p: 'google' | 'apple') => {
     try {
-      if (await signInWithProvider(p)) router.back();
+      if (await signInWithProvider(p)) goBack('/settings/sync');
     } catch (e) {
       toast(`${translateAuthError(e)} (o login ${p === 'google' ? 'Google' : 'Apple'} tem de estar configurado no Supabase)`, 'error');
     }

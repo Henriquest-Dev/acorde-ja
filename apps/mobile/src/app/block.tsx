@@ -11,6 +11,7 @@ import {
 } from '@acorde/core';
 import { Feather } from '@expo/vector-icons';
 import { randomUUID } from 'expo-crypto';
+import { goBack } from '@/navigation/goBack';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -209,7 +210,7 @@ function ExtraTimeSheet({
       await invalidate(qk.today);
       toast(`+${g.extraMinutes} minutos no ${appName}. Use-os com intenção.`);
       onClose();
-      router.back();
+      goBack();
     } catch (e) {
       toast(e instanceof RuleError ? 'A pausa consciente ainda não terminou.' : 'Não foi possível conceder tempo extra.', 'error');
     } finally {

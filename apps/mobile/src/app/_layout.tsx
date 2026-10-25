@@ -1,6 +1,7 @@
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, useFonts } from '@expo-google-fonts/inter';
 import { QueryClient, QueryClientProvider, focusManager } from '@tanstack/react-query';
 import * as LocalAuthentication from 'expo-local-authentication';
+import * as Network from 'expo-network';
 import * as Notifications from 'expo-notifications';
 import { Stack, router, useRootNavigationState, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -62,6 +63,14 @@ export default function RootLayout() {
       void syncRulesToNative().catch(() => undefined);
       void flushSync().catch(() => undefined);
       void queryClient.invalidateQueries({ queryKey: ['today'] });
+    });
+    return () => sub.remove();
+  }, []);
+
+  // Sincronização após reconexão à Internet.
+  useEffect(() => {
+    const sub = Network.addNetworkStateListener((s) => {
+      if (s.isConnected && s.isInternetReachable !== false) void flushSync().catch(() => undefined);
     });
     return () => sub.remove();
   }, []);

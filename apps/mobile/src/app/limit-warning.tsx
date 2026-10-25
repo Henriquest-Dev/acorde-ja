@@ -1,4 +1,5 @@
 import { MINUTE } from '@acorde/core';
+import { goBack } from '@/navigation/goBack';
 import { router, useLocalSearchParams } from 'expo-router';
 import { View } from 'react-native';
 import { AppBlockScreen, AppButton, AppSkeleton, BrandIcon } from '@/components';
@@ -50,7 +51,7 @@ export default function LimitWarning() {
       footer={'Lembre-se do seu objetivo:\nmenos tela, mais vida.'}
     >
       <View style={{ alignSelf: 'stretch', marginTop: spacing.xxxl, gap: spacing.md, paddingHorizontal: spacing.xxl }}>
-        <AppButton label="Continuar a usar" variant="subtle" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} testID="warn-continue" />
+        <AppButton label="Continuar a usar" variant="subtle" onPress={() => goBack()} testID="warn-continue" />
         <AppButton label="Fechar app" variant="subtle" onPress={close} testID="warn-close" />
       </View>
     </AppBlockScreen>

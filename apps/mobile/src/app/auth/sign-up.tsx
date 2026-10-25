@@ -1,5 +1,6 @@
 import { signUpSchema } from '@acorde/core';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { goBack } from '@/navigation/goBack';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -22,7 +23,7 @@ export default function SignUp() {
     try {
       const r = await signUp(v.email, v.password);
       if (r.needsVerification) setSentTo(v.email);
-      else router.back();
+      else goBack('/settings/sync');
     } catch (e) {
       toast(translateAuthError(e), 'error');
     } finally {

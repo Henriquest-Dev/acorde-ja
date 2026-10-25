@@ -1,6 +1,7 @@
 import { formatClock } from '@acorde/core';
 import { Feather } from '@expo/vector-icons';
 import { randomUUID } from 'expo-crypto';
+import { goBack } from '@/navigation/goBack';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -41,12 +42,12 @@ export default function Breathing() {
 
   const finish = async (outcome: 'helped' | 'partly' | 'not_helped') => {
     await saveHelpOutcome({ id: randomUUID(), difficulty: 'impulse', strategy: 'breathing', outcome, createdAt: Date.now() });
-    router.back();
+    goBack();
   };
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background, paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + spacing.xl }]}>
-      <Pressable onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Fechar" hitSlop={12} style={{ alignSelf: 'flex-end' }}>
+      <Pressable onPress={() => goBack()} accessibilityRole="button" accessibilityLabel="Fechar" hitSlop={12} style={{ alignSelf: 'flex-end' }}>
         <Feather name="x" size={24} color={colors.text} />
       </Pressable>
       <AppText variant="h2" align="center">
