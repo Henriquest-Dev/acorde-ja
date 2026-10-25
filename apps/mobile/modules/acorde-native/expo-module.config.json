@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["AcordeNativeModule"]
+  },
+  "android": {
+    "modules": ["pt.acordeja.nativemodule.AcordeNativeModule"]
+  }
+}
