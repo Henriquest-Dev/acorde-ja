@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { AppButton, AppCard, AppHeader, AppPermissionCard, AppSkeleton, AppText, Screen, SectionTitle, toast } from '@/components';
+import { RestrictedSettingsHelp } from '@/features/onboarding/RestrictedSettingsHelp';
 import { activateEnforcement, requestPermission, usePermissionSummary, type PermissionKey } from '@/features/onboarding/usePermissionSummary';
 import { stopEnforcement } from '@/native/device';
 import { spacing } from '@/theme/tokens';
@@ -31,6 +32,8 @@ export default function PermissionsSettings() {
               <AppPermissionCard key={i.key} icon={ICONS[i.key]} title={i.title} description={i.description} state={i.state} onRequest={() => void ask(i.key)} />
             ))}
       </View>
+
+      <RestrictedSettingsHelp items={data?.items ?? []} />
 
       <SectionTitle>Aplicação de regras</SectionTitle>
       <AppCard>

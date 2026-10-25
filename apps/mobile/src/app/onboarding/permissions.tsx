@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppBottomSheet, AppButton, AppSkeleton, AppText, Screen, toast, type RowIcon, RowIconView } from '@/components';
 import { PermissionStatusIcon } from '@/features/onboarding/PermissionStatusIcon';
+import { RestrictedSettingsHelp } from '@/features/onboarding/RestrictedSettingsHelp';
 import { requestPermission, usePermissionSummary, type PermissionKey } from '@/features/onboarding/usePermissionSummary';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
@@ -92,6 +93,7 @@ export default function Permissions() {
               </Pressable>
             ))}
       </View>
+      <RestrictedSettingsHelp items={items} />
       {data?.caps.notes.length ? (
         <AppText variant="caption" tone="muted" style={{ marginTop: spacing.lg }}>
           {data.caps.notes[0]}
