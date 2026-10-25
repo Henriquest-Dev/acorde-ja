@@ -26,6 +26,14 @@ export default function Limits() {
       <AppText variant="small" tone="muted" align="center" style={{ marginTop: spacing.xl }} testID="limits-total">
         Total diário: {total} minutos
       </AppText>
+      <AppButton
+        label="Adicionar ou remover aplicações"
+        variant="ghost"
+        size="sm"
+        onPress={() => router.push('/settings/limits')}
+        style={{ marginTop: spacing.sm }}
+        testID="onb-manage-apps"
+      />
       <LimitEditorSheet limit={editing} onClose={() => setEditing(null)} />
     </Screen>
   );

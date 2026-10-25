@@ -14,6 +14,7 @@ import { AppButton, AppErrorState, AppLogo, AppText, AppToastHost } from '@/comp
 import { getDb } from '@/database/db';
 import { ensureDefaultLimits, ensureDefaultSchedule } from '@/repositories/limits';
 import { configureNotifications } from '@/services/notifications';
+import { enforceChallengeLock } from '@/services/challenge';
 import { flushSync } from '@/services/sync';
 import { syncRulesToNative } from '@/services/usage';
 import { usePrefs } from '@/stores/prefs';
@@ -35,6 +36,7 @@ async function bootSequence(loadPrefs: () => Promise<void>) {
   await ensureDefaultSchedule();
   configureNotifications();
   await syncRulesToNative().catch(() => undefined);
+  await enforceChallengeLock().catch(() => undefined);
 }
 
 export default function RootLayout() {
@@ -69,6 +71,7 @@ export default function RootLayout() {
     const sub = AppState.addEventListener('change', (s) => {
       if (s !== 'active') return;
       void syncRulesToNative().catch(() => undefined);
+      void enforceChallengeLock().catch(() => undefined);
       void flushSync().catch(() => undefined);
       void queryClient.invalidateQueries({ queryKey: ['today'] });
     });

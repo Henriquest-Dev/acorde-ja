@@ -8,6 +8,8 @@ export interface AppLimit {
   limitMinutes: number;
   enabled: boolean;
   sort: number;
+  /** Momento a partir do qual o limite conta (no próprio dia, o uso anterior não esgota o limite). */
+  sinceMs: number;
 }
 
 interface LimitRow {
@@ -17,6 +19,7 @@ interface LimitRow {
   limit_minutes: number;
   enabled: number;
   sort: number;
+  since_ms: number;
 }
 
 const toLimit = (r: LimitRow): AppLimit => ({
@@ -26,6 +29,7 @@ const toLimit = (r: LimitRow): AppLimit => ({
   limitMinutes: r.limit_minutes,
   enabled: r.enabled === 1,
   sort: r.sort,
+  sinceMs: r.since_ms,
 });
 
 export async function listLimits(): Promise<AppLimit[]> {
@@ -43,27 +47,32 @@ export async function ensureDefaultLimits(): Promise<void> {
   await inTransaction(db, async (tx) => {
     for (const [i, app] of DEFAULT_APPS.entries()) {
       await tx.runAsync(
-        'INSERT INTO app_limits (app_id, name, package_names, limit_minutes, enabled, sort, updated_at) VALUES (?, ?, ?, ?, 1, ?, ?)',
+        'INSERT INTO app_limits (app_id, name, package_names, limit_minutes, enabled, sort, updated_at, since_ms) VALUES (?, ?, ?, ?, 1, ?, ?, ?)',
         app.id,
         app.name,
         JSON.stringify(app.androidPackages),
         app.defaultLimitMinutes,
         i,
         now,
+        now,
       );
     }
   });
 }
 
-export async function upsertLimit(limit: Omit<AppLimit, 'sort'> & { sort?: number }): Promise<AppLimit> {
+export async function upsertLimit(limit: Omit<AppLimit, 'sort' | 'sinceMs'> & { sort?: number }): Promise<AppLimit> {
   appLimitSchema.parse(limit);
   const db = await getDb();
+  // Novo limite, ou limite reactivado: passa a contar a partir de agora.
+  const prev = await db.getFirstAsync<{ enabled: number; since_ms: number }>('SELECT enabled, since_ms FROM app_limits WHERE app_id = ?', limit.appId);
+  const sinceMs = !prev || (prev.enabled === 0 && limit.enabled) ? Date.now() : prev.since_ms;
   const sort = limit.sort ?? (await db.getFirstAsync<{ s: number }>('SELECT COALESCE(MAX(sort), -1) + 1 AS s FROM app_limits'))?.s ?? 0;
   await db.runAsync(
-    `INSERT INTO app_limits (app_id, name, package_names, limit_minutes, enabled, sort, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO app_limits (app_id, name, package_names, limit_minutes, enabled, sort, updated_at, since_ms)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(app_id) DO UPDATE SET name = excluded.name, package_names = excluded.package_names,
-       limit_minutes = excluded.limit_minutes, enabled = excluded.enabled, updated_at = excluded.updated_at`,
+       limit_minutes = excluded.limit_minutes, enabled = excluded.enabled, updated_at = excluded.updated_at,
+       since_ms = excluded.since_ms`,
     limit.appId,
     limit.name,
     JSON.stringify(limit.packageNames),
@@ -71,8 +80,15 @@ export async function upsertLimit(limit: Omit<AppLimit, 'sort'> & { sort?: numbe
     limit.enabled ? 1 : 0,
     sort,
     Date.now(),
+    sinceMs,
   );
-  return { ...limit, sort };
+  return { ...limit, sort, sinceMs };
+}
+
+/** No fim do onboarding: todos os limites passam a contar a partir de agora. */
+export async function restartLimitsFrom(ms: number): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('UPDATE app_limits SET since_ms = ?', ms);
 }
 
 export async function deleteLimit(appId: string): Promise<void> {

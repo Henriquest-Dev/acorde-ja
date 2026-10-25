@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { ZoomIn, ZoomOut, runOnJS, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radii, spacing } from '@/theme/tokens';
 import { AppText } from './AppText';
@@ -84,7 +84,11 @@ export function AppCheckbox({
         { borderColor: checked ? colors.accent : colors.textMuted, backgroundColor: checked ? colors.accent : 'transparent' },
       ]}
     >
-      {checked ? <Feather name="check" size={15} color={colors.onAccent} /> : null}
+      {checked ? (
+        <Animated.View entering={ZoomIn.springify().damping(14)} exiting={ZoomOut.duration(120)}>
+          <Feather name="check" size={15} color={colors.onAccent} />
+        </Animated.View>
+      ) : null}
     </Pressable>
   );
 }

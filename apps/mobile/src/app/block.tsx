@@ -7,6 +7,7 @@ import {
   dayKey,
   formatClock,
   grantException,
+  nextLocalMidnight,
   type OverrideReason,
 } from '@acorde/core';
 import { Feather } from '@expo/vector-icons';
@@ -49,6 +50,14 @@ const SUGGESTIONS: { icon: React.ComponentProps<typeof Feather>['name']; title: 
   { icon: 'book-open', title: 'Ler 20 minutos', text: 'Pegue num livro em papel e afaste o telemóvel.', go: () => router.replace('/habits') },
   { icon: 'activity', title: 'Caminhar ou alongar', text: 'Levante-se e mexa o corpo durante 5 minutos.', go: () => router.replace('/(tabs)/focus') },
   { icon: 'message-circle', title: 'Falar com o assistente', text: 'Reflicta sobre o que está a sentir agora.', go: () => router.replace('/assistant') },
+];
+
+const BLOCK_QUOTES = [
+  'Que tal fazer algo melhor com o seu tempo agora?',
+  'Respire fundo. O impulso passa.',
+  'Menos tela. Mais vida.',
+  'Levante-se e beba um copo de água.',
+  'Ligue a alguém de quem gosta.',
 ];
 
 /** Bloqueio activo — «Limite atingido». */
@@ -111,10 +120,9 @@ export default function BlockScreen() {
               ? `Já utilizou os seus ${app.limitMinutes} minutos diários no ${app.name}.`
               : `Utilizou ${Math.floor(app.usedMs / MINUTE)} de ${Math.round(app.effectiveLimitMs / MINUTE)} minutos no ${app.name} hoje.`
         }
+        countdownTo={blocked && !scheduled ? nextLocalMidnight(new Date()).getTime() : undefined}
+        quotes={BLOCK_QUOTES}
       >
-        <AppText variant="small" tone="muted" align="center" style={{ marginTop: spacing.xxl, maxWidth: 240 }}>
-          Que tal fazer algo melhor com o seu tempo agora?
-        </AppText>
         <View style={{ alignSelf: 'stretch', marginTop: spacing.xxxl, gap: spacing.md }}>
           <AppButton label="Ver sugestões" onPress={() => setSheet('suggestions')} testID="block-suggestions" />
           {blocked && !rules.strictMode ? (

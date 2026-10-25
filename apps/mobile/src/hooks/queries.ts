@@ -13,7 +13,10 @@ import { focusSessionsBetween } from '@/repositories/focus';
 import { entriesBetween, listHabits } from '@/repositories/habits';
 import { listLimits, listSchedules } from '@/repositories/limits';
 import { SCREEN_TOTAL_ID, exceptionsBetween, usageBetween } from '@/repositories/usage';
-import { loadToday } from '@/services/usage';
+import { challengeStats } from '@acorde/core';
+import { listChallenges, listCheckins } from '@/repositories/challenges';
+import { GOAL_LABEL, activeChallenges } from '@/services/challenge';
+import { loadHourly, loadToday } from '@/services/usage';
 
 export const qk = {
   today: ['today'] as const,
@@ -26,7 +29,7 @@ export const qk = {
 
 /** Snapshot de hoje (utilização real + estado das regras). Actualiza a cada minuto. */
 export function useToday() {
-  return useQuery({ queryKey: qk.today, queryFn: () => loadToday(), refetchInterval: 60_000 });
+  return useQuery({ queryKey: qk.today, queryFn: () => loadToday(), refetchInterval: 30_000 });
 }
 
 export function useLimits() {
@@ -85,4 +88,30 @@ export function useFocusHistory(fromMs: number) {
 export function useInvalidate() {
   const qc = useQueryClient();
   return (...keys: readonly (readonly unknown[])[]) => Promise.all(keys.map((k) => qc.invalidateQueries({ queryKey: k })));
+}
+
+/** Tempo de ecrã por hora de hoje — actualiza a cada 30 s (gráfico ao vivo). */
+export function useHourly() {
+  return useQuery({ queryKey: ['hourly'], queryFn: () => loadHourly(), refetchInterval: 30_000 });
+}
+
+/** Desafios em curso com estatísticas (dia, sequência, progresso). */
+export function useActiveChallenges() {
+  return useQuery({
+    queryKey: ['challenges', 'active'],
+    queryFn: async () => {
+      const now = new Date();
+      const list = await activeChallenges(now);
+      return Promise.all(
+        list.map(async (c) => {
+          const checkins = await listCheckins(c.id);
+          return { challenge: c, checkins, label: GOAL_LABEL[c.goal], stats: challengeStats(c, checkins, now) };
+        }),
+      );
+    },
+  });
+}
+
+export function useAllChallenges() {
+  return useQuery({ queryKey: ['challenges', 'all'], queryFn: listChallenges });
 }

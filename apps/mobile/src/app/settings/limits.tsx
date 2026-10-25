@@ -57,7 +57,7 @@ export default function LimitsSettings() {
                 subtitle={item.packageName}
                 onPress={() => {
                   setPicker(false);
-                  setEditing({ appId: item.packageName, name: item.label, packageNames: [item.packageName], limitMinutes: 30, enabled: true, sort: 99 });
+                  setEditing({ appId: item.packageName, name: item.label, packageNames: [item.packageName], limitMinutes: 30, enabled: true, sort: 99, sinceMs: 0 });
                 }}
               />
             )}

@@ -96,6 +96,11 @@ export async function getUsage(startMs: number, endMs: number): Promise<UsageQue
   return AcordeNative.getUsageStats(startMs, endMs);
 }
 
+export async function getHourlyUsage(dayStartMs: number): Promise<number[] | null> {
+  if (!AcordeNative) return null;
+  return AcordeNative.getHourlyUsage(dayStartMs);
+}
+
 export async function pushRuleConfig(config: NativeRuleConfig): Promise<void> {
   if (!AcordeNative) return;
   await AcordeNative.setRuleConfig(JSON.stringify(config));
@@ -160,6 +165,11 @@ export const shield = {
   },
   async stop(): Promise<void> {
     await AcordeNative?.stopShield();
+  },
+  /** Compromisso do desafio (só pode ser prolongado). */
+  async lock(untilMs: number): Promise<number | null> {
+    if (!AcordeNative) return null;
+    return AcordeNative.setShieldLock(untilMs);
   },
   async stats(): Promise<ShieldStats | null> {
     if (!AcordeNative) return null;

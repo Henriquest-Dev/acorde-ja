@@ -14,8 +14,13 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import {
+  AnimatedNumber,
+  AppBarChart,
   AppButton,
   AppCard,
+  FadeInItem,
+  LivePulse,
+  PressableScale,
   AppErrorState,
   AppProgressBar,
   AppProgressRing,
@@ -28,7 +33,7 @@ import {
 } from '@/components';
 import { quoteOfTheDay } from '@/features/dashboard/quotes';
 import { LimitEditorSheet } from '@/features/limits/LimitEditorSheet';
-import { useHabitsWeek, useLimits, useReport, useToday } from '@/hooks/queries';
+import { useActiveChallenges, useHabitsWeek, useHourly, useLimits, useReport, useToday } from '@/hooks/queries';
 import type { AppLimit } from '@/repositories/limits';
 import { usePrefs } from '@/stores/prefs';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -45,6 +50,8 @@ export default function Dashboard() {
   const focusMinutes = usePrefs((s) => s.prefs.focus.minutes);
   const [editing, setEditing] = useState<AppLimit | null>(null);
   const snap = today.data;
+  const hourly = useHourly();
+  const challenges = useActiveChallenges();
 
   const openApp = (appId: string, state: string) => {
     if (state === RuleState.BLOCKED || state === RuleState.SCHEDULED_BLOCK) router.push({ pathname: '/block', params: { appId } });
@@ -91,9 +98,19 @@ export default function Dashboard() {
                   : 'Utilização indisponível'
               }
             >
-              <AppText variant="h1" style={{ fontSize: 30 }} testID="ring-used">
-                {snap.measured ? formatDuration(snap.totals.usedMs) : '—'}
-              </AppText>
+              {snap.measured ? (
+                <AnimatedNumber
+                  value={Math.floor(snap.totals.usedMs / MINUTE)}
+                  format={(n) => formatDuration(Math.round(n) * MINUTE)}
+                  variant="h1"
+                  style={{ fontSize: 30 }}
+                  testID="ring-used"
+                />
+              ) : (
+                <AppText variant="h1" style={{ fontSize: 30 }} testID="ring-used">
+                  —
+                </AppText>
+              )}
               <AppText variant="caption" tone="muted">
                 de {formatHoursMinutes(snap.totals.limitMs)}
               </AppText>
@@ -121,17 +138,28 @@ export default function Dashboard() {
             </AppCard>
           ) : null}
 
+          <View style={styles.appsHeader}>
+            <AppText variant="caption" tone="muted">
+              {countingNote(snap.apps)}
+            </AppText>
+            <Pressable onPress={() => router.push('/settings/limits')} accessibilityRole="button" hitSlop={8} testID="manage-apps">
+              <AppText variant="caption" weight="semibold">
+                Gerir aplicações
+              </AppText>
+            </Pressable>
+          </View>
           <View style={{ gap: spacing.xs }}>
-            {snap.apps.map((a) => (
-              <AppUsageCard
-                key={a.appId}
-                appId={a.appId}
-                name={a.name}
-                usedMin={snap.measured ? Math.floor(a.usedMs / MINUTE) : null}
-                limitMin={a.limitMinutes}
-                state={a.state}
-                onPress={() => openApp(a.appId, a.state)}
-              />
+            {snap.apps.map((a, i) => (
+              <FadeInItem key={a.appId} index={i}>
+                <AppUsageCard
+                  appId={a.appId}
+                  name={a.name}
+                  usedMin={snap.measured ? Math.floor(a.usedMs / MINUTE) : null}
+                  limitMin={a.limitMinutes}
+                  state={a.state}
+                  onPress={() => openApp(a.appId, a.state)}
+                />
+              </FadeInItem>
             ))}
           </View>
 
@@ -142,6 +170,54 @@ export default function Dashboard() {
               <Stat label="Bloqueadas" value={String(snap.totals.blockedCount)} />
             </View>
           ) : null}
+        </>
+      ) : null}
+
+      {challenges.data?.length ? (
+        <FadeInItem index={2}>
+          <PressableScale onPress={() => router.push('/challenge')} accessibilityRole="button" style={[styles.challenge, { backgroundColor: colors.card, borderColor: colors.borderStrong }]} testID="challenge-card">
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+              <Feather name="award" size={22} color={colors.text} />
+              <View style={{ flex: 1 }}>
+                <AppText variant="bodyStrong">{challenges.data[0]!.label}</AppText>
+                <AppText variant="caption" tone="muted">
+                  Dia {challenges.data[0]!.stats.dayNumber} de {challenges.data[0]!.stats.total} · sequência de {challenges.data[0]!.stats.currentStreak}
+                </AppText>
+              </View>
+              <Feather name="chevron-right" size={18} color={colors.textMuted} />
+            </View>
+            <AppProgressBar progress={challenges.data[0]!.stats.progress} style={{ marginTop: spacing.md }} />
+          </PressableScale>
+        </FadeInItem>
+      ) : null}
+
+      {hourly.data ? (
+        <>
+          <SectionTitle
+            action={
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                <LivePulse color={colors.text} />
+                <AppText variant="caption" tone="muted">
+                  ao vivo
+                </AppText>
+              </View>
+            }
+          >
+            Hoje, hora a hora
+          </SectionTitle>
+          <AppCard>
+            <AppBarChart
+              data={hourly.data.map((ms, h) => ({
+                key: String(h),
+                label: h % 6 === 0 ? `${h}h` : '',
+                value: ms,
+                valueLabel: `${h}h–${h + 1}h · ${formatDuration(ms)}`,
+              }))}
+              highlightKey={String(now.getHours())}
+              height={90}
+              testID="hourly-chart"
+            />
+          </AppCard>
         </>
       ) : null}
 
@@ -212,6 +288,13 @@ export default function Dashboard() {
   );
 }
 
+function countingNote(apps: { countingSince: number | null }[]): string {
+  const since = apps.map((a) => a.countingSince).filter((x): x is number => x !== null);
+  if (since.length === 0) return 'Utilização de hoje';
+  const d = new Date(Math.min(...since));
+  return `A contar desde as ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
@@ -226,17 +309,12 @@ function Stat({ label, value }: { label: string; value: string }) {
 function QuickAction({ icon, label, onPress }: { icon: React.ComponentProps<typeof Feather>['name']; label: string; onPress: () => void }) {
   const { colors } = useTheme();
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      style={({ pressed }) => [styles.quick, { backgroundColor: colors.card, borderColor: colors.border, opacity: pressed ? 0.7 : 1 }]}
-    >
+    <PressableScale onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={[styles.quick, { backgroundColor: colors.card, borderColor: colors.border }]} scaleTo={0.94}>
       <Feather name={icon} size={20} color={colors.text} />
       <AppText variant="caption" align="center">
         {label}
       </AppText>
-    </Pressable>
+    </PressableScale>
   );
 }
 
@@ -255,5 +333,7 @@ const styles = StyleSheet.create({
   quote: { marginTop: spacing.lg, maxWidth: 290, fontSize: 13, lineHeight: 19 },
   stats: { flexDirection: 'row', marginTop: spacing.lg },
   quickRow: { flexDirection: 'row', gap: spacing.md },
+  appsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
+  challenge: { marginTop: spacing.xl, padding: spacing.lg, borderRadius: 16, borderWidth: 1 },
   quick: { flex: 1, alignItems: 'center', gap: 6, paddingVertical: spacing.lg, borderRadius: 14, borderWidth: StyleSheet.hairlineWidth },
 });

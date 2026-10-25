@@ -65,6 +65,8 @@ export interface NativeAppLimit {
   packageNames: string[];
   limitMinutes: number;
   enabled: boolean;
+  /** Epoch ms a partir do qual o limite conta. */
+  sinceMs: number;
 }
 
 export interface NativeRuleConfig {
@@ -102,6 +104,8 @@ export interface ShieldStats {
   blockedToday: number;
   domains: number;
   lastError: string | null;
+  /** Epoch ms até ao qual o filtro não pode ser desligado (desafio); 0 = sem bloqueio. */
+  lockedUntil: number;
 }
 
 /** Códigos de erro documentados que os módulos nativos podem lançar. */

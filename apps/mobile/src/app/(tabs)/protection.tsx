@@ -1,12 +1,13 @@
-import type { ShieldConfig } from '@acorde/core';
+import { challengeEndsAt, formatDayMonth, type ShieldConfig } from '@acorde/core';
 import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Linking, View } from 'react-native';
-import { AppCard, AppHeader, AppSwitch, AppText, ListRow, Screen, SectionTitle, toast } from '@/components';
+import { Linking, StyleSheet, View } from 'react-native';
+import { AppCard, AppHeader, AppSwitch, AppText, FadeInItem, ListRow, PressableScale, Screen, SectionTitle, toast } from '@/components';
 import { MindfulPause } from '@/components/MindfulPause';
-import { qk, useInvalidate, useSchedules } from '@/hooks/queries';
+import { qk, useActiveChallenges, useInvalidate, useSchedules } from '@/hooks/queries';
+import { GOAL_CATEGORY } from '@/services/challenge';
 import { getCapabilities, openSystemSettings, shield } from '@/native/device';
 import { NIGHT_SCHEDULE_ID, upsertSchedule } from '@/repositories/limits';
 import { applyShield } from '@/services/shield';
@@ -27,6 +28,11 @@ export default function Protection() {
     queryFn: async () => ({ caps: await getCapabilities(), stats: await shield.stats() }),
   });
   const night = schedules?.find((s) => s.id === NIGHT_SCHEDULE_ID);
+
+  const challenges = useActiveChallenges();
+  const lockedCategories = (challenges.data ?? []).map((c) => GOAL_CATEGORY[c.challenge.goal]);
+  const lockedUntil = Math.max(0, ...(challenges.data ?? []).map((c) => challengeEndsAt(c.challenge)));
+  const lockMessage = `Desafio em curso: a protecção está trancada até ${formatDayMonth(new Date(lockedUntil - 1))}.`;
 
   const setShield = async (patch: Partial<ShieldConfig>) => {
     const next = { ...prefs.shield, ...patch, categories: { ...prefs.shield.categories, ...patch.categories } };
@@ -60,6 +66,20 @@ export default function Protection() {
   return (
     <Screen testID="protection">
       <AppHeader title="Proteção" back onBack={() => router.navigate('/')} />
+      {lockedUntil > 0 ? (
+        <FadeInItem index={0}>
+          <PressableScale onPress={() => router.push('/challenge')} accessibilityRole="button" style={[styles.lock, { borderColor: colors.text, backgroundColor: colors.card }]}>
+            <Feather name="lock" size={18} color={colors.text} />
+            <View style={{ flex: 1 }}>
+              <AppText variant="bodyStrong">Protecção trancada pelo desafio</AppText>
+              <AppText variant="caption" tone="muted">
+                Até {formatDayMonth(new Date(lockedUntil - 1))} · ver calendário
+              </AppText>
+            </View>
+            <Feather name="chevron-right" size={18} color={colors.textMuted} />
+          </PressableScale>
+        </FadeInItem>
+      ) : null}
       <View style={{ gap: spacing.md }}>
         <ListRow
           icon={{ set: 'mci', name: 'close-octagon-outline' }}
@@ -68,6 +88,7 @@ export default function Protection() {
             <AppSwitch
               value={prefs.shield.categories.adult}
               onValueChange={(v) => {
+                if (!v && lockedCategories.includes('adult')) return toast(lockMessage, 'error');
                 if (!v && prefs.shield.strictMode) return toast('O modo restrito impede desligar esta protecção.', 'error');
                 void setShield({ categories: { ...prefs.shield.categories, adult: v } });
               }}
@@ -83,6 +104,7 @@ export default function Protection() {
             <AppSwitch
               value={prefs.shield.categories.gambling}
               onValueChange={(v) => {
+                if (!v && lockedCategories.includes('gambling')) return toast(lockMessage, 'error');
                 if (!v && prefs.shield.strictMode) return toast('O modo restrito impede desligar esta protecção.', 'error');
                 void setShield({ categories: { ...prefs.shield.categories, gambling: v } });
               }}
@@ -190,3 +212,7 @@ export default function Protection() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  lock: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.lg, borderRadius: 14, borderWidth: 1, marginBottom: spacing.lg },
+});

@@ -1,7 +1,9 @@
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import * as Haptics from 'expo-haptics';
+import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSequence, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/ThemeProvider';
 import { AppText } from './AppText';
@@ -44,7 +46,7 @@ export function AppTabBar({ state, descriptors, emitter, navigateToTab }: Bottom
             }}
             style={styles.item}
           >
-            {ICONS[route.name]?.(color, focused)}
+            <TabIcon focused={focused}>{ICONS[route.name]?.(color, focused)}</TabIcon>
             <AppText variant="caption" style={{ color, fontSize: 10, marginTop: 3 }} weight={focused ? 'semibold' : 'regular'}>
               {label}
             </AppText>
@@ -59,3 +61,13 @@ const styles = StyleSheet.create({
   bar: { flexDirection: 'row', borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 8 },
   item: { flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: 44 },
 });
+
+function TabIcon({ focused, children }: { focused: boolean; children: React.ReactNode }) {
+  const reduce = useReducedMotion();
+  const s = useSharedValue(1);
+  useEffect(() => {
+    if (focused && !reduce) s.value = withSequence(withSpring(1.18, { damping: 8, stiffness: 400 }), withSpring(1, { damping: 12 }));
+  }, [focused, reduce, s]);
+  const anim = useAnimatedStyle(() => ({ transform: [{ scale: s.value }] }));
+  return <Animated.View style={anim}>{children}</Animated.View>;
+}

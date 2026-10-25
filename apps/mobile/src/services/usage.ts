@@ -12,6 +12,7 @@ import {
   drainNativeEvents,
   getCapabilities,
   getPermissions,
+  getHourlyUsage,
   getUsage,
   pushRuleConfig,
   type NativeCapabilities,
@@ -111,7 +112,7 @@ export async function syncRulesToNative(now = new Date()): Promise<void> {
   const [limits, schedules, exceptions] = await Promise.all([listLimits(), listSchedules(), exceptionsForDay(dayKey(now))]);
   const { rules, notifications } = usePrefs.getState().prefs;
   await pushRuleConfig({
-    limits: limits.map((l) => ({ appId: l.appId, packageNames: l.packageNames, limitMinutes: l.limitMinutes, enabled: l.enabled })),
+    limits: limits.map((l) => ({ appId: l.appId, packageNames: l.packageNames, limitMinutes: l.limitMinutes, enabled: l.enabled, sinceMs: l.sinceMs })),
     schedules: schedules.map(({ label: _label, ...s }) => s),
     strictMode: rules.strictMode,
     notify: notifications.limitWarnings,
@@ -123,6 +124,8 @@ export interface TodayAppState extends AppRuleResult {
   name: string;
   packageNames: string[];
   limitMinutes: number;
+  /** Se o limite só começou a contar hoje, a hora a partir da qual conta. */
+  countingSince: number | null;
 }
 
 export interface TodaySnapshot {
@@ -151,19 +154,32 @@ export async function loadToday(now = new Date()): Promise<TodaySnapshot> {
     canRestrict: capabilities.canRestrictApps,
     permissionGranted: measured,
   };
+  // O limite só conta a partir do momento em que passou a valer: o uso anterior
+  // (por exemplo, antes de instalar o Acorde Já) não o esgota.
+  const dayStart = startOfLocalDay(now).getTime();
+  const windows = new Map<number, Awaited<ReturnType<typeof getUsage>>>();
+  if (measured) {
+    for (const since of new Set(limits.filter((l) => l.sinceMs > dayStart).map((l) => l.sinceMs))) {
+      windows.set(since, await getUsage(since, now.getTime()));
+    }
+  }
+  const usedFor = (l: (typeof limits)[number]) => {
+    const win = l.sinceMs > dayStart ? windows.get(l.sinceMs) : undefined;
+    if (win) return win.apps.filter((a) => l.packageNames.includes(a.packageName)).reduce((s, a) => s + a.foregroundMs, 0);
+    return rows.find((r) => r.appId === l.appId)?.usedMs ?? 0;
+  };
   const apps: TodayAppState[] = limits.map((l) => {
-    const row = rows.find((r) => r.appId === l.appId);
     const result = evaluateApp(
       {
         appId: l.appId,
         limitMinutes: l.limitMinutes,
         enabled: l.enabled,
-        usedMs: measured ? (row?.usedMs ?? 0) : null,
+        usedMs: measured ? usedFor(l) : null,
         exceptionsToday: exceptions.filter((e) => e.appId === l.appId),
       },
       { capability, schedules, now },
     );
-    return { ...result, name: l.name, packageNames: l.packageNames, limitMinutes: l.limitMinutes };
+    return { ...result, name: l.name, packageNames: l.packageNames, limitMinutes: l.limitMinutes, countingSince: l.sinceMs > dayStart ? l.sinceMs : null };
   });
   const screen = rows.find((r) => r.appId === SCREEN_TOTAL_ID);
   return {
@@ -175,4 +191,11 @@ export async function loadToday(now = new Date()): Promise<TodaySnapshot> {
     screenTimeMs: measured ? (screen?.usedMs ?? 0) : null,
     updatedAt: now.getTime(),
   };
+}
+
+/** Tempo de ecrã total por hora de hoje (24 valores em ms) — dados reais do sistema. */
+export async function loadHourly(now = new Date()): Promise<number[] | null> {
+  const caps = await getCapabilities();
+  if (!caps.canMeasureUsage) return null;
+  return getHourlyUsage(startOfLocalDay(now).getTime());
 }

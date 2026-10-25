@@ -84,5 +84,7 @@ export function evaluateDomain(
 export function activeDomainList(config: ShieldConfig, lists: Record<ShieldCategory, string[]> = SEED_DOMAINS): string[] {
   const set = new Set<string>(config.customDomains);
   for (const cat of Object.keys(lists) as ShieldCategory[]) if (config.categories[cat]) lists[cat].forEach((d) => set.add(d));
-  return [...set].sort();
+  // Domínios permitidos saem da lista (excepto em modo estrito).
+  const allowed = config.strictMode ? [] : config.allowDomains;
+  return [...set].filter((d) => !allowed.some((a) => matchesDomain(d, a))).sort();
 }

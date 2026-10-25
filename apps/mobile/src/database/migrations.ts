@@ -131,4 +131,27 @@ export const MIGRATIONS: string[] = [
   );
   CREATE INDEX IF NOT EXISTS sync_queue_due ON sync_queue (status, next_attempt_at);
   `,
+  // 2 — limites só contam a partir do momento em que passaram a valer
+  `
+  ALTER TABLE app_limits ADD COLUMN since_ms INTEGER NOT NULL DEFAULT 0;
+  UPDATE app_limits SET since_ms = updated_at;
+  `,
+  // 3 — desafios (pornografia / apostas) com calendário de recompensas
+  `
+  CREATE TABLE IF NOT EXISTS challenges (
+    id TEXT PRIMARY KEY NOT NULL,
+    goal TEXT NOT NULL,
+    start_day TEXT NOT NULL,
+    end_day TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    ended_at INTEGER
+  );
+  CREATE TABLE IF NOT EXISTS challenge_checkins (
+    challenge_id TEXT NOT NULL REFERENCES challenges (id) ON DELETE CASCADE,
+    day TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('clean', 'relapse')),
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (challenge_id, day)
+  );
+  `,
 ];

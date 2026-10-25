@@ -1,10 +1,11 @@
 import type { ComponentProps, ReactNode } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radii } from '@/theme/tokens';
 import { AppText } from './AppText';
+import { PressableScale } from './motion';
 
 export interface AppButtonProps {
   label: string;
@@ -42,7 +43,7 @@ export function AppButton({
   const border = variant === 'secondary' ? colors.text : variant === 'subtle' ? colors.border : 'transparent';
 
   return (
-    <Pressable
+    <PressableScale
       testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
@@ -53,12 +54,7 @@ export function AppButton({
         void Haptics.selectionAsync().catch(() => undefined);
         onPress?.();
       }}
-      style={({ pressed }) => [
-        styles.base,
-        size === 'sm' ? styles.sm : styles.md,
-        { backgroundColor: bg, borderColor: border, opacity: inactive ? 0.45 : pressed ? 0.78 : 1 },
-        style,
-      ]}
+      style={[styles.base, size === 'sm' ? styles.sm : styles.md, { backgroundColor: bg, borderColor: border, opacity: inactive ? 0.45 : 1 }, style]}
     >
       {loading ? (
         <ActivityIndicator color={fg} />
@@ -71,7 +67,7 @@ export function AppButton({
           {trailingIcon ? <Feather name={trailingIcon} size={18} color={fg} style={styles.trailing} /> : null}
         </View>
       )}
-    </Pressable>
+    </PressableScale>
   );
 }
 

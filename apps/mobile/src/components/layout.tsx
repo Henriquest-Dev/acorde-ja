@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/ThemeProvider';
 import { layout, radii, spacing } from '@/theme/tokens';
 import { AppText } from './AppText';
+import { PressableScale } from './motion';
 
 export function Screen({
   children,
@@ -178,15 +179,9 @@ export function ListRow({
     );
   }
   return (
-    <Pressable
-      testID={testID}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel ?? title}
-      style={({ pressed }) => [...style, pressed && { opacity: 0.7 }]}
-    >
+    <PressableScale testID={testID} onPress={onPress} accessibilityRole="button" accessibilityLabel={accessibilityLabel ?? title} style={style} scaleTo={0.98}>
       {content}
-    </Pressable>
+    </PressableScale>
   );
 }
 

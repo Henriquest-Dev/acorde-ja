@@ -1,8 +1,8 @@
 /** Componentes de domínio: AppUsageCard, AppLimitCard, AppHabitCard e AppBlockScreen. */
 import { Feather } from '@expo/vector-icons';
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { FadeInDown, useReducedMotion } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeOut, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radii, spacing } from '@/theme/tokens';
@@ -11,6 +11,7 @@ import { AppText } from './AppText';
 import { BrandIcon } from './brand';
 import { AppCheckbox } from './controls';
 import { RowIconView, type RowIcon } from './layout';
+import { Breathe, PulseRings } from './motion';
 
 const STATE_LABEL: Record<string, string> = {
   WARNING: 'Perto do limite',
@@ -129,21 +130,64 @@ export function AppHabitCard({
   );
 }
 
-/** Esqueleto partilhado pelos ecrãs «Limite atingido» e «80% do limite». */
-export function AppBlockScreen({ icon, title, message, children, footer }: { icon: ReactNode; title: string; message: string; children?: ReactNode; footer?: string }) {
+/** Esqueleto partilhado pelos ecrãs «Limite atingido» e «80% do limite» — animado. */
+export function AppBlockScreen({
+  icon,
+  title,
+  message,
+  children,
+  footer,
+  countdownTo,
+  quotes,
+}: {
+  icon: ReactNode;
+  title: string;
+  message: string;
+  children?: ReactNode;
+  footer?: string;
+  /** Epoch ms em que a app volta a estar disponível (mostra contagem decrescente). */
+  countdownTo?: number;
+  /** Frases que alternam a cada 5 s. */
+  quotes?: string[];
+}) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!countdownTo && !quotes) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [countdownTo, quotes]);
+  const quote = quotes?.length ? quotes[Math.floor(now / 5000) % quotes.length] : null;
+  const remaining = countdownTo ? Math.max(0, countdownTo - now) : 0;
+  const h = Math.floor(remaining / 3_600_000);
+  const m = Math.floor((remaining % 3_600_000) / 60_000);
+  const sec = Math.floor((remaining % 60_000) / 1000);
   return (
-    <View style={[styles.block, { backgroundColor: colors.background, paddingTop: insets.top + 110, paddingBottom: insets.bottom + spacing.xxl }]}>
+    <View style={[styles.block, { backgroundColor: colors.background, paddingTop: insets.top + 64, paddingBottom: insets.bottom + spacing.xxl }]}>
       <Animated.View entering={reduce ? undefined : FadeInDown.duration(380)} style={styles.blockInner}>
-        <View style={styles.blockIcon}>{icon}</View>
-        <AppText variant="h1" align="center" style={{ marginTop: spacing.xxl, fontSize: 26 }} accessibilityRole="header">
+        <PulseRings size={170} color={colors.text}>
+          <Breathe>{icon}</Breathe>
+        </PulseRings>
+        <AppText variant="h1" align="center" style={{ marginTop: spacing.lg, fontSize: 26 }} accessibilityRole="header">
           {title}
         </AppText>
         <AppText variant="body" tone="secondary" align="center" style={{ marginTop: spacing.md, maxWidth: 300 }}>
           {message}
         </AppText>
+        {countdownTo ? (
+          <AppText variant="small" tone="muted" align="center" style={{ marginTop: spacing.sm, fontVariant: ['tabular-nums'] }} accessibilityLiveRegion="polite">
+            Disponível novamente em {h > 0 ? `${h}h ` : ''}{String(m).padStart(2, '0')}min {String(sec).padStart(2, '0')}s
+          </AppText>
+        ) : null}
+        {quote ? (
+          <Animated.View key={quote} entering={reduce ? undefined : FadeIn.duration(400)} exiting={reduce ? undefined : FadeOut.duration(200)}>
+            <AppText variant="small" tone="muted" align="center" style={{ marginTop: spacing.xl, maxWidth: 260 }}>
+              {quote}
+            </AppText>
+          </Animated.View>
+        ) : null}
         {children}
       </Animated.View>
       {footer ? (

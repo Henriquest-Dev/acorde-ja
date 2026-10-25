@@ -38,6 +38,10 @@ export interface AcordeNativeModule {
   startShield(domains: string[], upstream: string): Promise<boolean>;
   stopShield(): Promise<void>;
   getShieldStats(): Promise<ShieldStats>;
+  /** Compromisso do desafio: o filtro não pode ser desligado até `untilMs` (só pode ser prolongado). */
+  setShieldLock(untilMs: number): Promise<number>;
+  /** Tempo de ecrã total por hora (24 valores, ms) desde `dayStartMs`. */
+  getHourlyUsage(dayStartMs: number): Promise<number[]>;
   // iOS (FamilyControls)
   requestFamilyControlsAuthorization?(): Promise<PermissionStatus['familyControls']>;
   presentAppPicker?(): Promise<number>;

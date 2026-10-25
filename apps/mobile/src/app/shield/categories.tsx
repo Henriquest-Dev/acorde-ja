@@ -1,6 +1,8 @@
 import { SEED_DOMAINS, SHIELD_CATEGORIES, type ShieldCategory } from '@acorde/core';
 import { View } from 'react-native';
 import { AppHeader, AppSwitch, AppText, ListRow, Screen, toast } from '@/components';
+import { useActiveChallenges } from '@/hooks/queries';
+import { GOAL_CATEGORY } from '@/services/challenge';
 import { applyShield } from '@/services/shield';
 import { usePrefs } from '@/stores/prefs';
 import { spacing } from '@/theme/tokens';
@@ -8,8 +10,11 @@ import { spacing } from '@/theme/tokens';
 /** Bloquear por categoria. */
 export default function ShieldCategories() {
   const { prefs, update } = usePrefs();
+  const challenges = useActiveChallenges();
+  const locked = (challenges.data ?? []).map((c) => GOAL_CATEGORY[c.challenge.goal]);
 
   const toggle = async (id: ShieldCategory, on: boolean) => {
+    if (!on && locked.includes(id)) return toast('Desafio em curso: esta categoria está trancada até ao fim do desafio.', 'error');
     if (!on && prefs.shield.strictMode) return toast('O modo restrito impede desligar categorias.', 'error');
     const shield = { ...prefs.shield, categories: { ...prefs.shield.categories, [id]: on } };
     await update({ shield });

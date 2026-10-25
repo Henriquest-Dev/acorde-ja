@@ -3,6 +3,7 @@ import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { AppButton, AppEmptyState, AppHeader, AppInput, AppText, ListRow, Screen, SegmentedControl, toast } from '@/components';
+import { useActiveChallenges } from '@/hooks/queries';
 import { applyShield } from '@/services/shield';
 import { usePrefs } from '@/stores/prefs';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -12,6 +13,7 @@ import { spacing } from '@/theme/tokens';
 export default function ShieldCustom() {
   const { colors } = useTheme();
   const { prefs, update } = usePrefs();
+  const challenges = useActiveChallenges();
   const [mode, setMode] = useState<'block' | 'allow'>('block');
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | undefined>();
@@ -28,6 +30,7 @@ export default function ShieldCustom() {
   const add = async () => {
     const d = normalizeDomain(value);
     if (!d) return setError('Indique um domínio válido, ex.: exemplo.pt');
+    if (mode === 'allow' && challenges.data?.length) return setError('Durante o desafio não é possível adicionar excepções.');
     if (list.includes(d)) return setError('Este domínio já está na lista');
     setError(undefined);
     setValue('');
@@ -35,7 +38,10 @@ export default function ShieldCustom() {
   };
 
   const remove = async (d: string) => {
-    if (mode === 'block' && prefs.shield.strictMode) return toast('O modo restrito impede remover domínios.', 'error');
+    if (mode === 'block' && (prefs.shield.strictMode || challenges.data?.length)) {
+      return toast(challenges.data?.length ? 'Desafio em curso: não é possível remover domínios.' : 'O modo restrito impede remover domínios.', 'error');
+    }
+    if (mode === 'allow' && challenges.data?.length) return toast('Desafio em curso.', 'error');
     await save(list.filter((x) => x !== d));
   };
 

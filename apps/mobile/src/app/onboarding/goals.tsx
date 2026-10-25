@@ -17,7 +17,7 @@ export default function Goals() {
   return (
     <Screen
       testID="onb-goals"
-      footer={<AppButton label="Continuar" disabled={goals.length === 0} onPress={() => router.push('/onboarding/limits')} testID="onb-goals-continue" />}
+      footer={<AppButton label="Continuar" disabled={goals.length === 0} onPress={() => router.push(goals.includes('avoid_porn') || goals.includes('avoid_gambling') ? '/onboarding/challenge' : '/onboarding/limits')} testID="onb-goals-continue" />}
     >
       <AppText variant="h2" style={styles.title} accessibilityRole="header">
         Quais são os seus principais objetivos?

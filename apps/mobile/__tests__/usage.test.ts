@@ -5,7 +5,7 @@ import { mapUsageToRows } from '@/services/usage';
 jest.mock('@/database/db', () => ({ getDb: jest.fn(), inTransaction: jest.fn() }));
 
 const limits = [
-  { appId: 'tiktok', name: 'TikTok', packageNames: ['com.zhiliaoapp.musically', 'com.ss.android.ugc.trill'], limitMinutes: 20, enabled: true, sort: 0 },
+  { appId: 'tiktok', name: 'TikTok', packageNames: ['com.zhiliaoapp.musically', 'com.ss.android.ugc.trill'], limitMinutes: 20, enabled: true, sort: 0, sinceMs: 0 },
 ];
 
 describe('mapUsageToRows', () => {

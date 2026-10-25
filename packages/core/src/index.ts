@@ -7,3 +7,4 @@ export * from './habits';
 export * from './reports';
 export * from './shield';
 export * from './validation';
+export * from './challenge';

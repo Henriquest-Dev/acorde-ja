@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { PressableScale } from './motion';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radii, spacing } from '@/theme/tokens';
 
@@ -29,15 +30,9 @@ export function AppCard({ children, onPress, style, padded = true, elevated, acc
     );
   }
   return (
-    <Pressable
-      testID={testID}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      style={({ pressed }) => [...base, pressed && { opacity: 0.8 }]}
-    >
+    <PressableScale testID={testID} onPress={onPress} accessibilityRole="button" accessibilityLabel={accessibilityLabel} style={base} scaleTo={0.98}>
       {children}
-    </Pressable>
+    </PressableScale>
   );
 }
 

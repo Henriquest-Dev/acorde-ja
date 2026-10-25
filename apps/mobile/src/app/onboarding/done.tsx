@@ -8,6 +8,7 @@ import { AppButton, AppText, Screen } from '@/components';
 import { PermissionStatusIcon } from '@/features/onboarding/PermissionStatusIcon';
 import { activateEnforcement, usePermissionSummary } from '@/features/onboarding/usePermissionSummary';
 import { useLimits } from '@/hooks/queries';
+import { restartLimitsFrom } from '@/repositories/limits';
 import { usePrefs } from '@/stores/prefs';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
@@ -26,6 +27,8 @@ export default function Done() {
 
   const finish = async () => {
     setFinishing(true);
+    // Os limites começam a contar agora: o uso de hoje antes da configuração não conta.
+    await restartLimitsFrom(Date.now());
     await activateEnforcement().catch(() => false);
     await update({ onboardingDone: true });
     router.replace('/');
