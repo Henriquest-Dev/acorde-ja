@@ -118,10 +118,19 @@ class ShieldVpnService : VpnService() {
   }
 
   override fun onRevoke() {
-    // O utilizador desligou a VPN nas definições do sistema: respeitamos e registamos.
-    store.appendEvent("shield_revoked", null)
-    store.shieldEnabled = false
     shutdown()
+    if (store.shieldLocked) {
+      // Compromisso do desafio activo: regista a tentativa e volta a ligar o filtro.
+      store.appendEvent("shield_revoked_locked", null)
+      val app = applicationContext
+      android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+        if (Permissions.vpnPrepared(app)) start(app)
+      }, RESTART_DELAY_MS)
+    } else {
+      // Sem compromisso: respeitamos a decisão do utilizador.
+      store.appendEvent("shield_revoked", null)
+      store.shieldEnabled = false
+    }
     super.onRevoke()
   }
 
@@ -135,6 +144,7 @@ class ShieldVpnService : VpnService() {
     @Volatile var isRunning = false
       internal set
     const val ACTION_STOP = "pt.acordeja.SHIELD_STOP"
+    private const val RESTART_DELAY_MS = 3_000L
     private const val TUN_ADDRESS = "10.111.222.1"
     private const val DNS_ADDRESS = "10.111.222.2"
 

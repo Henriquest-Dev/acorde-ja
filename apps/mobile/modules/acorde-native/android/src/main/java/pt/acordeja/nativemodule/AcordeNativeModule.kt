@@ -21,6 +21,7 @@ import java.util.Calendar
 class PermissionDeniedException(message: String) : CodedException("ERR_PERMISSION_DENIED", message, null)
 class InvalidArgumentException(message: String) : CodedException("ERR_INVALID_ARGUMENT", message, null)
 class VpnNotPreparedException : CodedException("ERR_VPN_NOT_PREPARED", "O utilizador ainda não autorizou a VPN local.", null)
+class ShieldLockedException : CodedException("ERR_SHIELD_LOCKED", "A protecção está bloqueada pelo desafio até à data escolhida.", null)
 
 class AcordeNativeModule : Module() {
   private val context: Context
@@ -137,7 +138,8 @@ class AcordeNativeModule : Module() {
 
     AsyncFunction("setAppLimit") { appId: String, packageNames: List<String>, limitMinutes: Int, enabled: Boolean ->
       if (limitMinutes !in 1..720) throw InvalidArgumentException("O limite tem de estar entre 1 e 720 minutos")
-      store.upsertLimit(RuleStore.Limit(appId, packageNames, limitMinutes, enabled))
+      val previous = store.config().limits.firstOrNull { it.appId == appId }
+      store.upsertLimit(RuleStore.Limit(appId, packageNames, limitMinutes, enabled, previous?.sinceMs ?: System.currentTimeMillis()))
       if (store.enforcementEnabled) EnforcementService.start(context, invalidate = true)
     }
 
@@ -166,7 +168,8 @@ class AcordeNativeModule : Module() {
       val usage = UsageCalculator.query(context, start, now)
       val day = RuleStore.dayKey(now)
       config.limits.map { limit ->
-        val used = limit.packages.sumOf { usage.apps[it]?.foregroundMs ?: 0L }
+        val window = if (limit.sinceMs > start) UsageCalculator.query(context, limit.sinceMs, now) else usage
+        val used = limit.packages.sumOf { window.apps[it]?.foregroundMs ?: 0L }
         val ev = RuleEvaluator.evaluate(limit, used, config, day, cal)
         val state = if (ev.state in listOf("BLOCKED", "SCHEDULED_BLOCK") && !Permissions.hasOverlay(context)) {
           "PERMISSION_REQUIRED"
@@ -218,15 +221,29 @@ class AcordeNativeModule : Module() {
 
     AsyncFunction("startShield") { domains: List<String>, upstream: String ->
       if (!Permissions.vpnPrepared(context)) throw VpnNotPreparedException()
-      store.shieldDomains = domains.map { it.lowercase().trim() }.filter { it.isNotEmpty() }
+      val requested = domains.map { it.lowercase().trim() }.filter { it.isNotEmpty() }
+      // Durante o desafio a lista só pode crescer.
+      store.shieldDomains = if (store.shieldLocked) (store.shieldDomains + requested).distinct() else requested
       store.shieldUpstream = if (upstream in ALLOWED_UPSTREAMS) upstream else "1.1.1.1"
       store.shieldEnabled = true
       ShieldVpnService.start(context)
     }
 
     AsyncFunction("stopShield") {
+      if (store.shieldLocked) throw ShieldLockedException()
       store.shieldEnabled = false
       ShieldVpnService.stop(context)
+    }
+
+    AsyncFunction("setShieldLock") { untilMs: Double ->
+      // O compromisso só pode ser prolongado, nunca encurtado.
+      store.shieldLockUntil = maxOf(store.shieldLockUntil, untilMs.toLong())
+      store.shieldLockUntil.toDouble()
+    }
+
+    AsyncFunction("getHourlyUsage") { dayStartMs: Double ->
+      requireUsageAccess()
+      UsageCalculator.hourly(context, dayStartMs.toLong(), System.currentTimeMillis()).map { it.toDouble() }
     }
 
     AsyncFunction("getShieldStats") {
@@ -235,6 +252,7 @@ class AcordeNativeModule : Module() {
         "blockedToday" to store.shieldBlockedToday(),
         "domains" to store.shieldDomains.size,
         "lastError" to store.shieldLastError,
+        "lockedUntil" to store.shieldLockUntil.toDouble(),
       )
     }
   }

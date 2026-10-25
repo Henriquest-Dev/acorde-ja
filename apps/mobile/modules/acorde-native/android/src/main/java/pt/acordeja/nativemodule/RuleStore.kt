@@ -15,7 +15,11 @@ import java.util.Locale
 class RuleStore(context: Context) {
   private val prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
-  data class Limit(val appId: String, val packages: List<String>, val limitMinutes: Int, val enabled: Boolean)
+  /**
+   * `sinceMs`: momento em que o limite passou a valer. No próprio dia só conta o
+   * uso a partir daí — o uso anterior à configuração não esgota o limite.
+   */
+  data class Limit(val appId: String, val packages: List<String>, val limitMinutes: Int, val enabled: Boolean, val sinceMs: Long = 0L)
   data class Schedule(
     val id: String,
     val enabled: Boolean,
@@ -56,6 +60,16 @@ class RuleStore(context: Context) {
   var enforcementEnabled: Boolean
     get() = prefs.getBoolean(KEY_ENFORCEMENT, false)
     set(v) = prefs.edit().putBoolean(KEY_ENFORCEMENT, v).apply()
+
+  /**
+   * Compromisso do desafio: até esta data o filtro de sites não pode ser
+   * desligado a partir do aplicativo e é religado se a VPN cair.
+   */
+  var shieldLockUntil: Long
+    get() = prefs.getLong(KEY_SHIELD_LOCK, 0L)
+    set(v) = prefs.edit().putLong(KEY_SHIELD_LOCK, v).apply()
+
+  val shieldLocked: Boolean get() = shieldLockUntil > System.currentTimeMillis()
 
   var shieldEnabled: Boolean
     get() = prefs.getBoolean(KEY_SHIELD, false)
@@ -128,6 +142,7 @@ class RuleStore(context: Context) {
     private const val KEY_CONFIG = "config"
     private const val KEY_ENFORCEMENT = "enforcement_enabled"
     private const val KEY_SHIELD = "shield_enabled"
+    private const val KEY_SHIELD_LOCK = "shield_lock_until"
     private const val KEY_SHIELD_DOMAINS = "shield_domains"
     private const val KEY_SHIELD_UPSTREAM = "shield_upstream"
     private const val KEY_SHIELD_DAY = "shield_day"
@@ -149,7 +164,7 @@ class RuleStore(context: Context) {
           val l = a.getJSONObject(it)
           val minutes = l.getInt("limitMinutes")
           require(minutes in 1..720) { "limitMinutes fora do intervalo" }
-          Limit(l.getString("appId"), strings(l.optJSONArray("packageNames")), minutes, l.optBoolean("enabled", true))
+          Limit(l.getString("appId"), strings(l.optJSONArray("packageNames")), minutes, l.optBoolean("enabled", true), l.optLong("sinceMs", 0L))
         }
       } ?: emptyList()
       val schedules = o.optJSONArray("schedules")?.let { a ->
@@ -174,7 +189,7 @@ class RuleStore(context: Context) {
       val o = JSONObject()
       o.put("limits", JSONArray(c.limits.map {
         JSONObject().put("appId", it.appId).put("packageNames", JSONArray(it.packages))
-          .put("limitMinutes", it.limitMinutes).put("enabled", it.enabled)
+          .put("limitMinutes", it.limitMinutes).put("enabled", it.enabled).put("sinceMs", it.sinceMs)
       }))
       o.put("schedules", JSONArray(c.schedules.map {
         JSONObject().put("id", it.id).put("enabled", it.enabled).put("start", it.start).put("end", it.end)

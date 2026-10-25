@@ -16,87 +16,55 @@ object UsageCalculator {
   /** Janela anterior a `start` usada para detectar apps já abertas nesse instante. */
   private const val LOOKBACK_MS = 3 * 60 * 60 * 1000L
 
-  data class AppUsage(
-    val packageName: String,
-    var foregroundMs: Long = 0,
-    var opens: Int = 0,
-    var lastUsedAt: Long? = null,
-  )
-
   data class Result(
     val startMs: Long,
     val endMs: Long,
-    val apps: Map<String, AppUsage>,
+    val apps: Map<String, ForegroundTracker.AppUsage>,
     val currentForeground: String?,
   ) {
     val totalForegroundMs: Long get() = apps.values.sumOf { it.foregroundMs }
   }
 
   fun query(context: Context, startMs: Long, endMs: Long): Result {
-    val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-    val excluded = excludedPackages(context)
-    val events = usm.queryEvents(startMs - LOOKBACK_MS, endMs)
-    val apps = HashMap<String, AppUsage>()
-    val openSince = HashMap<String, Long>()
-    var lastForeground: String? = null
-    val event = UsageEvents.Event()
-
-    fun close(pkg: String, at: Long) {
-      val since = openSince.remove(pkg) ?: return
-      val from = maxOf(since, startMs)
-      val to = minOf(at, endMs)
-      if (to > from) {
-        val u = apps.getOrPut(pkg) { AppUsage(pkg) }
-        u.foregroundMs += to - from
-        u.lastUsedAt = maxOf(u.lastUsedAt ?: 0L, to)
-      }
-    }
-
-    while (events.hasNextEvent()) {
-      events.getNextEvent(event)
-      val pkg = event.packageName ?: continue
-      val ts = event.timeStamp
-      when (event.eventType) {
-        UsageEvents.Event.ACTIVITY_RESUMED -> {
-          if (pkg in excluded) {
-            lastForeground = pkg
-            continue
-          }
-          // Outra app em primeiro plano fecha a anterior.
-          openSince.keys.filter { it != pkg }.forEach { close(it, ts) }
-          if (!openSince.containsKey(pkg)) openSince[pkg] = ts
-          if (pkg != lastForeground && ts >= startMs && ts < endMs) {
-            apps.getOrPut(pkg) { AppUsage(pkg) }.opens++
-          }
-          lastForeground = pkg
-        }
-        UsageEvents.Event.ACTIVITY_PAUSED, ACTIVITY_STOPPED -> close(pkg, ts)
-        UsageEvents.Event.SCREEN_NON_INTERACTIVE, UsageEvents.Event.KEYGUARD_SHOWN, DEVICE_SHUTDOWN -> {
-          openSince.keys.toList().forEach { close(it, ts) }
-          lastForeground = null
-        }
-      }
-    }
-    val current = openSince.keys.firstOrNull()
-    openSince.keys.toList().forEach { close(it, endMs) }
-    return Result(startMs, endMs, apps, current)
+    val tracker = ForegroundTracker(startMs, endMs, excludedPackages(context))
+    replay(context, startMs - LOOKBACK_MS, endMs, tracker)
+    val current = tracker.current
+    return Result(startMs, endMs, tracker.finish(endMs), current)
   }
 
   /** App actualmente em primeiro plano (eventos dos últimos minutos). */
   fun currentForegroundPackage(context: Context, now: Long): String? {
+    val tracker = ForegroundTracker(now, now, excludedPackages(context))
+    replay(context, now - 10 * 60 * 1000L, now, tracker)
+    return tracker.current
+  }
+
+  /** Tempo de ecrã total por hora (24 posições) desde `dayStart` até `now`. */
+  fun hourly(context: Context, dayStart: Long, now: Long): LongArray {
+    val out = LongArray(24)
+    for (h in 0 until 24) {
+      val from = dayStart + h * 3_600_000L
+      if (from >= now) break
+      val to = minOf(from + 3_600_000L, now)
+      out[h] = query(context, from, to).totalForegroundMs
+    }
+    return out
+  }
+
+  private fun replay(context: Context, from: Long, to: Long, tracker: ForegroundTracker) {
     val usm = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-    val events = usm.queryEvents(now - 10 * 60 * 1000L, now)
+    val events = usm.queryEvents(from, to)
     val event = UsageEvents.Event()
-    var current: String? = null
     while (events.hasNextEvent()) {
       events.getNextEvent(event)
+      val pkg = event.packageName ?: continue
+      val cls = event.className ?: ""
       when (event.eventType) {
-        UsageEvents.Event.ACTIVITY_RESUMED -> current = event.packageName
-        UsageEvents.Event.ACTIVITY_PAUSED, ACTIVITY_STOPPED -> if (event.packageName == current) current = null
-        UsageEvents.Event.SCREEN_NON_INTERACTIVE, UsageEvents.Event.KEYGUARD_SHOWN -> current = null
+        UsageEvents.Event.ACTIVITY_RESUMED -> tracker.resume(pkg, cls, event.timeStamp)
+        UsageEvents.Event.ACTIVITY_PAUSED, ACTIVITY_STOPPED -> tracker.pause(pkg, cls, event.timeStamp)
+        UsageEvents.Event.SCREEN_NON_INTERACTIVE, UsageEvents.Event.KEYGUARD_SHOWN, DEVICE_SHUTDOWN -> tracker.screenOff(event.timeStamp)
       }
     }
-    return current
   }
 
   /** Launchers e a interface do sistema não contam como "tempo de ecrã" de apps. */

@@ -26,7 +26,8 @@ class EnforcementService : Service() {
   private lateinit var store: RuleStore
   private lateinit var overlay: BlockOverlay
 
-  private var cache: UsageCalculator.Result? = null
+  private val cacheByStart = HashMap<Long, UsageCalculator.Result>()
+  private var lastHomeAt = 0L
   private var cacheAtElapsed = 0L
   private var cacheDay: String? = null
   private var lastWall = 0L
@@ -55,7 +56,7 @@ class EnforcementService : Service() {
   }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-    if (intent?.action == ACTION_INVALIDATE) cache = null
+    if (intent?.action == ACTION_INVALIDATE) cacheByStart.clear()
     handler.removeCallbacks(loop)
     handler.post(loop)
     return START_STICKY
@@ -68,6 +69,7 @@ class EnforcementService : Service() {
   }
 
   private fun tick() {
+    keepShieldAlive()
     if (!Permissions.hasUsageAccess(this)) {
       // Permissão revogada: regista e deixa de aplicar (sem fingir bloqueios).
       overlay.hide()
@@ -83,24 +85,27 @@ class EnforcementService : Service() {
 
     val cal = Calendar.getInstance()
     val day = RuleStore.dayKey(now)
+    val dayStart = startOfDay(cal)
     val config = store.config()
     if (config.limits.isEmpty() && config.schedules.none { it.enabled }) {
       overlay.hide()
       return
     }
 
-    // Recalcula a utilização do dia a cada 15 s; entre recálculos usa a cache.
-    if (cache == null || cacheDay != day || elapsed - cacheAtElapsed > RECALC_MS) {
-      cache = UsageCalculator.query(this, startOfDay(cal), now)
+    // Recalcula a utilização a cada 15 s; entre recálculos usa a cache.
+    // Cada janela começa na meia-noite ou no momento em que o limite passou a valer.
+    if (cacheDay != day || elapsed - cacheAtElapsed > RECALC_MS) {
+      cacheByStart.clear()
       cacheAtElapsed = elapsed
       cacheDay = day
     }
-    val usage = cache!!
+    fun usageFrom(start: Long) = cacheByStart.getOrPut(start) { UsageCalculator.query(this, start, now) }
     val foreground = UsageCalculator.currentForegroundPackage(this, now)
     val sinceCache = elapsed - cacheAtElapsed
 
     var blockedForeground: Pair<RuleStore.Limit, RuleEvaluator.Evaluation>? = null
     for (limit in config.limits) {
+      val usage = usageFrom(maxOf(dayStart, limit.sinceMs))
       var used = limit.packages.sumOf { usage.apps[it]?.foregroundMs ?: 0L }
       if (foreground != null && foreground in limit.packages) used += sinceCache
       val ev = RuleEvaluator.evaluate(limit, used, config, day, cal)
@@ -120,30 +125,55 @@ class EnforcementService : Service() {
         }
         store.setLastState(limit.appId, day, ev.state)
       }
-      if (foreground != null && foreground in limit.packages && (ev.state == "BLOCKED" || ev.state == "SCHEDULED_BLOCK")) {
-        blockedForeground = limit to ev
-      }
+      val isBlocked = ev.state == "BLOCKED" || ev.state == "SCHEDULED_BLOCK"
+      // O ecrã de bloqueio sai quando a app deixa de estar bloqueada (ex.: tempo extra concedido).
+      if (!isBlocked && overlay.shownForApp == limit.appId) overlay.hide()
+      if (foreground != null && foreground in limit.packages && isBlocked) blockedForeground = limit to ev
     }
 
-    val blocked = blockedForeground
-    if (blocked == null) {
-      overlay.hide()
-      return
-    }
+    val blocked = blockedForeground ?: return
     val (limit, ev) = blocked
-    val name = limit.packages.firstOrNull()?.let { UsageCalculator.label(this, it) } ?: limit.appId
+    val pkg = limit.packages.firstOrNull { it == foreground } ?: limit.packages.firstOrNull()
+    val name = pkg?.let { UsageCalculator.label(this, it) } ?: limit.appId
     if (overlay.shownForApp != limit.appId) {
       store.appendEvent("block_screen_shown", limit.appId, JSONObject().put("state", ev.state))
     }
+    // Primeiro mostra o bloqueio (a janela visível permite lançar actividades),
+    // depois envia a app para segundo plano: o vídeo/áudio pára e nada fica visível.
     if (ev.state == "SCHEDULED_BLOCK") {
-      overlay.show(limit.appId, name, "Horário de bloqueio", "O $name está bloqueado neste horário.", allowExtra = false)
+      overlay.show(limit.appId, pkg, name, "Horário de bloqueio", "O $name está bloqueado neste horário.", allowExtra = false, until = scheduleEnd(config, limit, cal))
     } else {
       overlay.show(
-        limit.appId, name, "Limite atingido",
+        limit.appId, pkg, name, "Limite atingido",
         "Já utilizou os seus ${ev.limitMs / 60_000} minutos diários no $name.",
         allowExtra = !config.strictMode,
+        until = BlockOverlay.nextMidnight(now),
       )
     }
+    if (elapsed - lastHomeAt > HOME_THROTTLE_MS) {
+      lastHomeAt = elapsed
+      BlockOverlay.goHome(this)
+    }
+  }
+
+  /** Desafio activo: se a VPN do filtro caiu, volta a ligá-la (com o consentimento já dado). */
+  private fun keepShieldAlive() {
+    if (!store.shieldEnabled || ShieldVpnService.isRunning) return
+    if (store.shieldLocked && Permissions.vpnPrepared(this)) {
+      store.appendEvent("shield_restarted", null)
+      ShieldVpnService.start(this)
+    }
+  }
+
+  private fun scheduleEnd(config: RuleStore.Config, limit: RuleStore.Limit, now: Calendar): Long {
+    val s = config.schedules.firstOrNull { (it.appIds.isEmpty() || limit.appId in it.appIds) && RuleEvaluator.isScheduleActive(it, now) }
+      ?: return BlockOverlay.nextMidnight(now.timeInMillis)
+    val end = RuleEvaluator.parseTime(s.end)
+    val c = (now.clone() as Calendar).apply {
+      set(Calendar.HOUR_OF_DAY, end / 60); set(Calendar.MINUTE, end % 60); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+    }
+    if (c.timeInMillis <= now.timeInMillis) c.add(Calendar.DAY_OF_YEAR, 1)
+    return c.timeInMillis
   }
 
   private fun detectClockChange(wall: Long, elapsed: Long) {
@@ -151,7 +181,7 @@ class EnforcementService : Service() {
       val drift = (wall - lastWall) - (elapsed - lastElapsed)
       if (kotlin.math.abs(drift) > CLOCK_TOLERANCE_MS) {
         store.appendEvent("clock_changed", null, JSONObject().put("driftMs", drift))
-        cache = null
+        cacheByStart.clear()
       }
     }
     lastWall = wall
@@ -168,7 +198,8 @@ class EnforcementService : Service() {
   companion object {
     const val NOTIFICATION_ID = 4101
     const val ACTION_INVALIDATE = "pt.acordeja.INVALIDATE"
-    private const val TICK_MS = 2_000L
+    private const val TICK_MS = 1_000L
+    private const val HOME_THROTTLE_MS = 1_500L
     private const val RECALC_MS = 15_000L
     private const val CLOCK_TOLERANCE_MS = 2 * 60_000L
 
