@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withTiming } from 'react-native-reanimated';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 import { AppText } from './AppText';
@@ -15,63 +13,53 @@ export interface BarDatum {
 }
 
 /**
- * Gráfico de barras monocromático e interactivo (toque numa barra para ver o
- * valor). As barras crescem a partir de baixo e animam quando os dados mudam
- * (gráficos em tempo real). Sem cor: degradé branco→cinzento; a barra
- * seleccionada (ou `highlightKey`, ex.: a hora actual) fica sólida.
+ * Gráfico de barras sóbrio: barras planas, sem degradé nem animação, sobre uma
+ * linha de base. A barra em destaque (hora actual / selecionada) é branca; as
+ * restantes são cinzentas. A linha de cima diz sempre o que está a ver.
  */
 export function AppBarChart({
   data,
-  height = 120,
-  yTicks,
+  height = 96,
   highlightKey,
   testID,
 }: {
   data: BarDatum[];
   height?: number;
-  /** Etiquetas do eixo Y de cima para baixo (ex.: ["4h","3h","2h","1h","0h"]). */
-  yTicks?: string[];
+  /** Barra em destaque por omissão (ex.: a hora actual). */
   highlightKey?: string;
+  yTicks?: string[];
   testID?: string;
 }) {
+  const { colors } = useTheme();
   const [selected, setSelected] = useState<string | null>(null);
   const max = Math.max(1, ...data.map((d) => d.value));
-  const sel = data.find((d) => d.key === selected);
+  const activeKey = selected ?? highlightKey ?? null;
+  const active = data.find((d) => d.key === activeKey);
   return (
     <View testID={testID}>
-      <View style={{ height: 22, alignItems: 'center' }}>
-        {sel ? (
-          <AppText variant="caption" weight="semibold">
-            {sel.label} · {sel.valueLabel}
-          </AppText>
-        ) : null}
-      </View>
-      <View style={{ flexDirection: 'row' }}>
-        {yTicks ? (
-          <View style={{ height, justifyContent: 'space-between', marginRight: spacing.sm }}>
-            {yTicks.map((t) => (
-              <AppText key={t} variant="caption" tone="muted" style={{ fontSize: 10, lineHeight: 12 }}>
-                {t}
-              </AppText>
-            ))}
-          </View>
-        ) : null}
-        <View style={[styles.bars, { height }]}>
-          {data.map((d, i) => (
-            <Bar
+      <AppText variant="caption" tone="secondary" style={{ minHeight: 18 }}>
+        {active ? `${active.label || active.key} · ${active.valueLabel}` : 'Toque numa barra'}
+      </AppText>
+      <View style={[styles.bars, { height, borderBottomColor: colors.borderStrong, marginTop: spacing.sm }]}>
+        {data.map((d) => {
+          const on = d.key === activeKey;
+          const h = d.value > 0 ? Math.max(3, Math.round((d.value / max) * height)) : 0;
+          return (
+            <Pressable
               key={d.key}
-              datum={d}
-              index={i}
-              target={Math.max(d.value > 0 ? 3 : 0, (d.value / max) * height)}
-              active={selected === d.key || highlightKey === d.key}
+              style={styles.col}
               onPress={() => setSelected(selected === d.key ? null : d.key)}
-            />
-          ))}
-        </View>
+              accessibilityRole="button"
+              accessibilityLabel={`${d.label || d.key}: ${d.valueLabel}`}
+            >
+              <View style={{ width: '62%', height: h, borderTopLeftRadius: 2, borderTopRightRadius: 2, backgroundColor: on ? colors.text : colors.textMuted, opacity: on ? 1 : 0.45 }} />
+            </Pressable>
+          );
+        })}
       </View>
-      <View style={[styles.labels, yTicks ? { marginLeft: 22 } : null]}>
+      <View style={styles.labels}>
         {data.map((d) => (
-          <AppText key={d.key} variant="caption" tone={selected === d.key || highlightKey === d.key ? 'primary' : 'muted'} style={styles.label} numberOfLines={1}>
+          <AppText key={d.key} variant="caption" tone={d.key === activeKey ? 'primary' : 'muted'} style={styles.label} numberOfLines={1}>
             {d.label}
           </AppText>
         ))}
@@ -80,36 +68,9 @@ export function AppBarChart({
   );
 }
 
-function Bar({ datum, index, target, active, onPress }: { datum: BarDatum; index: number; target: number; active: boolean; onPress: () => void }) {
-  const { colors } = useTheme();
-  const reduce = useReducedMotion();
-  const h = useSharedValue(reduce ? target : 0);
-  useEffect(() => {
-    h.value = reduce ? target : withDelay(index * 35, withTiming(target, { duration: 650, easing: Easing.out(Easing.cubic) }));
-  }, [target, reduce, index, h]);
-  const style = useAnimatedStyle(() => ({ height: h.value }));
-  return (
-    <Pressable style={styles.barCol} onPress={onPress} accessibilityRole="button" accessibilityLabel={`${datum.label}: ${datum.valueLabel}`}>
-      <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center', width: '100%' }}>
-        <Animated.View style={[{ width: '58%', borderRadius: 3, overflow: 'hidden' }, style]}>
-          <Svg width="100%" height="100%" preserveAspectRatio="none">
-            <Defs>
-              <LinearGradient id={`bar-${datum.key}`} x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0" stopColor={colors.text} stopOpacity={1} />
-                <Stop offset="1" stopColor={colors.text} stopOpacity={active ? 1 : 0.3} />
-              </LinearGradient>
-            </Defs>
-            <Rect x={0} y={0} width="100%" height="100%" fill={`url(#bar-${datum.key})`} />
-          </Svg>
-        </Animated.View>
-      </View>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
-  bars: { flex: 1, flexDirection: 'row', alignItems: 'flex-end' },
-  barCol: { flex: 1, height: '100%' },
-  labels: { flexDirection: 'row', marginTop: spacing.sm },
-  label: { flex: 1, textAlign: 'center' },
+  bars: { flexDirection: 'row', alignItems: 'flex-end', borderBottomWidth: StyleSheet.hairlineWidth },
+  col: { flex: 1, height: '100%', justifyContent: 'flex-end', alignItems: 'center' },
+  labels: { flexDirection: 'row', marginTop: spacing.xs },
+  label: { flex: 1, textAlign: 'center', fontSize: 10 },
 });

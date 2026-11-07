@@ -12,9 +12,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { ZoomIn, useReducedMotion } from 'react-native-reanimated';
+import Animated, { FadeIn, useReducedMotion } from 'react-native-reanimated';
 import {
-  AnimatedNumber,
   AppBottomSheet,
   AppButton,
   AppCard,
@@ -22,9 +21,7 @@ import {
   AppProgressRing,
   AppSkeleton,
   AppText,
-  Breathe,
   FadeInItem,
-  LivePulse,
   PressableScale,
   Screen,
   SectionTitle,
@@ -101,7 +98,7 @@ export default function ChallengeScreen() {
           <AppText variant="caption" tone="muted">
             DIA
           </AppText>
-          <AnimatedNumber value={stats.dayNumber} format={(n) => String(Math.round(n))} variant="display" style={{ fontSize: 48 }} />
+          <AppText variant="display" style={{ fontSize: 48 }}>{stats.dayNumber}</AppText>
           <AppText variant="caption" tone="muted">
             de {stats.total}
           </AppText>
@@ -127,9 +124,7 @@ export default function ChallengeScreen() {
             <AppText variant="small" tone="muted" style={{ marginTop: 2 }}>
               Seja honesto consigo: o calendário é só seu.
             </AppText>
-            <Breathe style={{ marginTop: spacing.lg }} amount={0.02}>
-              <AppButton label="Mantive-me firme hoje" onPress={() => void record('clean')} testID="checkin-clean" />
-            </Breathe>
+            <AppButton label="Mantive-me firme hoje" onPress={() => void record('clean')} testID="checkin-clean" style={{ marginTop: spacing.lg }} />
             <AppButton label="Tive uma recaída" variant="ghost" size="sm" onPress={() => void record('relapse')} style={{ marginTop: spacing.sm }} />
           </AppCard>
         </FadeInItem>
@@ -152,7 +147,7 @@ export default function ChallengeScreen() {
               {shieldStatus.data?.running ? 'Filtro de sites activo' : 'Filtro de sites a ligar…'} · {shieldStatus.data?.blockedToday ?? 0} bloqueios hoje
             </AppText>
           </View>
-          {shieldStatus.data?.running ? <LivePulse color={colors.text} /> : null}
+          {shieldStatus.data?.running ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.text }} accessibilityLabel="Ativo" /> : null}
         </View>
         <AppText variant="caption" tone="muted" style={{ marginTop: spacing.md }}>
           Dica: em Definições → Rede → VPN → offly, active «VPN sempre activa» e «Bloquear ligações sem VPN» para reforçar o
@@ -196,7 +191,7 @@ export default function ChallengeScreen() {
 function Stat({ label, value }: { label: string; value: number }) {
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
-      <AnimatedNumber value={value} format={(n) => String(Math.round(n))} variant="h2" />
+      <AppText variant="h2">{value}</AppText>
       <AppText variant="caption" tone="muted">
         {label}
       </AppText>
@@ -232,8 +227,8 @@ function DayCell({ day, index, onPress }: { day: CalendarDay; index: number; onP
     </PressableScale>
   );
   return (
-    <Animated.View entering={reduce ? undefined : ZoomIn.delay(Math.min(index, 40) * 12).duration(260)}>
-      {day.status === 'today' ? <Breathe amount={0.06}>{cell}</Breathe> : cell}
+    <Animated.View entering={reduce ? undefined : FadeIn.duration(200)}>
+      {cell}
     </Animated.View>
   );
 }
@@ -243,7 +238,7 @@ function RewardReveal({ reward, onClose }: { reward: Reward; onClose: () => void
   const reduce = useReducedMotion();
   return (
     <View style={{ alignItems: 'center', gap: spacing.md, paddingVertical: spacing.lg }}>
-      <Animated.View entering={reduce ? undefined : ZoomIn.springify().damping(9)} style={[styles.reveal, { backgroundColor: colors.accent }]}>
+      <Animated.View entering={reduce ? undefined : FadeIn.duration(250)} style={[styles.reveal, { backgroundColor: colors.accent }]}>
         <Feather name={reward.icon as never} size={44} color={colors.onAccent} />
       </Animated.View>
       <AppText variant="overline" tone="muted">

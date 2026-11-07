@@ -7,7 +7,7 @@ import { BackHandler, Platform, Pressable, StyleSheet, View } from 'react-native
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppProgressBar, AppText, Breathe, FadeInItem, PressableScale } from '@/components';
+import { AppProgressBar, AppText, FadeInItem, PressableScale } from '@/components';
 import { useLauncher } from '@/features/launcher/useLauncher';
 import { useActiveChallenges } from '@/hooks/queries';
 import { isDefaultHome, isLauncherPreview, openCamera, openDialer, openHomeSettings } from '@/services/launcher';
@@ -122,9 +122,7 @@ export default function LauncherHome() {
 
         <View style={{ flex: 1 }} />
         <Pressable onPress={() => router.push('/launcher/apps')} accessibilityRole="button" accessibilityLabel="Todas as apps" style={{ alignItems: 'center', paddingVertical: spacing.md }}>
-          <Breathe amount={0.12} period={2800}>
-            <Feather name="chevron-up" size={20} color={colors.textMuted} />
-          </Breathe>
+          <Feather name="chevron-up" size={20} color={colors.textMuted} />
           <AppText variant="overline" tone="muted" style={{ fontSize: 10 }}>
             DESLIZE PARA CIMA · TODAS AS APPS
           </AppText>

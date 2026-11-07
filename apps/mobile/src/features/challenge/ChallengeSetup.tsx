@@ -2,7 +2,7 @@ import { CHALLENGE_PRESETS, MAX_CHALLENGE_DAYS, MIN_CHALLENGE_DAYS, addDays, for
 import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { AppButton, AppCard, AppCheckbox, AppSlider, AppText, Breathe, FadeInItem, PressableScale, toast } from '@/components';
+import { AppButton, AppCard, AppCheckbox, AppSlider, AppText, FadeInItem, PressableScale, toast } from '@/components';
 import { GOAL_LABEL, startChallenges } from '@/services/challenge';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radii, spacing } from '@/theme/tokens';
@@ -36,11 +36,9 @@ export function ChallengeSetup({ initialGoals, onDone, onSkip }: { initialGoals:
   return (
     <View style={{ gap: spacing.xl }}>
       <FadeInItem index={0} style={{ alignItems: 'center' }}>
-        <Breathe>
-          <View style={[styles.badge, { borderColor: colors.text }]}>
-            <Feather name="award" size={34} color={colors.text} />
-          </View>
-        </Breathe>
+        <View style={[styles.badge, { borderColor: colors.text }]}>
+          <Feather name="award" size={34} color={colors.text} />
+        </View>
       </FadeInItem>
 
       <FadeInItem index={1} style={{ gap: spacing.sm }}>

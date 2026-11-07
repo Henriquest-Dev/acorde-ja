@@ -1,6 +1,7 @@
 import {
   WEEK_INITIALS,
   addDays,
+  dayKey,
   formatDayMonth,
   formatDuration,
   formatMonthYear,
@@ -29,7 +30,7 @@ import {
   toast,
 } from '@/components';
 import { exportCsv, exportPdf } from '@/features/insights/export';
-import { useReport } from '@/hooks/queries';
+import { useHourly, useReport } from '@/hooks/queries';
 import { usageBetween } from '@/repositories/usage';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
@@ -44,6 +45,8 @@ export default function Progress() {
   const report = useReport(period, ref);
   const chartPeriod: ReportPeriod = period === 'month' ? 'month' : 'week';
   const chart = useReport(chartPeriod, ref);
+  const hourly = useHourly();
+  const isToday = dayKey(ref) === dayKey(new Date());
 
   const shift = (dir: -1 | 1) => {
     const next = period === 'day' ? addDays(ref, dir) : period === 'week' ? addDays(ref, dir * 7) : new Date(ref.getFullYear(), ref.getMonth() + dir, 1);
@@ -62,7 +65,12 @@ export default function Progress() {
   const data = report.data;
   const total = data ? (data.screen.hasData ? data.screen.totalMs : data.report.totalMs) : 0;
   const list = data ? withOthers(data.report.byApp, data.tracked) : [];
+  const hourlyBars =
+    period === 'day' && isToday && hourly.data
+      ? hourly.data.map((ms, h) => ({ key: String(h), label: h % 6 === 0 ? `${h}h` : '', value: ms, valueLabel: `${h}h–${h + 1}h · ${formatDuration(ms)}` }))
+      : null;
   const bars =
+    hourlyBars ??
     chart.data?.screen.byDay.map((d, i) => {
       const date = parseDayKey(d.day);
       const label = chartPeriod === 'week' ? WEEK_INITIALS[i]! : date.getDate() % 5 === 1 ? String(date.getDate()) : '';

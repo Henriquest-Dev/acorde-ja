@@ -11,7 +11,6 @@ import { AppText } from './AppText';
 import { BrandIcon } from './brand';
 import { AppCheckbox } from './controls';
 import { RowIconView, type RowIcon } from './layout';
-import { Breathe, PulseRings } from './motion';
 
 const STATE_LABEL: Record<string, string> = {
   WARNING: 'Perto do limite',
@@ -167,9 +166,9 @@ export function AppBlockScreen({
   return (
     <View style={[styles.block, { backgroundColor: colors.background, paddingTop: insets.top + 64, paddingBottom: insets.bottom + spacing.xxl }]}>
       <Animated.View entering={reduce ? undefined : FadeInDown.duration(380)} style={styles.blockInner}>
-        <PulseRings size={170} color={colors.text}>
-          <Breathe>{icon}</Breathe>
-        </PulseRings>
+        <View style={{ width: 150, height: 150, borderRadius: 75, borderWidth: 1, borderColor: colors.borderStrong, alignItems: 'center', justifyContent: 'center' }}>
+          {icon}
+        </View>
         <AppText variant="h1" align="center" style={{ marginTop: spacing.lg, fontSize: 26 }} accessibilityRole="header">
           {title}
         </AppText>

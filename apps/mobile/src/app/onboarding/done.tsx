@@ -37,7 +37,7 @@ export default function Done() {
   return (
     <Screen testID="onb-done" footer={<AppButton label="Ir para o início" onPress={finish} loading={finishing} testID="onb-finish" />}>
       <View style={{ alignItems: 'center', marginTop: spacing.huge }}>
-        <Animated.View entering={reduce ? undefined : ZoomIn.springify()} style={[styles.check, { borderColor: colors.text }]}>
+        <Animated.View entering={reduce ? undefined : ZoomIn.duration(200)} style={[styles.check, { borderColor: colors.text }]}>
           <Feather name="check" size={40} color={colors.text} />
         </Animated.View>
         <AppText variant="h2" align="center" style={{ marginTop: spacing.xxl }} accessibilityRole="header">

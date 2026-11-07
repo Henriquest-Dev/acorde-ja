@@ -85,7 +85,7 @@ export function AppCheckbox({
       ]}
     >
       {checked ? (
-        <Animated.View entering={ZoomIn.springify().damping(14)} exiting={ZoomOut.duration(120)}>
+        <Animated.View entering={ZoomIn.duration(120)} exiting={ZoomOut.duration(120)}>
           <Feather name="check" size={15} color={colors.onAccent} />
         </Animated.View>
       ) : null}

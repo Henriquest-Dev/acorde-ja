@@ -73,7 +73,7 @@ class BlockOverlay(private val context: Context) {
     }
     root.addView(column, FrameLayout.LayoutParams(-1, -1))
 
-    // Ícone da app a cinzento, com anéis a pulsar.
+    // Ícone da app a cinzento, dentro de um anel fixo.
     val stage = FrameLayout(context)
     val pulse = PulseView(context)
     stage.addView(pulse, FrameLayout.LayoutParams(dp(180), dp(180), Gravity.CENTER))
@@ -145,7 +145,6 @@ class BlockOverlay(private val context: Context) {
       v.translationY = dp(24).toFloat(); v.alpha = 0f
       v.animate().translationY(0f).alpha(1f).setStartDelay(120L + i * 70L).setDuration(380).setInterpolator(DecelerateInterpolator()).start()
     }
-    animators += pulse.start()
 
     // Contagem e frases a alternar.
     var i = 0
@@ -184,28 +183,18 @@ class BlockOverlay(private val context: Context) {
     hide()
   }
 
-  /** Anéis concêntricos que se expandem e desvanecem. */
+  /** Anel fixo e discreto à volta do ícone (sem animação). */
   private class PulseView(context: Context) : View(context) {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; color = Color.WHITE }
-    private var phase = 0f
-
-    fun start(): ValueAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-      duration = 2400
-      repeatCount = ValueAnimator.INFINITE
-      addUpdateListener { phase = it.animatedValue as Float; invalidate() }
-      start()
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+      style = Paint.Style.STROKE
+      color = Color.WHITE
+      alpha = 70
+      strokeWidth = resources.displayMetrics.density
     }
 
     override fun onDraw(canvas: Canvas) {
-      val cx = width / 2f
-      val cy = height / 2f
-      val maxR = minOf(cx, cy)
-      for (k in 0 until 3) {
-        val p = (phase + k / 3f) % 1f
-        paint.strokeWidth = 2f * resources.displayMetrics.density
-        paint.alpha = ((1f - p) * 140).toInt()
-        canvas.drawCircle(cx, cy, maxR * (0.4f + 0.6f * p), paint)
-      }
+      val r = minOf(width, height) / 2f - paint.strokeWidth
+      canvas.drawCircle(width / 2f, height / 2f, r, paint)
     }
   }
 
