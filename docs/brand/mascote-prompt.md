@@ -1,62 +1,86 @@
-# offly — prompt do mascote
+# offly: prompt do mascote (estilo Dreamcore)
 
 ## Conceito
 
-**Offy, o galo.** O galo é quem acorda as pessoas ao nascer do sol — a missão do offly
-(desligar o ecrã e acordar para a vida). A crista do Offy tem a forma dos raios do sol do
-símbolo actual, por isso mascote e logótipo contam a mesma história.
+**Offy, o galo, em Dreamcore antigo.** O galo é quem acorda as pessoas ao nascer do sol, que é a
+missão do offly: desligar o ecrã e acordar para a vida. A crista do Offy tem a forma dos raios do sol
+do logótipo.
 
-Personalidade: calmo, confiante, um pouco cómico, nunca moralista. Celebra as vitórias e
-consola nas recaídas. Estilo: preto e branco puro, formas geométricas simples, traço
-grosso e arredondado — reconhecível em 32 px (ícone) e em 3 m (cartaz).
+O estilo é o Dreamcore do início da internet: imagens que parecem uma memória de infância meio
+esquecida, espaços vazios e silenciosos, luz suave e estranha, grão de fotografia antiga ou de cassete
+VHS. É um pouco inquietante, mas nunca violento nem gore. A sensação certa é "já estive aqui num sonho",
+não um filme de terror.
 
-## Prompt principal (Midjourney v7, GPT-image, Ideogram, Flux)
+Isto bate com a marca: o Offy é o que fica quando o ecrã se apaga, um sonho calmo e um pouco estranho
+fora do telemóvel.
 
-```
-Mascot character design for a minimalist digital-wellbeing app called "offly".
-A friendly, confident little rooster named Offy, built from simple geometric shapes:
-round egg-shaped body, short legs, small wing raised in a wave. Its comb is a
-half-sun with five short rays, like a sunrise icon. Big, kind, slightly sleepy-but-awake
-eyes, tiny beak, warm smile.
-Pure black and white only: solid black fills, white negative space, thick rounded
-monoline outlines, no grey gradients, no colour, no texture.
-Flat vector, bold and iconic like the Duolingo owl or the Headspace characters,
-centered on a pure black background, front three-quarter view, full body,
-generous padding, high contrast, crisp edges, app-icon friendly, 1:1.
-```
+Regras de personagem (para todas as imagens serem do mesmo Offy):
+- galo pequeno e redondo, de corpo em forma de ovo, como um brinquedo de pano ou de feltro antigo;
+- crista em meio-sol com 5 raios curtos;
+- olhos grandes, pretos e brilhantes, com um olhar fixo e calmo, ligeiramente vazio;
+- sem boca a sorrir; só o bico pequeno;
+- sempre sozinho, parado, a olhar para a câmara.
 
-**Negativo / evitar:** `colour, gradients, 3D render, realistic feathers, shading, text,
-watermark, busy background, emoji style, angry expression, phone in hand`
-
-## Folha de personagem (expressões para o app)
+## Prompt principal: foto de perfil (Midjourney v7, GPT-image, Ideogram, Flux)
 
 ```
-Character sheet of Offy, the minimalist black-and-white rooster mascot of the app
-"offly" (sunrise-shaped comb with five rays, egg-shaped body, thick rounded monoline
-outlines, flat vector, pure black and white, no colour). Six poses in a 3x2 grid on a
-black background, same proportions in every pose, each labelled below in small white
-sans-serif text:
-1 "Bom dia" — stretching wings at sunrise, eyes open, smiling.
-2 "Foco" — eyes closed, meditating, small sun glowing behind.
-3 "Bloqueado" — calmly holding up one wing like a stop sign, kind expression.
-4 "Conquista" — jumping with joy, small stars around, holding a tiny medal.
-5 "Recaída" — gentle, comforting hug pose, soft smile, not sad.
-6 "A dormir" — curled up asleep on a crescent moon, phone face-down beside it.
+Dreamcore portrait of Offy, a small round rooster mascot that looks like an old handmade felt toy
+from the 1990s, egg-shaped body, soft worn fabric texture, a half-sun comb with five short rays,
+big glossy black eyes with a calm, fixed, slightly empty stare, tiny beak, no smile.
+It stands alone in the middle of an empty liminal space: a faded childhood bedroom at dusk,
+wallpaper with tiny clouds, an old CRT television turned off and glowing faintly,
+soft hazy light coming from nowhere.
+Early-internet dreamcore aesthetic, nostalgic and uncanny, quiet and slightly eerie but not scary,
+like a forgotten memory from a dream.
+Shot on a 2003 digital camera, low resolution, VHS grain, soft blur, light leaks, slightly washed-out
+colours, centered composition, looking straight at the camera, square 1:1, profile picture.
 ```
 
-## Ícone da app com o mascote
+**Midjourney:** acrescentar `--ar 1:1 --style raw --stylize 250 --v 7`
+
+**Negativo / evitar:**
+`gore, blood, horror monster, sharp teeth, red eyes, demonic, creepy smile, realistic chicken,
+realistic feathers, text, watermark, logo, modern 3D render, glossy plastic, bright saturated cartoon,
+cute anime style, crowded scene, multiple characters, phone in hand`
+
+## Versão a preto e branco (combina com a identidade do app)
 
 ```
-App icon, 1024x1024, pure black rounded-square background, centered head of Offy the
-minimalist rooster: sunrise comb with five rays, big friendly eyes, tiny beak. White
-thick rounded monoline on black, flat vector, no colour, no text, high legibility at
-small sizes.
+Black and white dreamcore portrait of Offy, a small round rooster mascot like an old handmade felt
+toy, egg-shaped body, half-sun comb with five short rays, big glossy black eyes with a calm, fixed,
+slightly empty stare, tiny beak, no smile. Alone in an empty liminal hallway with old checkered floor
+and one soft light at the end. Nostalgic, uncanny, quiet, a little eerie but not scary, like a memory
+from a dream. Grainy monochrome photograph, early 2000s digital camera, VHS noise, soft blur,
+deep blacks, centered, looking straight at the camera, square 1:1, profile picture.
 ```
+
+## Variações para publicações (Instagram)
+
+Manter o mesmo Offy e mudar só o cenário. Juntar ao fim do prompt principal, no lugar do quarto:
+
+1. **Bom dia:** `standing on a foggy empty playground at sunrise, a faded sun low on the horizon`
+2. **Foco:** `sitting still in an empty swimming pool with pale blue tiles, perfect silence`
+3. **Bloqueado:** `standing in front of an old phone lying face-down on a carpet, dim light`
+4. **Desafio:** `in an endless field of tall grass under a pastel sky, small paper calendar beside it`
+5. **Recaída:** `in a dim empty school corridor, one soft light on, gentle and comforting mood`
+6. **A dormir:** `asleep on a cloud-patterned bed in a liminal bedroom, moonlight through the window`
+
+## Folha de personagem (para manter a consistência)
+
+```
+Character reference sheet of Offy, a small round rooster mascot like an old handmade felt toy,
+egg-shaped body, half-sun comb with five short rays, big glossy black eyes with a calm fixed stare,
+tiny beak, no smile. Front view, side view, back view and three-quarter view on a plain faded
+cream background, same proportions in every view, soft worn fabric texture, dreamcore, nostalgic,
+slightly uncanny, grainy early-2000s photo look, no text.
+```
+
+Depois de gerar uma imagem boa, usá-la como referência nas seguintes (Midjourney `--cref <url> --cw 100`,
+ou "usa esta imagem como referência do personagem" no GPT-image) para o Offy sair sempre igual.
 
 ## Regras de uso
 
-- Só preto e branco (o mesmo do app: #000000, #FFFFFF, cinzentos #888 / #CCC).
-- Exportar em SVG ou PNG transparente a 1024 px; o ícone da loja continua a ser o sol
-  até o mascote ser aprovado.
-- Antes de usar comercialmente, confirmar a licença do gerador de imagens escolhido e
-  pedir uma vectorização limpa (Illustrator/Figma) para registo de marca.
+- Foto de perfil: Offy centrado e a olhar para a câmara, para se ler bem em círculo pequeno.
+- Dentro do app mantém-se o preto e branco; o Dreamcore a cores fica para as redes sociais.
+- Não usar o mascote nos ecrãs de bloqueio nem de crise: lá o tom tem de ser só calmo.
+- Antes de usar comercialmente, confirmar a licença do gerador de imagens escolhido.
