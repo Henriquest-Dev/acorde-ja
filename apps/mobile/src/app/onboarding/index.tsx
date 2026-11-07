@@ -41,8 +41,8 @@ export default function Welcome() {
         </Pressable>
       </View>
       <Animated.View entering={reduce ? undefined : FadeInDown.duration(500)} style={styles.content}>
-        <AppText variant="display" align="center" style={{ fontSize: 40 }} accessibilityRole="header">
-          Acorde Já
+        <AppText variant="display" align="center" style={{ fontSize: 52, letterSpacing: -2.5, fontFamily: 'Inter_700Bold' }} accessibilityRole="header">
+          offly
         </AppText>
         <AppText variant="body" tone="secondary" align="center" style={{ marginTop: 4 }}>
           Menos tela. Mais vida.
@@ -56,7 +56,7 @@ export default function Welcome() {
         <AppButton label="Conhecer a plataforma" variant="ghost" size="sm" onPress={() => setAbout(true)} style={{ marginTop: spacing.xs }} />
       </View>
 
-      <AppBottomSheet visible={about} onClose={() => setAbout(false)} title="O que o Acorde Já faz">
+      <AppBottomSheet visible={about} onClose={() => setAbout(false)} title="O que o offly faz">
         <View style={{ gap: spacing.lg }}>
           {FEATURES.map((f) => (
             <View key={f.title} style={{ flexDirection: 'row', gap: spacing.md }}>
@@ -70,7 +70,7 @@ export default function Welcome() {
             </View>
           ))}
           <AppText variant="caption" tone="muted">
-            O Acorde Já é uma ferramenta de autocontrolo e não substitui acompanhamento médico ou psicológico.
+            O offly é uma ferramenta de autocontrolo e não substitui acompanhamento médico ou psicológico.
           </AppText>
         </View>
       </AppBottomSheet>

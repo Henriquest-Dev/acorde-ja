@@ -157,6 +157,18 @@ public class AcordeNativeModule: Module {
     AsyncFunction("getRestrictionStatus") { () -> [[String: Any]] in [] }
     AsyncFunction("drainEvents") { () -> String in "[]" }
     AsyncFunction("goHome") {}
+    // O iOS não permite substituir o ecrã inicial: o launcher é só Android.
+    AsyncFunction("getLauncherApps") { () -> [[String: Any]] in [] }
+    AsyncFunction("launchApp") { (_: String) -> Bool in false }
+    AsyncFunction("openCamera") {}
+    AsyncFunction("setLauncherEnabled") { (_: Bool) in }
+    AsyncFunction("isDefaultLauncher") { () -> Bool in false }
+    AsyncFunction("openHomeSettings") {}
+    AsyncFunction("openGrayscaleSettings") {
+      if let url = URL(string: UIApplication.openSettingsURLString) {
+        DispatchQueue.main.async { UIApplication.shared.open(url) }
+      }
+    }
   }
 
   private func loadSelection() -> FamilyActivitySelection {

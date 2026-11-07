@@ -155,7 +155,7 @@ export async function loadToday(now = new Date()): Promise<TodaySnapshot> {
     permissionGranted: measured,
   };
   // O limite só conta a partir do momento em que passou a valer: o uso anterior
-  // (por exemplo, antes de instalar o Acorde Já) não o esgota.
+  // (por exemplo, antes de instalar o offly) não o esgota.
   const dayStart = startOfLocalDay(now).getTime();
   const windows = new Map<number, Awaited<ReturnType<typeof getUsage>>>();
   if (measured) {

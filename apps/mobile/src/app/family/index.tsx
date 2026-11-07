@@ -63,7 +63,7 @@ export default function Family() {
           <HeaderIconButton
             icon="plus"
             label="Convidar membro"
-            onPress={() => void Share.share({ message: `Junte-se à família «${family.data!.group!.name}» no Acorde Já com o código ${family.data!.group!.inviteCode}.` })}
+            onPress={() => void Share.share({ message: `Junte-se à família «${family.data!.group!.name}» no offly com o código ${family.data!.group!.inviteCode}.` })}
           />
         ) : undefined
       }
@@ -80,7 +80,7 @@ export default function Family() {
           message={
             isBackendConfigured
               ? 'Inicie sessão para criar um grupo familiar ou juntar-se a um.'
-              : 'Os grupos familiares usam o servidor do Acorde Já, que não está configurado nesta instalação.'
+              : 'Os grupos familiares usam o servidor do offly, que não está configurado nesta instalação.'
           }
           actionLabel={isBackendConfigured ? 'Iniciar sessão' : undefined}
           onAction={isBackendConfigured ? () => router.push('/auth/sign-in') : undefined}

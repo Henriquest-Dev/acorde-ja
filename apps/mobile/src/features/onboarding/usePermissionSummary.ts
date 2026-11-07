@@ -49,7 +49,7 @@ export function usePermissionSummary() {
           unavailable: 'Sem esta permissão não é possível medir o tempo nem aplicar limites.',
           howTo: ios
             ? 'Toque em «Conceder» e confirme com o código do dispositivo.'
-            : 'Definições → Acesso a dados de utilização → Acorde Já → Permitir.',
+            : 'Definições → Acesso a dados de utilização → offly → Permitir.',
         },
         {
           key: 'apps',
@@ -59,7 +59,7 @@ export function usePermissionSummary() {
             : 'Mostra o ecrã de bloqueio sobre a aplicação quando o limite é atingido, e envia avisos.',
           state: ios ? perms.familyControls : both(perms.overlay, perms.notifications === 'unsupported' ? 'granted' : perms.notifications),
           unavailable: 'Sem esta permissão recebe apenas as estatísticas, sem ecrã de bloqueio.',
-          howTo: ios ? 'Requer a autorização do Tempo de Ecrã.' : 'Definições → Sobrepor a outras apps → Acorde Já → Permitir. Depois aceite as notificações.',
+          howTo: ios ? 'Requer a autorização do Tempo de Ecrã.' : 'Definições → Sobrepor a outras apps → offly → Permitir. Depois aceite as notificações.',
         },
         {
           key: 'sites',

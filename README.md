@@ -1,6 +1,6 @@
-# Acorde Já
+# offly
 
-**Menos tela. Mais vida.**
+**Menos tela. Mais vida.** (antigo «Acorde Já»)
 
 Plataforma de bem-estar digital para recuperar o controlo do tempo: limites diários por aplicação,
 bloqueio aos 100% com pausa consciente, protecção voluntária contra sites (pornografia, apostas),

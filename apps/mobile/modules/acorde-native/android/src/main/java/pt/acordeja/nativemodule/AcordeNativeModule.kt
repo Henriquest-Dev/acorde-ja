@@ -246,6 +246,55 @@ class AcordeNativeModule : Module() {
       UsageCalculator.hourly(context, dayStartMs.toLong(), System.currentTimeMillis()).map { it.toDouble() }
     }
 
+    // --- Launcher ---------------------------------------------------------
+
+    /** Apps com ícone no launcher, só nome e pacote (leve, para listas de texto). */
+    AsyncFunction("getLauncherApps") {
+      val pm = context.packageManager
+      val launcher = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+      pm.queryIntentActivities(launcher, 0)
+        .map { it.activityInfo.packageName to it.loadLabel(pm).toString() }
+        .distinctBy { it.first }
+        .filter { it.first != context.packageName }
+        .sortedBy { it.second.lowercase() }
+        .map { mapOf("packageName" to it.first, "label" to it.second) }
+    }
+
+    AsyncFunction("launchApp") { packageName: String ->
+      val intent = context.packageManager.getLaunchIntentForPackage(packageName)
+        ?: throw InvalidArgumentException("App não encontrada: $packageName")
+      context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED))
+      true
+    }
+
+    AsyncFunction("openCamera") {
+      val intent = Intent(android.provider.MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      context.startActivity(intent)
+    }
+
+    /** Activa/desactiva a actividade «Início» (o utilizador escolhe-a depois nas definições). */
+    AsyncFunction("setLauncherEnabled") { enabled: Boolean ->
+      val component = android.content.ComponentName(context, LauncherActivity::class.java)
+      context.packageManager.setComponentEnabledSetting(
+        component,
+        if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+        PackageManager.DONT_KILL_APP,
+      )
+    }
+
+    AsyncFunction("isDefaultLauncher") {
+      val home = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+      context.packageManager.resolveActivity(home, PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.packageName == context.packageName
+    }
+
+    AsyncFunction("openHomeSettings") {
+      openSettings(Intent(Settings.ACTION_HOME_SETTINGS), fallback = Intent(Settings.ACTION_SETTINGS))
+    }
+
+    AsyncFunction("openGrayscaleSettings") {
+      openSettings(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+    }
+
     AsyncFunction("getShieldStats") {
       mapOf(
         "running" to ShieldVpnService.isRunning,

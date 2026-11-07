@@ -48,7 +48,7 @@ class ShieldVpnService : VpnService() {
   private fun establish() {
     try {
       val builder = Builder()
-        .setSession("Acorde Já — Proteção")
+        .setSession("offly — Proteção")
         .addAddress(TUN_ADDRESS, 32)
         .addDnsServer(DNS_ADDRESS)
         .addRoute(DNS_ADDRESS, 32)

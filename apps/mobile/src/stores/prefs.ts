@@ -32,7 +32,24 @@ export interface Prefs {
   };
   /** Ids das apps restringidas durante sessões de foco. */
   focusBlockedApps: string[];
+  launcher: LauncherPrefs;
 }
+
+export interface LauncherPrefs {
+  /** O utilizador activou o offly como ecrã inicial. */
+  enabled: boolean;
+  /** Pacotes no ecrã inicial (máx. 7). */
+  favorites: string[];
+  /** Pacotes escondidos da gaveta. */
+  hidden: string[];
+  /** Segundos da pausa de intenção antes de abrir apps com limite (0 = desligada). */
+  intentionSeconds: number;
+  showUsage: boolean;
+  /** Pede para voltar ao offly se o ecrã inicial for trocado durante um desafio. */
+  lockDuringChallenge: boolean;
+}
+
+export const MAX_FAVORITES = 7;
 
 export const DEFAULT_PREFS: Prefs = {
   onboardingDone: false,
@@ -48,6 +65,7 @@ export const DEFAULT_PREFS: Prefs = {
   aiMemory: false,
   focus: { minutes: 25, pomodoro: false, sound: 'none', weeklyGoalMinutes: 300 },
   focusBlockedApps: [],
+  launcher: { enabled: false, favorites: [], hidden: [], intentionSeconds: 10, showUsage: true, lockDuringChallenge: true },
 };
 
 const KEY = 'prefs';
@@ -73,6 +91,7 @@ export const usePrefs = create<PrefsState>((set, get) => ({
       shield: { ...DEFAULT_PREFS.shield, ...stored.shield, categories: { ...DEFAULT_PREFS.shield.categories, ...stored.shield?.categories } },
       notifications: { ...DEFAULT_PREFS.notifications, ...stored.notifications },
       focus: { ...DEFAULT_PREFS.focus, ...stored.focus },
+      launcher: { ...DEFAULT_PREFS.launcher, ...stored.launcher },
     };
     set({ prefs, loaded: true });
   },

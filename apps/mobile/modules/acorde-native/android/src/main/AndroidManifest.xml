@@ -41,6 +41,23 @@
                 android:value="true" />
         </service>
 
+        <!-- Ecrã inicial (launcher). Desactivado por defeito: só é activado quando o
+             utilizador escolhe usar o offly como ecrã inicial (setLauncherEnabled). -->
+        <activity
+            android:name=".LauncherActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <receiver
             android:name=".SystemEventsReceiver"
             android:exported="false">

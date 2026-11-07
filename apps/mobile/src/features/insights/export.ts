@@ -42,7 +42,7 @@ export async function exportPdf(params: {
     table{width:100%;border-collapse:collapse} td{padding:8px 0;border-bottom:1px solid #ddd}
     footer{margin-top:32px;color:#888;font-size:11px}
   </style></head><body>
-    <h1>Acorde Já — Relatório</h1><p>${esc(params.title)}</p>
+    <h1>offly — Relatório</h1><p>${esc(params.title)}</p>
     <div class="big">${formatDuration(params.totalMs)}</div>
     <table>${rows}</table>
     <p style="margin-top:24px">Foco: ${formatDuration(params.focusMs)} · Excepções concedidas: ${params.exceptions}</p>

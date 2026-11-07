@@ -42,6 +42,14 @@ export interface AcordeNativeModule {
   setShieldLock(untilMs: number): Promise<number>;
   /** Tempo de ecrã total por hora (24 valores, ms) desde `dayStartMs`. */
   getHourlyUsage(dayStartMs: number): Promise<number[]>;
+  // Launcher (só Android)
+  getLauncherApps(): Promise<{ packageName: string; label: string }[]>;
+  launchApp(packageName: string): Promise<boolean>;
+  openCamera(): Promise<void>;
+  setLauncherEnabled(enabled: boolean): Promise<void>;
+  isDefaultLauncher(): Promise<boolean>;
+  openHomeSettings(): Promise<void>;
+  openGrayscaleSettings(): Promise<void>;
   // iOS (FamilyControls)
   requestFamilyControlsAuthorization?(): Promise<PermissionStatus['familyControls']>;
   presentAppPicker?(): Promise<number>;

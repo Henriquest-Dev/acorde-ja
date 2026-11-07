@@ -92,8 +92,8 @@ export function ChallengeSetup({ initialGoals, onDone, onSkip }: { initialGoals:
             <View style={{ flex: 1, gap: 4 }}>
               <AppText variant="bodyStrong">A protecção fica trancada</AppText>
               <AppText variant="small" tone="muted">
-                Até {formatDayMonth(end)} não poderá desligar o bloqueio de sites no Acorde Já. Se desligar a VPN nas definições do
-                sistema, o Acorde Já volta a ligá-la. Todos os dias em que se mantiver firme ganha uma recompensa.
+                Até {formatDayMonth(end)} não poderá desligar o bloqueio de sites no offly. Se desligar a VPN nas definições do
+                sistema, o offly volta a ligá-la. Todos os dias em que se mantiver firme ganha uma recompensa.
               </AppText>
             </View>
           </View>

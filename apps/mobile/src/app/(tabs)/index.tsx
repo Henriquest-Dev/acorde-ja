@@ -127,7 +127,7 @@ export default function Dashboard() {
                     {snap.capabilities.platform === 'web'
                       ? 'Na versão web não é possível medir o tempo nas aplicações. Utilize o aplicativo Android ou iOS.'
                       : snap.capabilities.platform === 'ios'
-                        ? 'No iOS a Apple não disponibiliza os minutos de cada aplicação ao Acorde Já. Os limites são aplicados pelo Tempo de Ecrã.'
+                        ? 'No iOS a Apple não disponibiliza os minutos de cada aplicação ao offly. Os limites são aplicados pelo Tempo de Ecrã.'
                         : 'Conceda o acesso aos dados de utilização para ver o seu tempo real. Não mostramos valores estimados.'}
                   </AppText>
                 </View>
@@ -271,7 +271,7 @@ export default function Dashboard() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
           <MaterialCommunityIcons name="robot-outline" size={24} color={colors.text} />
           <View style={{ flex: 1 }}>
-            <AppText variant="bodyStrong">Assistente Acorde Já</AppText>
+            <AppText variant="bodyStrong">Assistente offly</AppText>
             <AppText variant="caption" tone="muted">
               Apoio em momentos de impulso e planos de redução.
             </AppText>

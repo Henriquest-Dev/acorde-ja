@@ -45,8 +45,8 @@ export default function Done() {
         </AppText>
         <AppText variant="body" tone="secondary" align="center" style={{ marginTop: spacing.md, maxWidth: 260 }}>
           {allGranted
-            ? 'O Acorde Já já está a proteger o seu tempo. Vamos nessa!'
-            : 'O Acorde Já está configurado. Algumas protecções precisam de permissões — pode activá-las quando quiser.'}
+            ? 'O offly já está a proteger o seu tempo. Vamos nessa!'
+            : 'O offly está configurado. Algumas protecções precisam de permissões — pode activá-las quando quiser.'}
         </AppText>
       </View>
 

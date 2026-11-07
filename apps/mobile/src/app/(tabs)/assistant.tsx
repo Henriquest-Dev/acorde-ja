@@ -20,7 +20,7 @@ import { fonts, radii, spacing } from '@/theme/tokens';
 const GREETING = 'Olá! Como posso ajudar-te hoje?';
 
 const OFFLINE_TEXT: Record<AssistantUnavailableError['reason'], string> = {
-  no_backend: 'O assistente precisa de ligação ao servidor do Acorde Já, que não está configurado nesta instalação.',
+  no_backend: 'O assistente precisa de ligação ao servidor do offly, que não está configurado nesta instalação.',
   no_session: 'Para conversar com o assistente, inicie sessão na sua conta.',
   rate_limited: 'Atingiu o limite de mensagens de hoje. Volte amanhã — entretanto, experimente o exercício abaixo.',
   network: 'Sem ligação à Internet. Entretanto, experimente o exercício abaixo — funciona offline.',
@@ -104,7 +104,7 @@ export default function Assistant() {
         </View>
         <View style={{ flex: 1 }}>
           <AppText variant="small" weight="semibold">
-            Assistente Acorde Já
+            Assistente offly
           </AppText>
           <AppText variant="caption" tone="muted" style={{ fontSize: 10 }}>
             {online ? 'Online' : 'Offline'}
@@ -169,7 +169,7 @@ export default function Assistant() {
 
       <AppBottomSheet visible={consent} onClose={() => setConsent(false)} title="Antes de começar">
         <AppText variant="small" tone="secondary">
-          As suas mensagens são enviadas para o servidor do Acorde Já e processadas por um modelo de IA para gerar respostas. Enviamos
+          As suas mensagens são enviadas para o servidor do offly e processadas por um modelo de IA para gerar respostas. Enviamos
           também os seus objectivos e os minutos de hoje (valores agregados). Nunca enviamos listas de sites, contactos ou conteúdos de
           outras aplicações.
         </AppText>

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Acorde Já",
+    "name": "offly",
     "slug": "acorde-ja",
     "scheme": "acordeja",
     "version": "0.1.1",
@@ -14,7 +14,7 @@
       "bundleIdentifier": "pt.acordeja.app",
       "supportsTablet": false,
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Utilizamos o Face ID para proteger o acesso às suas definições do Acorde Já."
+        "NSFaceIDUsageDescription": "Utilizamos o Face ID para proteger o acesso às suas definições do offly."
       },
       "entitlements": {
         "com.apple.developer.family-controls": true
@@ -67,7 +67,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Utilizamos o Face ID para proteger o acesso às suas definições do Acorde Já."
+          "faceIDPermission": "Utilizamos o Face ID para proteger o acesso às suas definições do offly."
         }
       ],
       "expo-web-browser"

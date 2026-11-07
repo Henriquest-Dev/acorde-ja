@@ -36,7 +36,7 @@ import java.util.Calendar
  * - Animado: entrada suave, anéis a pulsar à volta do ícone (a cinzento),
  *   contagem até voltar a estar disponível e frases que alternam.
  * - O utilizador mantém sempre o controlo do telemóvel: pode ir para o ecrã
- *   inicial; o Acorde Já nunca bloqueia chamadas nem as definições.
+ *   inicial; o offly nunca bloqueia chamadas nem as definições.
  */
 class BlockOverlay(private val context: Context) {
   private val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager

@@ -1,4 +1,4 @@
-import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, useFonts } from '@expo-google-fonts/inter';
+import { Inter_200ExtraLight, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, useFonts } from '@expo-google-fonts/inter';
 import { QueryClient, QueryClientProvider, focusManager } from '@tanstack/react-query';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as Network from 'expo-network';
@@ -40,7 +40,7 @@ async function bootSequence(loadPrefs: () => Promise<void>) {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold });
+  const [fontsLoaded, fontError] = useFonts({ Inter_200ExtraLight, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold });
   const [bootError, setBootError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const { prefs, loaded, load } = usePrefs();
@@ -156,6 +156,7 @@ function Shell({
           <Stack.Screen name="limit-warning" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
           <Stack.Screen name="help-now" options={{ presentation: 'modal' }} />
           <Stack.Screen name="breathing" options={{ presentation: 'fullScreenModal' }} />
+          <Stack.Screen name="launcher" options={{ animation: 'fade', gestureEnabled: false }} />
         </Stack.Protected>
         <Stack.Screen name="auth" />
       </Stack>
@@ -172,7 +173,7 @@ function BiometricGate() {
   const lastActive = useRef(0);
 
   const unlock = useCallback(() => {
-    void LocalAuthentication.authenticateAsync({ promptMessage: 'Desbloquear o Acorde Já', cancelLabel: 'Cancelar' }).then((res) => {
+    void LocalAuthentication.authenticateAsync({ promptMessage: 'Desbloquear o offly', cancelLabel: 'Cancelar' }).then((res) => {
       if (res.success) setLocked(false);
     });
   }, []);
@@ -193,7 +194,7 @@ function BiometricGate() {
   return (
     <View style={{ position: 'absolute', inset: 0, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center', gap: 20, padding: 32 }}>
       <AppLogo size={72} />
-      <AppText variant="h2">Acorde Já</AppText>
+      <AppText variant="h2">offly</AppText>
       <AppButton label="Desbloquear" onPress={unlock} style={{ alignSelf: 'stretch' }} />
     </View>
   );

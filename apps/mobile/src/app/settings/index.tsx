@@ -17,6 +17,8 @@ const ITEMS: { title: string; icon: RowIcon; href: Href }[] = [
 ];
 
 const MORE: { title: string; icon: RowIcon; href: Href }[] = [
+  { title: 'Planos e faturação', icon: { set: 'feather', name: 'credit-card' }, href: '/settings/billing' },
+  { title: 'Launcher', icon: { set: 'feather', name: 'smartphone' }, href: '/settings/launcher' },
   { title: 'Permissões do sistema', icon: { set: 'mci', name: 'shield-check-outline' }, href: '/settings/permissions' },
   { title: 'Hábitos', icon: { set: 'feather', name: 'check-square' }, href: '/habits' },
   { title: 'Família', icon: { set: 'feather', name: 'users' }, href: '/family' },
@@ -38,7 +40,7 @@ export default function Settings() {
         ))}
       </View>
       <AppText variant="caption" tone="muted" align="center" style={{ marginTop: spacing.xxl }}>
-        Acorde Já {Constants.expoConfig?.version ?? ''} · Menos tela. Mais vida.
+        offly {Constants.expoConfig?.version ?? ''} · Menos tela. Mais vida.
       </AppText>
     </Screen>
   );

@@ -14,7 +14,7 @@ export function AppLogo({ size = 64, color }: { size?: number; color?: string })
     return `M${50 + Math.cos(a) * 27} ${60 + Math.sin(a) * 27} L${50 + Math.cos(a) * 38} ${60 + Math.sin(a) * 38}`;
   });
   return (
-    <Svg width={size} height={size} viewBox="0 0 100 100" accessibilityLabel="Acorde Já">
+    <Svg width={size} height={size} viewBox="0 0 100 100" accessibilityLabel="offly">
       {rays.map((d) => (
         <Path key={d} d={d} stroke={c} strokeWidth={4} strokeLinecap="round" />
       ))}

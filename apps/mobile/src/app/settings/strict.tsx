@@ -52,7 +52,7 @@ export default function Strict() {
       </View>
 
       <AppText variant="caption" tone="muted" style={{ marginTop: spacing.xl }}>
-        O Acorde Já nunca impede o acesso a chamadas de emergência nem às definições do sistema. Pode sempre desinstalar o aplicativo.
+        O offly nunca impede o acesso a chamadas de emergência nem às definições do sistema. Pode sempre desinstalar o aplicativo.
       </AppText>
 
       <MindfulPause

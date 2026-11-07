@@ -155,7 +155,7 @@ export default function ChallengeScreen() {
           {shieldStatus.data?.running ? <LivePulse color={colors.text} /> : null}
         </View>
         <AppText variant="caption" tone="muted" style={{ marginTop: spacing.md }}>
-          Dica: em Definições → Rede → VPN → Acorde Já, active «VPN sempre activa» e «Bloquear ligações sem VPN» para reforçar o
+          Dica: em Definições → Rede → VPN → offly, active «VPN sempre activa» e «Bloquear ligações sem VPN» para reforçar o
           compromisso.
         </AppText>
       </AppCard>

@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
   s.name           = 'AcordeNative'
   s.version        = '0.1.0'
-  s.summary        = 'Integração Screen Time (FamilyControls / ManagedSettings) do Acorde Já'
+  s.summary        = 'Integração Screen Time (FamilyControls / ManagedSettings) do offly'
   s.description    = 'Autorização FamilyControls, selecção de aplicações e restrições ManagedSettings.'
   s.license        = 'UNLICENSED'
-  s.author         = 'Acorde Já'
+  s.author         = 'offly'
   s.homepage       = 'https://acordeja.pt'
   s.platforms      = { :ios => '16.4' }
   s.swift_version  = '5.9'

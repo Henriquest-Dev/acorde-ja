@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
+import { Feather } from '@expo/vector-icons';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radii } from '@/theme/tokens';
@@ -47,9 +48,12 @@ export function AppInput({ ref, label, error, hint, style, editable = true, ...r
         ]}
       />
       {error ? (
-        <AppText variant="caption" accessibilityRole="alert" style={{ color: colors.text }}>
-          ⚠ {error}
-        </AppText>
+        <View accessibilityRole="alert" style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Feather name="alert-circle" size={13} color={colors.text} />
+          <AppText variant="caption" style={{ color: colors.text, flex: 1 }}>
+            {error}
+          </AppText>
+        </View>
       ) : hint ? (
         <AppText variant="caption" tone="muted">
           {hint}

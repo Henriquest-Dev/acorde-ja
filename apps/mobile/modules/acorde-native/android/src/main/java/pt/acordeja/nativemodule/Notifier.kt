@@ -42,7 +42,7 @@ object Notifier {
 
   fun serviceNotification(context: Context): Notification =
     builder(context, CHANNEL_SERVICE)
-      .setContentTitle("Acorde Já")
+      .setContentTitle("offly")
       .setContentText("Os seus limites estão activos.")
       .setOngoing(true)
       .setContentIntent(deepLink(context, ""))

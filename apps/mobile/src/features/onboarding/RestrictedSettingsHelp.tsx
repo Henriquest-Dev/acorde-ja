@@ -22,7 +22,7 @@ export function RestrictedSettingsHelp({ items }: { items: PermissionItem[] }) {
         {[
           '1. Tente activar a permissão uma vez (aparece o aviso «Definição restrita»).',
           '2. Toque em «Abrir informações da app» abaixo.',
-          '3. No menu ⋮ (canto superior direito), escolha «Permitir definições restritas» e confirme.',
+          '3. No menu de três pontos (canto superior direito), escolha «Permitir definições restritas» e confirme.',
           '4. Volte aqui e toque novamente em «Conceder permissões».',
         ].map((s) => (
           <AppText key={s} variant="small" tone="secondary">
@@ -35,7 +35,7 @@ export function RestrictedSettingsHelp({ items }: { items: PermissionItem[] }) {
         variant="secondary"
         size="sm"
         style={{ marginTop: spacing.md }}
-        onPress={() => void openSystemSettings('app').catch(() => toast('Abra Definições → Apps → Acorde Já.', 'error'))}
+        onPress={() => void openSystemSettings('app').catch(() => toast('Abra Definições → Apps → offly.', 'error'))}
       />
     </AppCard>
   );

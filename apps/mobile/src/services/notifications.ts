@@ -84,7 +84,7 @@ export async function syncWeeklySummary(enabled: boolean): Promise<void> {
   if (!enabled || !(await canNotify())) return;
   await Notifications.scheduleNotificationAsync({
     identifier: WEEKLY_ID,
-    content: { title: 'O seu resumo semanal', body: 'Veja como correu a semana no Acorde Já.', data: { url: 'acordeja://progress' } },
+    content: { title: 'O seu resumo semanal', body: 'Veja como correu a semana no offly.', data: { url: 'acordeja://progress' } },
     trigger: { type: Notifications.SchedulableTriggerInputTypes.WEEKLY, weekday: 1, hour: 19, minute: 0 },
   });
 }

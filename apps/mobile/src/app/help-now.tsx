@@ -152,7 +152,7 @@ export default function HelpNow() {
           Se estiver em perigo ou a pensar fazer-se mal
         </AppText>
         <AppText variant="small" tone="secondary" style={{ marginTop: spacing.xs }}>
-          Ligue 112. Para aconselhamento psicológico, contacte o SNS 24 (808 24 24 24). O Acorde Já não substitui ajuda profissional.
+          Ligue 112. Para aconselhamento psicológico, contacte o SNS 24 (808 24 24 24). O offly não substitui ajuda profissional.
         </AppText>
         <View style={{ flexDirection: 'row', gap: spacing.lg, marginTop: spacing.md }}>
           <AppText variant="small" style={{ textDecorationLine: 'underline' }} onPress={() => void Linking.openURL('tel:112')}>

@@ -16,7 +16,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'O bloqueio não aparece sobre a aplicação.',
-    a: 'Confirme a permissão «Sobrepor a outras apps» e que a optimização de bateria não está a terminar o Acorde Já (Definições → Bateria).',
+    a: 'Confirme a permissão «Sobrepor a outras apps» e que a optimização de bateria não está a terminar o offly (Definições → Bateria).',
   },
   {
     q: 'O filtro de sites não bloqueia num navegador.',
@@ -93,7 +93,7 @@ export default function Help() {
       <SectionTitle>Apoio especializado</SectionTitle>
       <AppCard>
         <AppText variant="small" tone="secondary">
-          O Acorde Já é uma ferramenta de autocontrolo e não substitui acompanhamento médico ou psicológico.
+          O offly é uma ferramenta de autocontrolo e não substitui acompanhamento médico ou psicológico.
         </AppText>
         {[
           { label: 'Emergência — 112', url: 'tel:112' },
