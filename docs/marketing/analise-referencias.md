@@ -128,11 +128,11 @@ que já decidimos, mantendo o mesmo esqueleto de câmara e de HUD.
 A ideia é manter o **Dreamcore como assinatura** (grão, pixel, música, olho, Offy) e usar a **estrutura do vídeo A
 para os vídeos de história** (HUD, série, escolha do público, números, frases curtas).
 
-### Esqueleto da série do Leo (low poly 3D)
+### Esqueleto da série do Pedro (low poly 3D)
 
 - **HUD fixo:** "DIA 3 DE 30" e "CONTROLO 42%" (sobe e desce com as vitórias e as recaídas).
-- **Primeiros 2 s:** imagem forte sem contexto. Ex.: o Leo com o dedo a meio centímetro do ecrã, às 3 da manhã.
-- **Aposta clara em 6 s:** "O Leo tem 30 dias para dormir antes das 23h."
+- **Primeiros 2 s:** imagem forte sem contexto. Ex.: o Pedro com o dedo a meio centímetro do ecrã, às 3 da manhã.
+- **Aposta clara em 6 s:** "O Pedro tem 30 dias para dormir antes das 23h."
 - **Regra de três:** duas tentativas que falham com humor seco, a terceira pequena e pessoal.
 - **Número concreto em cada cena:** "3h12 de ecrã", "4 minutos", "11 notificações".
 - **Final em suspensão:** a recaída ou o novo desafio vira o gancho do próximo episódio.
@@ -141,7 +141,7 @@ para os vídeos de história** (HUD, série, escolha do público, números, fras
 
 ### Primeiros 20 s da narração com a linguagem do vídeo A
 
-> O Leo dormiu duas horas. [pausa] O Leo tem 30 dias para dormir antes das onze.
+> O Pedro dormiu duas horas. [pausa] O Pedro tem 30 dias para dormir antes das onze.
 > Primeiro dia, [pausa] ele abre o telemóvel às 3 da manhã. Só para ver as horas.
 > Três horas e doze minutos depois, [pausa] ainda são "só as horas".
 > Primeira ideia, esconder o telemóvel na gaveta. [pausa curta] Ele abriu a gaveta.
@@ -162,7 +162,7 @@ para os vídeos de história** (HUD, série, escolha do público, números, fras
 
 ## O que ainda falta definir
 
-1. **Qual o vídeo principal a fazer primeiro:** a introdução do Leo, com história e HUD (formato A).
-2. **Quem narra:** voz de fora (como no A) ou o Leo na primeira pessoa.
+1. **Qual o vídeo principal a fazer primeiro:** a introdução do Pedro, com história e HUD (formato A).
+2. **Quem narra:** voz de fora (como no A) ou o Pedro na primeira pessoa.
 3. **Língua:** pt-BR ou pt-PT.
 4. **Nome e cara do HUD:** sugiro "DIA X DE 30" e "CONTROLO %", mas é a marca que decide.

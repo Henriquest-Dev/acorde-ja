@@ -14,17 +14,17 @@ Duração: **60 a 75 segundos**, vertical 9:16, 24 fps. Dá para cortar em 3 epi
 
 ## Personagem
 
-- **Leo**, 19 anos. Corpo de cubos arredondados, capuz cinzento, olhos que são dois quadrados
+- **Pedro**, 19 anos. Corpo de cubos arredondados, capuz cinzento, olhos que são dois quadrados
   que refletem a luz do ecrã (em cena de dia, os olhos ficam escuros e opacos).
 - **O Feed**: não é um vilão com cara. É um corredor que nunca acaba, com cubos-ecrã a flutuar
-  que se viram para o Leo quando ele passa. Sem rosto, sem voz própria.
+  que se viram para o Pedro quando ele passa. Sem rosto, sem voz própria.
 - **Offy** (o galo do mascote, versão Dreamcore): aparece só no fim, parado ao fundo, como uma
   memória de infância. Não fala.
 
 ## Estilo visual
 
 - Low poly com planos grandes e arestas visíveis; paleta quase preto e branco, com **uma só cor
-  de acento** (azul-frio do ecrã) que desaparece quando o Leo melhora e dá lugar a luz de nascer
+  de acento** (azul-frio do ecrã) que desaparece quando o Pedro melhora e dá lugar a luz de nascer
   do sol (âmbar suave). A cor conta a história sozinha.
 - Câmara de cinema: lente longa, profundidade de campo curta, um pouco de grão e aberração
   cromática nas cenas do Feed; imagem limpa e estável nas cenas de recuperação.
@@ -38,13 +38,13 @@ Brasil (muda para pt-PT se o público for português; diz-me qual).
 
 ### 1. Gancho (0 a 4 s)
 
-*Plano 1:* câmara muito perto do rosto do Leo, só o brilho azul nos olhos. Silêncio, um zumbido.
+*Plano 1:* câmara muito perto do rosto do Pedro, só o brilho azul nos olhos. Silêncio, um zumbido.
 
 > [sussurro, calmo] São três da manhã... <break time="0.8s"/> e você ainda está aí.
 
 ### 2. O quarto-feed (4 a 16 s)
 
-*Plano 2:* travelling para trás. O quarto é um corredor sem fim de ecrãs. O polegar do Leo sobe,
+*Plano 2:* travelling para trás. O quarto é um corredor sem fim de ecrãs. O polegar do Pedro sobe,
 sobe, sobe, e o corredor cresce.
 *Plano 3:* relógio de parede de cubos: as horas passam de 3h para 4h para 5h em dois segundos.
 
@@ -52,9 +52,9 @@ sobe, sobe, e o corredor cresce.
 
 ### 3. A primeira tentativa (16 a 28 s)
 
-*Plano 4:* o Leo larga o telemóvel na cama e vai à janela. Luz do dia, o azul some um instante.
+*Plano 4:* o Pedro larga o telemóvel na cama e vai à janela. Luz do dia, o azul some um instante.
 *Plano 5:* cortes rápidos: copo de água, cadeira, janela. 3 segundos de paz.
-*Plano 6:* o telemóvel vibra na cama. Câmara em plongée. O Leo olha. Hesita.
+*Plano 6:* o telemóvel vibra na cama. Câmara em plongée. O Pedro olha. Hesita.
 
 > [voz mais baixa, quase para si] Dois minutos... <break time="0.5s"/> é o que dura a coragem.
 
@@ -62,7 +62,7 @@ sobe, sobe, e o corredor cresce.
 
 *Plano 7:* ele volta a pegar. O corredor fecha-se atrás dele. O som sobe, depois **corta
 para silêncio total**.
-*Plano 8:* o Leo sentado no chão, ecrã apagado no colo, cara de vergonha. Sem exagero.
+*Plano 8:* o Pedro sentado no chão, ecrã apagado no colo, cara de vergonha. Sem exagero.
 
 > [cansada, sem julgar] E você voltou. <break time="1.0s"/> Todo mundo volta.
 
@@ -70,17 +70,17 @@ para silêncio total**.
 
 *Plano 9:* ele abre o offly. O ecrã mostra só uma coisa: **um relógio a contar 5 minutos**.
 Nada de pontuação, nada de rede.
-*Plano 10:* close-up. O Leo aguenta o impulso: dedos a tremer, depois parados. Os cubos-ecrã
+*Plano 10:* close-up. O Pedro aguenta o impulso: dedos a tremer, depois parados. Os cubos-ecrã
 lá fora tremem, depois afastam-se um passo.
 
 > [respiração, devagar] Cinco minutos. <break time="0.8s"/> Só cinco. <break time="0.8s"/> Aguenta.
 
 ### 6. A virada (50 a 62 s)
 
-*Plano 11:* o relógio chega a zero. O Leo respira. Primeira luz âmbar entra pela janela.
+*Plano 11:* o relógio chega a zero. O Pedro respira. Primeira luz âmbar entra pela janela.
 *Plano 12:* ele abre a janela, os ecrãs ficam para trás, pequenos, num quarto que volta a ter
 paredes.
-*Plano 13:* plano geral: rua de cubos ao amanhecer, o Leo caminha. Ao fundo, parado, o **Offy**.
+*Plano 13:* plano geral: rua de cubos ao amanhecer, o Pedro caminha. Ao fundo, parado, o **Offy**.
 
 > [calor, mais firme] Não foi um milagre. <break time="0.7s"/> Foi um dia. <break time="0.6s"/> E depois outro.
 
@@ -133,6 +133,6 @@ natural. O silêncio é metade do efeito.
    vocabulário, o ritmo das frases e o tipo de gancho ao tom que gostaste.
 2. **O que gostaste no segundo Reel** (planos de câmara, ritmo, estilo dos cubos). Só consegui
    ler que é um perfil identificado como gerado por IA; não consegui ver as imagens.
-3. Variante de língua (pt-BR ou pt-PT) e quem conta a história (voz de fora ou o próprio Leo).
+3. Variante de língua (pt-BR ou pt-PT) e quem conta a história (voz de fora ou o próprio Pedro).
 4. Como queres produzir: Blender (mais controlo, mais trabalho) ou geradores de vídeo por IA a
    partir de imagens-chave (mais rápido, menos consistente entre planos).
