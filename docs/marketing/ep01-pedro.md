@@ -38,38 +38,72 @@
 - Pergunta ao público no fim (`BLOCO` ou `RUA`), que decide o episódio 2.
 - O olho do Offy, no fim e escondido em 1 plano (rever para encontrar).
 
-## Texto limpo para o ElevenLabs
+## Narração com emoção, para o ElevenLabs (modelo v3)
 
-Voz masculina jovem, grave e próxima, **sem tom de locutor**. Gera cada bloco separado.
+O v3 lê **etiquetas de emoção entre colchetes** dentro do texto. Confirmei na documentação do ElevenLabs que o v3 **não
+aceita** as pausas `<break>` (isso era dos modelos antigos): as pausas fazem-se com reticências `...`, com quebras de linha
+e com etiquetas.
 
+- Etiquetas documentadas: `[whispers]`, `[sighs]`, `[exhales]`, `[sarcastic]`, `[curious]`, `[excited]`, `[crying]`,
+  `[laughs]`, `[gulps]`, `[swallows]`.
+- Etiquetas livres como `[nostalgic]`, `[tired]`, `[flat]`, `[voice breaking]` funcionam como descrição, mas o resultado pode
+  variar com a voz. Se uma não resultar, troca por uma documentada.
+- As etiquetas ficam em inglês (é assim que o modelo as entende), o texto fica em português do Brasil.
+- Gera **um bloco de cada vez** e junta no editor. Testa 3 versões do bloco 5 e escolhe a mais contida: a emoção é a
+  da última frase, não a de chorar.
+
+**Bloco 1: abertura (nostálgico, quase sorrindo)**
 ```
-Eu lembro de quando bastava um chão e um punhado de blocos.
-```
-```
-O dia inteiro cabia numa tarde. <break time="0.7s"/> E a tarde... nunca acabava.
-```
-```
-Aí me deram uma tela. <break time="0.6s"/> Só pra eu ficar quieto. <break time="0.7s"/> Eu fiquei. <break time="0.9s"/>
-Fiquei tão quieto... que esqueci de sair.
-```
-```
-Os anos passaram por cima de mim. <break time="0.6s"/> Eu nem vi. Tava no feed.
-Hoje são nove horas e quarenta e um minutos de tela por dia. <break time="0.5s"/> Eu vi o relatório.
-```
-```
-Eu tento largar. <break time="0.9s"/> A mão não deixa. <break time="1.0s"/>
-E o pior... é que ninguém me prendeu. <break time="0.7s"/> Eu entreguei.
-```
-```
-Hoje é o dia um. <break time="1.0s"/> Se você também esqueceu como se brinca... <break time="0.6s"/> fica comigo.
-Eu sou o Pedro. E eu vou sair dessa.
-```
-```
-Comenta uma palavra. Amanhã eu faço o que você escolher.
+[softly, nostalgic] Eu lembro de quando bastava um chão... e um punhado de blocos.
 ```
 
-No modelo v3 testa `[sussurro]` na frase "Eu entreguei" e `[suspiro]` antes de "A mão não deixa" (confirma os nomes
-na interface). Definições de partida: estabilidade baixa (mais emoção), semelhança alta, estilo baixo.
+**Bloco 2**
+```
+[warm] O dia inteiro cabia numa tarde...
+[sighs] E a tarde... nunca acabava.
+```
+
+**Bloco 3: chega a tela (a voz esfria)**
+```
+[flat] Aí me deram uma tela...
+Só pra eu ficar quieto.
+[exhales] Eu fiquei.
+[whispers] Fiquei tão quieto... que esqueci de sair.
+```
+
+**Bloco 4: os anos passam (cansado, seco)**
+```
+[tired] Os anos passaram por cima de mim... Eu nem vi.
+[sarcastic, quietly] Tava no feed.
+[flat] Hoje são nove horas e quarenta e um minutos de tela por dia...
+[exhales] Eu vi o relatório.
+```
+
+**Bloco 5: o ponto mais baixo (a frase que dói)**
+```
+[strained] Eu tento largar...
+[exhales] A mão não deixa.
+
+[whispers, voice breaking] E o pior... é que ninguém me prendeu...
+[whispers] Eu entreguei.
+```
+
+**Bloco 6: a decisão (calmo e firme)**
+```
+[quietly] Hoje é o dia um...
+[softly] Se você também esqueceu como se brinca... fica comigo.
+[calm, firm] Eu sou o Pedro. E eu vou sair dessa.
+```
+
+**Bloco 7: chamada final (mais humano e simples)**
+```
+[friendly] Comenta uma palavra. Amanhã eu faço o que você escolher.
+```
+
+**Voz e definições:** voz masculina jovem, grave e próxima, sem tom de locutor. Se o ElevenLabs oferecer modos de
+estabilidade no v3, usa o mais expressivo (os mais estáveis ignoram as etiquetas de emoção). Mantém a semelhança alta.
+
+**Se usares um modelo antigo (v2):** as etiquetas não funcionam; usa `<break time="0.8s"/>` nas pausas e tira os colchetes.
 
 ## Cuidados
 
