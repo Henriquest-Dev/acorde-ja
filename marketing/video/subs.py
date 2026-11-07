@@ -6,7 +6,7 @@ import json
 import re
 import sys
 
-LEAD = 1.5
+LEAD = 0.0
 FIX = {'Abrir': 'Abri', 'Abre': 'Abri', 'para': 'pra', 'Para': 'Pra', 'celular': 'celular'}
 EMPH = {'tela', 'quieto', 'nunca', 'relatório', 'mão', 'entreguei', 'bloco', 'lua', 'Pedro', 'dia', 'feliz', 'sair', 'aguentei',
         'menti', 'manhã', 'relógio', 'comigo', 'dessa', 'rua', 'tarde', 'esfriava', 'prendeu'}
@@ -47,7 +47,7 @@ WrapStyle: 2
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Cap,Inter,{int(h * 0.048)},&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,{max(3, int(h * 0.0035))},2,2,60,60,{int(h * 0.19)},1
+Style: Cap,Pixelify Sans,{int(h * 0.05)},&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,2,0,1,{max(4, int(h * 0.0055))},0,2,70,70,{int(h * 0.27)},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -59,7 +59,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         end = ch[-1][1] + LEAD + 0.12
         if i + 1 < len(cs):
             end = min(end, cs[i + 1][0][0] + LEAD - 0.02)
-        text = ' '.join(('{\\c' + BLUE + '}' + x[2].upper() + '{\\c&HFFFFFF&}') if x[2].strip('.,?!').lower() in {e.lower() for e in EMPH} else x[2].upper() for x in ch)
+        text = ' '.join(x[2].upper() for x in ch)
         text = '{\\fad(60,60)}' + text.replace('.', '').replace(',', '')
         lines.append(f'Dialogue: 0,{ts(start)},{ts(end)},Cap,,0,0,0,,{text}')
     open(dst, 'w').write(head + '\n'.join(lines) + '\n')

@@ -2,8 +2,8 @@
 
 Tempos de `NARR` em segundos da narração. No vídeo, tudo desloca `LEAD` (silêncio inicial com música).
 """
-LEAD = 1.5
-TAIL = 3.5
+LEAD = 0.0
+TAIL = 0.0
 NARR_LEN = 82.83
 
 # (cena, início, fim, frase-chave da legenda, efeitos sonoros)
@@ -28,7 +28,7 @@ SCENES = [
     ('s18', 67.0, 70.9, 'a lua entrou pela janela', 'telemóvel pousado, silêncio'),
     ('s19', 70.9, 75.5, 'fica comigo', 'caixa de música afinada'),
     ('s20', 75.5, 78.2, 'eu vou sair dessa', 'tom de abertura'),
-    ('s21', 78.2, NARR_LEN + TAIL, 'bloco ou rua?', 'nota final'),
+    ('s21', 78.2, NARR_LEN, 'bloco ou rua?', 'nota final'),
 ]
 
 

@@ -7,7 +7,11 @@ import bpy
 from mathutils import Vector
 
 
+CHARS = []
+
+
 def reset(width=540, height=960, samples=48, fps=24):
+    CHARS.clear()
     bpy.ops.wm.read_factory_settings(use_empty=True)
     sc = bpy.context.scene
     sc.render.engine = 'CYCLES'
@@ -101,6 +105,11 @@ def character(skin, shirt, pants, hair, scale=1.0, head_scale=1.0):
     F['mouthR'] = cube('mouthR', (0.07 * h, fy - 0.005, 0.10 * h), (0.06 * h, 0.02, 0.028 * h), mouth_m, 0.006, parent=P['head'])
     F['mouthO'] = cube('mouthO', (0, fy - 0.003, 0.10 * h), (0.10 * h, 0.02, 1.0), mouth_dark, 0.0, parent=P['head'], keep_scale=True)
     P['face'] = F
+    for side, x in (('L', -0.125 * h), ('R', 0.125 * h)):
+        sp = cube('spupil' + side, (x, fy - 0.014, 0.30 * h), (0.075 * h, 0.02, 0.1 * h), mat('scr' + side, (0.3, 0.6, 1.0), 0.2, emit=6.0, emit_color=(0.3, 0.6, 1.0)), 0.01, parent=P['head'])
+        sp.hide_render = True
+        F['spupil' + side] = sp
+    CHARS.append(P)
     for side, x in (('L', -0.4), ('R', 0.4)):
         P['arm' + side] = empty('arm' + side, (x, 0, 0.7), P['hips'])
         cube('arm' + side + 'm', (0, 0, -0.34), (0.25, 0.25, 0.7), s, 0.04, parent=P['arm' + side])
@@ -171,10 +180,10 @@ def set_face(P, brow=0.0, brow_lift=0.0, lid=0.0, gaze=(0.0, 0.0), smile=0.0, mo
         # olhar
         F['pupil' + side].location.x = (-0.125 if side == 'L' else 0.125) * h + gaze[0] * 0.028 * h
         F['pupil' + side].location.z = 0.30 * h + gaze[1] * 0.03 * h
-        if screen_eyes:
-            F['pupil' + side].data.materials[0] = mat('scr' + side, blue, 0.2, emit=6.0, emit_color=blue)
-            F['pupil' + side].scale = (1.6, 1.0, 1.4)
-            F['eye' + side].data.materials[0] = mat('scrw' + side, (0.05, 0.08, 0.16), 0.3)
+        F['pupil' + side].hide_render = bool(screen_eyes)
+        F['spupil' + side].hide_render = not screen_eyes
+        F['spupil' + side].location.x = F['pupil' + side].location.x
+        F['spupil' + side].location.z = F['pupil' + side].location.z
     # boca: curva de sorriso com três segmentos
     ang = th(30) * smile
     F['mouthL'].rotation_euler = (0, ang, 0)

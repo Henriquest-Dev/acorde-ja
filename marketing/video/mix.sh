@@ -5,8 +5,9 @@ set -euo pipefail
 NARR="$1"; MUSIC="$2"; SFX="$3"; OUT="$4"
 DUR=$(python3 -c "import sys; sys.path.insert(0,'$(dirname "$0")'); from timeline import video_len; print(round(video_len(),2))")
 FADE=$(python3 -c "print(round($DUR-4,2))")
+ADEL=$(python3 -c "import sys; sys.path.insert(0,'$(dirname "$0")'); from timeline import LEAD; print(int(LEAD*1000))")
 ffmpeg -v error -y -i "$NARR" -i "$MUSIC" -i "$MUSIC" -i "$SFX" -filter_complex "
-[0:a]loudnorm=I=-16:TP=-1.5:LRA=7,aformat=sample_rates=48000:channel_layouts=stereo,adelay=1500|1500,apad=whole_dur=$DUR[n];
+[0:a]loudnorm=I=-16:TP=-1.5:LRA=7,aformat=sample_rates=48000:channel_layouts=stereo,adelay=${ADEL}|${ADEL},apad=whole_dur=$DUR[n];
 [1:a]aformat=sample_rates=48000:channel_layouts=stereo[m1];
 [2:a]aformat=sample_rates=48000:channel_layouts=stereo[m2];
 [m1][m2]acrossfade=d=3[m0];
