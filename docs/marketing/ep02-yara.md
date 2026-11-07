@@ -1,106 +1,106 @@
-# Episódio 2: "Yara" (vestibular)
+# Episódio 2: "Yara" (dois caminhos que se encontram)
 
 - **Narradora:** a Yara, em primeira pessoa. Português do Brasil.
 - **Duração:** 2:00, vertical 9:16, 30 fps.
-- **Estilo:** o mesmo do episódio 1: cubos polidos, luz com ray tracing, câmara de cinema, legendas em pixel branco
-  com contorno preto, 1 a 3 palavras de cada vez. Sem granulado.
-- **Regra de luz (igual ao Pedro):** quente e dourado = vida real; azul frio = ecrã. A cor fala antes da voz.
-- **Ritmo:** lento no início (dias que passam), cortes secos na prova, montagem rápida no estudo do fim.
+- **Estilo:** o mesmo do Pedro: cubos polidos, ray tracing, câmara de cinema, legendas pixel branco com contorno preto,
+  1 a 3 palavras. Sem granulado.
+- **Estrutura:** duas linhas de tempo com a mesma Yara. A linha A (azul frio, ecrã) chumba. A linha B (dourada, estudo)
+  passa. Elas encontram-se num **glitch de recapitulação** a meio do vídeo e acabam lado a lado.
+- **Sem Laura:** removi a Laura deste episódio, para não confundir com a Laura do Pedro.
 
-## Personagens
+## Personagem
 
 - **Yara** (18 anos): cabelo cacheado em cubos, óculos de aro grosso, moletom cinzento. Mesa de estudo cheia de apostilas.
-- **Laura** (18 anos, amiga da Yara): camisola amarela, caderno de anotações. Quer o curso de Arquitetura.
-- **Mãe da Yara** (fora de campo na maior parte): só uma voz e uma sombra na porta.
-- **Offy** (o galo, Dreamcore): aparece uma vez, na capa do caderno da Laura, no fim.
-
-> Nota: "Laura" é também o nome da namorada do Pedro no episódio 1. Se as duas séries forem publicadas juntas,
-> sugiro mudar o nome desta Laura para evitar confusão. Diz-me se queres outro.
+- **Mãe** (só voz e sombra na porta).
+- **Os cubos do Instagram:** pequenos personagens de cubos a dançar nos vídeos que a Yara vê. É a própria estética
+  do canal, dentro da história.
 
 ## Roteiro minuto a minuto
 
-### Ato 1: A mesa (0:00 a 0:20)
+### Abertura (0:00 a 0:15): a intenção
 | Tempo | O que se vê e se ouve |
 |---|---|
-| 0:00 a 0:06 | Quarto da Yara à noite. Apostilas empilhadas, uma com a capa "VESTIBULAR". Luz quente da lâmpada da mesa. Pó no ar. |
-| 0:06 a 0:13 | A Yara pega no caderno, escreve "segunda: começo". Pousa a caneta. O telemóvel acende na mesa: azul frio, o rosto dela ilumina-se. |
-| 0:13 a 0:20 | Ela abre uma rede social. Scroll: vídeos em cubos a deslizar. Ela diz "só cinco minutos". A lâmpada fica mais fraca. |
+| 0:00 a 0:05 | Mesa com apostilas. Lâmpada quente. A Yara escreve no caderno: "hoje eu estudo". Pó dourado no ar. |
+| 0:05 a 0:10 | Ela pousa a caneta e pega no telemóvel "só para ver uma coisa". O ecrã acende azul no rosto. |
+| 0:10 a 0:15 | Scroll: cubos a dançar, cores, sons de notificação. A lâmpada perde brilho sem ninguém tocar nela. |
 
-### Ato 2: Os dias (0:20 a 0:50)
+### Linha A (0:15 a 0:45): a distração (azul, frio, desfocada)
 | Tempo | O que se vê e se ouve |
 |---|---|
-| 0:20 a 0:28 | Montagem rápida: a folha do calendário arranca-se dia após dia. Em cada dia, a mesa tem mais apostilas por abrir e a caneta está no mesmo sítio. |
-| 0:28 a 0:36 | Painel de cubos no canto: `TEMPO NO CELULAR` com a soma a subir: `4H`, `9H`, `15H`. Ao fundo, a mãe chama da porta; a Yara não se vira. |
-| 0:36 a 0:43 | A Laura liga por vídeo. Na janela pequena, a Laura tenta falar. A Yara recusa a chamada e volta ao ecrã. A Laura fica a olhar para o telemóvel dela. |
-| 0:43 a 0:50 | O quarto escurece por completo. Só o rosto azul da Yara, olhos quadrados. A caneta cai da mesa e rola até ao chão. |
+| 0:15 a 0:25 | Calendário a folhear-se. As apostilas continuam fechadas. O painel `TEMPO NO CELULAR` sobe: `2H`, `5H`, `9H`. |
+| 0:25 a 0:35 | Ela assiste a mais um vídeo de cubos, e depois a outro. O telemóvel pesa na mão. A caneta cai e rola para debaixo da cama. |
+| 0:35 a 0:45 | Noite. O quarto azul. A mãe chama da porta; ela não se vira. Só o rosto dela, iluminado, olhos quadrados. |
 
-### Ato 3: A prova (0:50 a 1:08)
+### Prova A (0:45 a 1:00): o branco na folha
 | Tempo | O que se vê e se ouve |
 |---|---|
-| 0:50 a 0:56 | Sala de prova: filas de carteiras de cubos. Relógio na parede. A Yara abre a folha de questões e a câmara aproxima-se do papel, que está em branco para ela. |
-| 0:56 a 1:02 | Close nos olhos: as letras da folha começam a flutuar e a separar-se. A respiração dela sobe. O relógio acelera. Silêncio, só a caneta a tocar no papel. |
-| 1:02 a 1:08 | Ela levanta-se, a cadeira arrasta, ninguém olha. Corredor vazio. Porta de vidro, luz da rua. |
+| 0:45 a 0:52 | Sala de prova. Filas de carteiras de cubos. Relógio na parede. Ela abre a folha de questões e a câmara aproxima-se do papel. |
+| 0:52 a 1:00 | As letras começam a flutuar e a separar-se. O relógio acelera. A respiração sobe. Ela levanta-se e sai. |
 
-### Ato 4: O resultado e a Laura (1:08 a 1:28)
+### Glitch de recapitulação (1:00 a 1:08): os dois caminhos encontram-se
 | Tempo | O que se vê e se ouve |
 |---|---|
-| 1:08 a 1:14 | No telemóvel, um ecrã branco com `REPROVADA` em letra grande. Ao lado, a Laura recebe o mesmo resultado: `REPROVADA`. Dois quartos, duas luzes frias. |
-| 1:14 a 1:20 | A Laura senta-se no chão com o caderno de Arquitetura aberto. Ela não chora, lê a nota. Depois vira a página: a lista de cursos. |
-| 1:20 a 1:28 | A Laura abre o offly no telemóvel. Ecrã preto, o sol do logótipo nasce. Um temporizador: `25:00`. Ela aperta a tecla de começar. |
+| 1:00 a 1:03 | O ecrã racha: linhas de cubos a tremer. A imagem recua para o início do vídeo, com uma falha de vídeo (som de fita a rebobinar). |
+| 1:03 a 1:08 | Painel em letras pixel, `RECAPITULANDO`, a piscar. Divide-se em duas colunas: à esquerda a linha A (azul), à direita a linha B (dourada, ainda sem imagem). |
 
-### Ato 5: Montagem do estudo (1:28 a 1:48)
+### Linha B (1:08 a 1:30): o processo inverso (dourado, quente, organizado)
 | Tempo | O que se vê e se ouve |
 |---|---|
-| 1:28 a 1:34 | Quarto da Laura, dia. Luz dourada. Cartões de estudo espalhados. O telemóvel está virado para baixo, com o temporizador a contar. |
-| 1:34 a 1:40 | Plano rápido de três dias: o temporizador reinicia, as folhas do calendário viram em sentido contrário (ao contrário da Yara). Os cartões vão sendo marcados com um visto. |
-| 1:40 a 1:48 | Dia da segunda prova. A Laura entra na sala, senta-se, respira. Câmara a aproximar-se do papel: as letras estão nítidas, sem flutuar. Ela escreve. |
+| 1:08 a 1:14 | A mesma Yara, mesma mesa, mesma hora. Ela pega no telemóvel e procura o offly. Instala. O sol do logótipo nasce no ecrã. |
+| 1:14 a 1:20 | Gráficos de barras a crescer: `TEMPO DE ESTUDO` e `TEMPO NO CELULAR`. A barra de estudo fica maior que a de celular. Ela toca nos números, como quem confere uma conta. |
+| 1:20 a 1:26 | Ela bloqueia a rede social no próprio app. Os cubos dançantes desaparecem do ecrã. Um temporizador começa: `25:00`. A caneta volta à mão. |
+| 1:26 a 1:30 | Calendário a folhear-se ao contrário. Cada dia tem um visto a mais na lista de cartões. |
 
-### Ato 6: Resultado e recapitulação (1:48 a 2:00)
+### Prova B (1:30 a 1:48): o branco que fica parado
 | Tempo | O que se vê e se ouve |
 |---|---|
-| 1:48 a 1:53 | Ecrã branco com `APROVADA` em letra grande. A Laura solta um suspiro e sorri. Ao fundo, a Yara, de frente para a janela, vê o mesmo resultado no seu telemóvel. |
-| 1:53 a 1:58 | Painel de recapitulação em cubos, duas colunas: à esquerda `YARA: REPROVADA` com o tempo no celular; à direita `LAURA: APROVADA` com o tempo do temporizador. Sem números a mais. |
-| 1:58 a 2:00 | Legenda: `QUAL CURSO A YARA TENTA NO PRÓXIMO ANO?` (opções: `MEDICINA` ou `DIREITO`). Logótipo e `offly. Menos tela. Mais vida.` O olho do Offy abre no canto, na capa do caderno. |
+| 1:30 a 1:37 | Sala de prova. A Yara entra, senta-se e respira. A câmara aproxima-se do papel: as letras estão nítidas, paradas. |
+| 1:37 a 1:44 | Ela escreve. Close na caneta a deslizar. O relógio anda no ritmo normal. |
+| 1:44 a 1:48 | O resultado no ecrã: `APROVADA` em letra grande. A mãe aparece na porta, sorri, e a luz dourada enche o quarto. |
+
+### Fecho (1:48 a 2:00): os dois caminhos lado a lado
+| Tempo | O que se vê e se ouve |
+|---|---|
+| 1:48 a 1:54 | Divisão em dois ecrãs: à esquerda `REPROVADA` (azul, com `TEMPO NO CELULAR: 9H`); à direita `APROVADA` (dourado, com `TEMPO DE ESTUDO: 25 MIN`). |
+| 1:54 a 2:00 | Pergunta em letras pixel: `QUAL CAMINHO VOCÊ ESCOLHE? COMENTE A OU B.` O olho do Offy abre no canto. `offly. Menos tela. Mais vida.` |
 
 ## Narração (um bloco, ElevenLabs v3)
 
-Texto em português do Brasil. Etiquetas de emoção em inglês. Sem pausas `<break>` (o v3 não as aceita): usar reticências.
+Texto em português do Brasil. Etiquetas de emoção em inglês. Sem `<break>` (o v3 não aceita); pausas com reticências.
 
 ```
-[quietly, nostalgic] Eu tinha uma mesa cheia de apostilas e um plano. Segunda, eu começo. [sighs] Eu disse isso muitas vezes.
-[flat] Aí o telemóvel acendeu. Só cinco minutos, eu pensei. [tired] Foram dias... e eu nem vi passar.
-[sarcastic, quietly] Os calendários viraram. A caneta ficou no mesmo lugar. [flat] Quinze horas no celular, numa semana. [exhales] Eu vi o relatório.
-[whispers] A Laura me ligou. Eu não atendi. [strained] Eu achei que ainda dava tempo.
-[strained, voice breaking] Na prova, as letras começaram a flutuar... [whispers] E eu não lembrava de nada.
-[flat] Reprovada. [exhales] O meu nome, em branco.
-[quietly] A Laura também reprovou. Ela queria Arquitetura. [softly] Mas ela sentou no chão, abriu o caderno e não chorou muito.
-[calm, firm] Ela baixou um aplicativo que prende o celular em blocos de estudo. [softly] Vinte e cinco minutos de cada vez... dia após dia.
-[warm] Na segunda prova, as letras ficaram paradas. [exhales] Ela passou.
-[friendly] Então, qual curso a Yara tenta no próximo ano? Comenta: medicina ou direito.
+[quietly, nostalgic] Eu tinha uma mesa cheia de apostilas... e um plano. Hoje eu estudo. [sighs] Eu disse isso muitas vezes.
+[flat] Aí o telemóvel acendeu. Só para ver uma coisa. [tired] E foram dias... que eu nem vi passar.
+[sarcastic, quietly] Um vídeo de cubos. Mais um. Mais um. [flat] Nove horas, numa semana. [exhales] Eu vi o relatório.
+[strained] Na prova, as letras começaram a flutuar... [whispers] E eu não lembrava de nada.
+[flat] Reprovada. [exhales] Meu nome, em branco.
+[quietly] Mas o tempo não volta... e a tela me deixou ver isso.
+[calm, firm] Eu baixei um aplicativo. Ele mostra quanto eu estudo, e quanto eu fico no celular. [softly] Bloqueei a rede social. Vinte e cinco minutos... de cada vez.
+[warm] Na segunda prova, as letras ficaram paradas. [exhales] Eu passei.
+[friendly] Dois caminhos. A mesma Yara. Qual você escolhe? Comenta A ou B.
 ```
 
-**Duração estimada:** cerca de 150 palavras. A 120 palavras por minuto, com as pausas, dá perto de 2 minutos. Vou ajustar cada plano
-ao tempo real quando o áudio chegar, como fizemos com o Pedro.
+**Duração estimada:** cerca de 140 palavras, perto de 2 minutos com as pausas. Ajusto cada plano ao áudio real quando o tiveres.
 
 ## Animação (tudo se mexe, a 30 fps)
-- Calendário: folhas que arrancam e voltam (ao contrário da Yara).
-- Caneta que cai e rola até ao chão.
-- Letras da prova a flutuar e a separar-se (efeito de pânico), depois paradas na prova da Laura.
-- Temporizador a contar, cartões de estudo a ser marcados com visto.
-- Câmara a aproximar-se do papel e da cara em cada momento-chave.
+- Calendário a folhear, para a frente na linha A e para trás na linha B.
+- Caneta que cai e rola (A) e que volta à mão (B).
+- Letras da prova a flutuar (A) e paradas (B).
+- Gráfico de barras a crescer, temporizador a contar, cartões marcados com visto.
+- Glitch de recapitulação: linhas de cubos a tremer, falha de fita a rebobinar.
 
 ## Legendas e cores
-- Mesmo tipo de legenda: pixel branco com contorno preto, 1 a 3 palavras.
-- Painel `TEMPO NO CELULAR` e `TEMPO DE ESTUDO` no canto, com a mesma fonte pixel.
-- Azul só para o ecrã do telemóvel; quente só para a vida real e o estudo.
+- Pixel branco com contorno preto, 1 a 3 palavras, como no Pedro.
+- Azul só no ecrã e na linha A; dourado só na linha B e na vida real.
+- Painéis `TEMPO NO CELULAR` e `TEMPO DE ESTUDO` no canto, na mesma fonte.
 
 ## Cuidados
-- Não afirmar regras de vestibular ou ENEM sem verificar: o texto fala de "prova" e "vestibular" de forma geral.
-- Sem promessa de aprovação: a Laura passa porque estuda, não por causa do app. A legenda deve dizer isso.
-- Na legenda do post: "Se sentir que perdeu o controle do uso do celular, procure um profissional de saúde."
+- Não citar regras de vestibular ou ENEM sem confirmar. O texto fala de "prova" em termos gerais.
+- A aprovação vem do estudo, não do aplicativo. A legenda deve dizer isso.
+- Legenda do post: "Se sentir que perdeu o controle do uso do celular, procure um profissional de saúde."
+- O cenário dos cubos a dançar no Instagram é uma referência ao próprio canal; não usar logótipos ou conteúdo de terceiros.
 
 ## Próximos passos
-1. Confirmares o nome da Laura (ou mudo para outro).
-2. Confirmares a pergunta final (medicina ou direito) e o que queres na capa.
-3. Aprovares o roteiro; depois gero a narração (o texto acima) e tu geras o áudio no ElevenLabs.
-4. Quando o render do Pedro terminar, faço a montagem dele e começo a cena da Yara.
+1. Confirmares o desenho dos dois caminhos e a pergunta final (A ou B).
+2. Aprovares o roteiro; depois passo-te o bloco único de narração para o ElevenLabs.
+3. Quando o render do Pedro terminar, começo a animação da Yara.
