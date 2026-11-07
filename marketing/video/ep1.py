@@ -160,7 +160,7 @@ def s05():
     set_face(p, screen_eyes=True, smile=-0.05, gaze=(0, -0.6), brow=0.1)
     aim(area_light('tabletlight', (0.0, -1.0, 0.5), (0, 0, 0), 55, BLUE, 0.7), tuple(head_pos(p)))
     aim(area_light('rim', (-1.5, 0.8, 1.6), (0, 0, 0), 40, (1.0, 0.7, 0.4), 1.0), tuple(head_pos(p)))
-    cam_on_face(p, dist=1.1, side=0.2, up=0.05, lens=50, fstop=1.8)
+    cam_on_face(p, dist=1.9, side=0.3, up=0.05, lens=55, fstop=4.0)
 
 
 def s06():
@@ -172,8 +172,8 @@ def s06():
         cube('bl%d' % i, (-0.4 + i * 0.25, 1.6, 0.48), (0.2, 0.2, 0.2), mat('bm%d' % i, c, 0.5), 0.015)
     aim(area_light('hall', (-1.0, 0.2, 2.0), (0, 0, 0), 160, (1.0, 0.75, 0.45), 1.5), (-0.1, 1.6, 0.3))
     p = kid()
-    p['root'].location = (1.7, 0.7, 0)
-    p['root'].rotation_euler = (0, 0, R(30))
+    p['root'].location = (1.15, 0.9, 0)
+    p['root'].rotation_euler = (0, 0, R(25))
     sit(p, 0.14)
     p['armL'].rotation_euler = (R(-55), 0, R(10))
     p['armR'].rotation_euler = (R(-55), 0, R(-10))

@@ -86,7 +86,7 @@ def character(skin, shirt, pants, hair, scale=1.0, head_scale=1.0):
     P['head'] = empty('head', (0, 0, 0.0), P['neck'])
     cube('skull', (0, 0, 0.27 * h), (0.5 * h, 0.5 * h, 0.5 * h), s, 0.04, parent=P['head'])
     cube('hair', (0, 0.01, 0.55 * h), (0.54 * h, 0.54 * h, 0.14 * h), ha, 0.04, parent=P['head'])
-    cube('hairback', (0, 0.1 * h, 0.3 * h), (0.54 * h, 0.3 * h, 0.5 * h), ha, 0.04, parent=P['head'])
+    cube('hairback', (0, 0.2 * h, 0.27 * h), (0.52 * h, 0.2 * h, 0.44 * h), ha, 0.03, parent=P['head'])
     cube('fringe', (0, -0.26 * h, 0.52 * h), (0.54 * h, 0.05, 0.09 * h), ha, 0.02, parent=P['head'])
     F = {'h': h, 'white': white, 'pupil': pupil, 'skin': skin_m}
     fy = -0.255 * h
