@@ -39,16 +39,12 @@ object UsageCalculator {
     return tracker.current
   }
 
-  /** Tempo de ecrã total por hora (24 posições) desde `dayStart` até `now`. */
+  /** Tempo de ecrã total por hora (24 posições) desde `dayStart` até `now`, numa só leitura dos eventos. */
   fun hourly(context: Context, dayStart: Long, now: Long): LongArray {
-    val out = LongArray(24)
-    for (h in 0 until 24) {
-      val from = dayStart + h * 3_600_000L
-      if (from >= now) break
-      val to = minOf(from + 3_600_000L, now)
-      out[h] = query(context, from, to).totalForegroundMs
-    }
-    return out
+    val tracker = ForegroundTracker(dayStart, now, excludedPackages(context))
+    replay(context, dayStart - LOOKBACK_MS, now, tracker)
+    tracker.finish(now)
+    return tracker.hourly
   }
 
   private fun replay(context: Context, from: Long, to: Long, tracker: ForegroundTracker) {

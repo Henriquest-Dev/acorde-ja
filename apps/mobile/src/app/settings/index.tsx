@@ -22,6 +22,7 @@ const MORE: { title: string; icon: RowIcon; href: Href }[] = [
   { title: 'Permissões do sistema', icon: { set: 'mci', name: 'shield-check-outline' }, href: '/settings/permissions' },
   { title: 'Hábitos', icon: { set: 'feather', name: 'check-square' }, href: '/habits' },
   { title: 'Família', icon: { set: 'feather', name: 'users' }, href: '/family' },
+  { title: 'Sobre, privacidade e termos', icon: { set: 'feather', name: 'info' }, href: '/settings/about' },
 ];
 
 /** Configurações — personalização e privacidade. */

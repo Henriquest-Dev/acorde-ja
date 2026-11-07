@@ -1,8 +1,9 @@
 import { Feather } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppButton, AppHeader, AppText, FadeInItem, PressableScale, Screen, SectionTitle, SegmentedControl, toast } from '@/components';
-import { BillingNotConfiguredError, purchase, restorePurchases } from '@/features/billing/billing';
+import { BillingNotConfiguredError, SignInRequiredError, fetchEntitlements, openBillingPortal, purchase, restorePurchases } from '@/features/billing/billing';
 import { COMPARISON, PLANS, formatUsd, yearlySavings, type BillingPeriod, type Plan, type PlanPrice } from '@/features/billing/plans';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radii, spacing } from '@/theme/tokens';
@@ -13,6 +14,9 @@ export default function Billing() {
   const [period, setPeriod] = useState<BillingPeriod>('yearly');
   const [selected, setSelected] = useState<Plan['id']>('pro');
   const [busy, setBusy] = useState(false);
+  const ent = useQuery({ queryKey: ['entitlements'], queryFn: fetchEntitlements });
+  const current = ent.data?.entitlements ?? [];
+  const currentName = current.includes('family') ? 'Família' : current.includes('pro_ai') ? 'Pro + IA' : current.includes('pro') ? 'Pro' : null;
   const plan = PLANS.find((p) => p.id === selected)!;
   const price = priceFor(plan, period);
 
@@ -20,9 +24,11 @@ export default function Billing() {
     if (!price) return;
     setBusy(true);
     try {
-      await purchase(price.price);
+      const state = await purchase(plan.id, price.price);
+      void ent.refetch();
+      toast(state.entitlements.length ? 'Plano activo. Obrigado!' : 'Assim que o pagamento for confirmado, o plano fica activo. Toque em «Restaurar compras» para verificar.');
     } catch (e) {
-      toast(e instanceof BillingNotConfiguredError ? e.message : 'Não foi possível concluir a compra.', 'error');
+      toast(e instanceof BillingNotConfiguredError || e instanceof SignInRequiredError ? e.message : 'Não foi possível abrir o pagamento.', 'error');
     } finally {
       setBusy(false);
     }
@@ -46,7 +52,7 @@ export default function Billing() {
           <AppText variant="caption" tone="muted" align="center">
             {plan.id === 'free' || price?.kind === 'once'
               ? 'Sem renovação automática.'
-              : `Renova automaticamente. Cancele quando quiser na loja de aplicações.${plan.trialDays && price?.kind === 'yearly' ? ' Não é cobrado durante o teste.' : ''}`}
+              : `Renova automaticamente. Cancele quando quiser, sem custos.${plan.trialDays && price?.kind === 'yearly' ? ' Não é cobrado durante o teste.' : ''}`}
           </AppText>
         </View>
       }
@@ -60,6 +66,21 @@ export default function Billing() {
           Menos tela. Mais vida. Escolha o plano certo para si.
         </AppText>
       </FadeInItem>
+
+      {currentName ? (
+        <View style={[styles.current, { borderColor: colors.text }]} testID="billing-current">
+          <Feather name="check-circle" size={18} color={colors.text} />
+          <View style={{ flex: 1 }}>
+            <AppText variant="bodyStrong">Plano actual: {currentName}</AppText>
+            <AppText variant="caption" tone="muted">
+              {ent.data?.expiresAt ? `Renova ou termina a ${new Date(ent.data.expiresAt).toLocaleDateString('pt-PT')}` : 'Sem data de fim'}
+            </AppText>
+          </View>
+          <AppText variant="small" style={{ textDecorationLine: 'underline' }} onPress={() => void openBillingPortal().then((ok) => (ok ? undefined : toast('Para gerir a subscrição, contacte o suporte.')))}>
+            Gerir
+          </AppText>
+        </View>
+      ) : null}
 
       <View style={{ marginTop: spacing.xl }}>
         <SegmentedControl
@@ -178,11 +199,16 @@ export default function Billing() {
         size="sm"
         style={{ marginTop: spacing.lg }}
         onPress={() =>
-          void restorePurchases().catch((e) => toast(e instanceof BillingNotConfiguredError ? e.message : 'Não foi possível restaurar.', 'error'))
+          void restorePurchases()
+            .then((st) => {
+              void ent.refetch();
+              toast(st.entitlements.length ? 'Plano restaurado.' : 'Não encontrámos um plano activo nesta conta.');
+            })
+            .catch((e) => toast(e instanceof BillingNotConfiguredError || e instanceof SignInRequiredError ? e.message : 'Não foi possível restaurar.', 'error'))
         }
       />
       <AppText variant="caption" tone="muted" align="center" style={{ marginTop: spacing.sm }}>
-        Preços em dólares americanos (USD). A loja pode mostrar o valor convertido para a sua moeda. Se a subscrição terminar durante um
+        Preços em dólares americanos (USD). O pagamento é processado por um parceiro de pagamentos seguro; o offly nunca vê os dados do seu cartão. Se a subscrição terminar durante um
         desafio, a proteção mantém-se até à data escolhida.
       </AppText>
     </Screen>
@@ -199,6 +225,7 @@ function priceFor(plan: Plan, period: BillingPeriod): { price: PlanPrice; suffix
 
 const styles = StyleSheet.create({
   plan: { borderRadius: radii.lg, padding: spacing.lg },
+  current: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, borderWidth: 1, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.xl },
   planTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   badge: { borderRadius: radii.pill, paddingHorizontal: 8, paddingVertical: 2 },
   table: { borderWidth: StyleSheet.hairlineWidth, borderRadius: radii.md, overflow: 'hidden' },

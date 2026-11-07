@@ -1,10 +1,8 @@
 /**
  * Planos e preços do offly (USD). Fonte única para o ecrã de planos.
  *
- * Os `productId` têm de coincidir com os produtos criados na Google Play
- * Console / App Store Connect (e no RevenueCat, se for usado). Os preços
- * mostrados aqui são os de referência; quando a loja estiver ligada, o
- * aplicativo deve mostrar o preço localizado devolvido pela loja.
+ * Os `productId` são os que o gateway externo envia no webhook
+ * (ver docs/billing.md e supabase/functions/_shared/billing.ts).
  */
 
 export type PlanId = 'free' | 'pro' | 'pro_ai' | 'family' | 'lifetime';

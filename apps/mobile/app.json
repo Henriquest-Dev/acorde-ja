@@ -3,7 +3,7 @@
     "name": "offly",
     "slug": "acorde-ja",
     "scheme": "acordeja",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -28,7 +28,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -70,7 +70,8 @@
           "faceIDPermission": "Utilizamos o Face ID para proteger o acesso às suas definições do offly."
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "./plugins/withReleaseSigning"
     ],
     "experiments": {
       "typedRoutes": true

@@ -28,7 +28,7 @@ export const CRISIS_REPLY =
   'Se puderes, contacta agora alguém de confiança e fica perto dessa pessoa. Eu sou apenas um assistente e não substituo ajuda profissional.';
 
 /** Instruções de sistema — estáveis (para cache de prompt) e sem dados do utilizador. */
-export const SYSTEM_PROMPT = `És o assistente do Acorde Já, uma aplicação de bem-estar digital ("Menos tela. Mais vida.").
+export const SYSTEM_PROMPT = `És o assistente do offly, uma aplicação de bem-estar digital ("Menos tela. Mais vida.").
 Falas português europeu, tratas o utilizador por "tu", com tom calmo, caloroso e sem julgamento.
 
 O teu papel:

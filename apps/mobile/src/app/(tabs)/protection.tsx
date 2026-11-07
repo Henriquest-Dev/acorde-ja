@@ -113,8 +113,28 @@ export default function Protection() {
             />
           }
         />
+        <ListRow
+          icon={{ set: 'mci', name: 'advertisements-off' }}
+          title="Bloquear anúncios"
+          subtitle="Publicidade e rastreadores"
+          right={
+            <AppSwitch
+              value={prefs.shield.categories.ads ?? false}
+              onValueChange={(v) => void setShield({ categories: { ...prefs.shield.categories, ads: v } })}
+              accessibilityLabel="Bloquear anúncios"
+              testID="toggle-ads"
+            />
+          }
+        />
         <ListRow icon={{ set: 'mci', name: 'tag-outline' }} title="Bloquear por categoria" chevron onPress={() => router.push('/shield/categories')} />
         <ListRow icon={{ set: 'mci', name: 'format-list-checks' }} title="Lista personalizada" chevron onPress={() => router.push('/shield/custom')} />
+        <ListRow
+          icon={{ set: 'mci', name: 'cellphone-lock' }}
+          title="iPhone e iPad"
+          subtitle="Perfil de proteção sem App Store"
+          chevron
+          onPress={() => router.push('/shield/iphone')}
+        />
         <ListRow
           icon={{ set: 'mci', name: 'timer-lock-outline' }}
           title="Modo restrito"

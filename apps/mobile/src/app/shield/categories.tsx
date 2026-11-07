@@ -32,13 +32,13 @@ export default function ShieldCategories() {
             key={c.id}
             title={c.label}
             subtitle={`${c.description} ${SEED_DOMAINS[c.id].length} domínios base.`}
-            right={<AppSwitch value={prefs.shield.categories[c.id]} onValueChange={(v) => void toggle(c.id, v)} accessibilityLabel={c.label} />}
+            right={<AppSwitch value={prefs.shield.categories[c.id] ?? false} onValueChange={(v) => void toggle(c.id, v)} accessibilityLabel={c.label} />}
           />
         ))}
       </View>
       <AppText variant="caption" tone="muted" style={{ marginTop: spacing.xl }}>
-        Com «Sites adultos» activo, os pedidos DNS são também resolvidos pelo Cloudflare for Families, que cobre muitos mais domínios
-        de conteúdo adulto. Nenhum histórico de navegação é guardado — apenas uma contagem diária de tentativas bloqueadas.
+        Os pedidos DNS são também resolvidos por um filtro público (Cloudflare for Families para adultos, AdGuard DNS para anúncios), que cobre muitos mais domínios
+        do que a lista local. Nenhum histórico de navegação é guardado — apenas uma contagem diária de tentativas bloqueadas.
       </AppText>
     </Screen>
   );

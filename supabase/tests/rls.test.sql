@@ -151,6 +151,34 @@ select public.leave_family_group();
 reset role;
 select pg_temp.assert((select count(*) from public.family_groups) = 0, 'grupo sem encarregado é eliminado');
 
+-- 11b. Faturação externa: idempotente, só o servidor aplica eventos
+do $$ begin
+  set local role authenticated;
+  perform public.apply_billing_event('e0', 'x', 'subscription.activated', '00000000-0000-0000-0000-00000000000d', 'offly_pro_monthly', 's0', now() + interval '30 days');
+  raise exception 'FALHOU: utilizador aplicou evento de faturação';
+exception when insufficient_privilege then raise notice 'ok — utilizador não aplica eventos de faturação';
+end $$;
+reset role;
+select pg_temp.assert(public.apply_billing_event('e1', 'gw', 'subscription.activated', '00000000-0000-0000-0000-00000000000d', 'offly_pro_ai_monthly', 'sub_1', now() + interval '30 days') = 'applied', 'evento aplicado');
+select pg_temp.assert(public.apply_billing_event('e1', 'gw', 'subscription.activated', '00000000-0000-0000-0000-00000000000d', 'offly_pro_ai_monthly', 'sub_1', now() + interval '30 days') = 'duplicate', 'evento repetido é ignorado');
+select pg_temp.assert((select count(*) from public.entitlements where user_id = '00000000-0000-0000-0000-00000000000d') = 2, 'Pro + IA concede pro e pro_ai');
+select pg_temp.assert(public.apply_billing_event('e2', 'gw', 'subscription.activated', '00000000-0000-0000-0000-0000000000ff', 'offly_pro_monthly', 'sub_2', null) = 'ignored', 'utilizador inexistente é ignorado');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000d');
+select pg_temp.assert((select count(*) from public.my_entitlements()) = 2, 'utilizador vê o próprio plano');
+do $$ begin
+  perform * from public.billing_events;
+  raise exception 'FALHOU: utilizador leu billing_events';
+exception when insufficient_privilege then raise notice 'ok — billing_events só no servidor';
+end $$;
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select pg_temp.assert((select count(*) from public.my_entitlements()) = 0, 'A não vê o plano de D');
+reset role;
+select pg_temp.assert(public.apply_billing_event('e3', 'gw', 'payment.refunded', '00000000-0000-0000-0000-00000000000d', 'offly_pro_ai_monthly', 'sub_1', null) = 'applied', 'reembolso aplicado');
+select pg_temp.assert((select count(*) from public.entitlements where user_id = '00000000-0000-0000-0000-00000000000d') = 0, 'reembolso retira o acesso');
+select pg_temp.assert(public.apply_billing_event('e4', 'gw', 'lifetime.purchased', '00000000-0000-0000-0000-00000000000d', 'offly_pro_lifetime', 'ord_9', null) = 'applied', 'vitalício aplicado');
+select pg_temp.assert((select expires_at is null from public.entitlements where user_id = '00000000-0000-0000-0000-00000000000d' and entitlement = 'pro'), 'vitalício não expira');
+
 -- 12. Conta eliminada: todos os dados em cascata
 delete from auth.users where id = '00000000-0000-0000-0000-00000000000b';
 select pg_temp.assert((select count(*) from public.usage_daily) = 0 and (select count(*) from public.habits) = 0

@@ -13,6 +13,8 @@ class ForegroundTracker(private val windowStart: Long, private val windowEnd: Lo
   data class AppUsage(val packageName: String, var foregroundMs: Long = 0, var opens: Int = 0, var lastUsedAt: Long? = null)
 
   val apps = HashMap<String, AppUsage>()
+  /** Tempo total por hora desde `windowStart` (24 posições), calculado na mesma passagem. */
+  val hourly = LongArray(24)
   /** Actividades retomadas por pacote. */
   private val resumed = HashMap<String, MutableSet<String>>()
   /** Desde quando cada pacote está em primeiro plano. */
@@ -76,6 +78,18 @@ class ForegroundTracker(private val windowStart: Long, private val windowEnd: Lo
       val u = apps.getOrPut(pkg) { AppUsage(pkg) }
       u.foregroundMs += to - from
       u.lastUsedAt = maxOf(u.lastUsedAt ?: 0L, to)
+      var t = from
+      while (t < to) {
+        val h = ((t - windowStart) / HOUR).toInt()
+        if (h !in 0..23) break
+        val end = minOf(to, windowStart + (h + 1) * HOUR)
+        hourly[h] += end - t
+        t = end
+      }
     }
+  }
+
+  private companion object {
+    const val HOUR = 3_600_000L
   }
 }

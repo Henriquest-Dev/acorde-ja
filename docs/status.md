@@ -18,6 +18,9 @@ Legenda: ✅ implementado e verificado neste ambiente · 🟡 implementado, veri
 | Compilação Android (`:app:assembleDebug`, arm64-v8a) | ✅ `BUILD SUCCESSFUL` — APK de debug gerado; manifesto final verificado (usage stats, overlay, FGS specialUse, VPN, receiver) |
 | `expo lint` | ✅ 0 erros (1 aviso informativo do React Compiler sobre react-hook-form) |
 | Compilação iOS | ⚠️ impossível neste ambiente (Linux, sem Xcode) |
+| Proteção no iPhone sem App Store | ✅ perfil DNS-over-HTTPS (adultos, anúncios); apostas só com resolvedor próprio — ver ios.md |
+| Bloqueio de anúncios (Android) | ✅ VPN local + AdGuard DNS como resolvedor |
+| Pagamentos | ✅ gateway externo via webhook assinado (docs/billing.md); sem RevenueCat |
 
 ## Ecrãs da imagem de referência
 

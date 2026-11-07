@@ -10,7 +10,7 @@ import { Platform } from 'react-native';
  */
 export async function exportCsv(rows: UsageDailyRow[], label: string): Promise<void> {
   const csv = reportToCsv(rows);
-  const name = `acorde-ja-${label}.csv`;
+  const name = `offly-${label}.csv`;
   if (Platform.OS === 'web') {
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');

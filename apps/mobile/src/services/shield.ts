@@ -1,4 +1,4 @@
-import { activeDomainList, type ShieldConfig } from '@acorde/core';
+import { RESOLVERS, activeDomainList, pickResolver, type ShieldConfig } from '@acorde/core';
 import { Platform } from 'react-native';
 import { getCapabilities, shield } from '@/native/device';
 
@@ -24,7 +24,7 @@ export async function applyShield(config: ShieldConfig): Promise<ShieldApplyResu
         Platform.OS === 'web'
           ? 'A protecção de sites só funciona no aplicativo Android ou iOS.'
           : Platform.OS === 'ios'
-            ? 'Conceda a autorização do Tempo de Ecrã para activar o filtro.'
+            ? 'No iPhone, instale o perfil de proteção em Proteção → iPhone e iPad.'
             : 'Módulo nativo indisponível nesta compilação.',
     };
   }
@@ -34,6 +34,8 @@ export async function applyShield(config: ShieldConfig): Promise<ShieldApplyResu
   }
   const prepared = await shield.prepare();
   if (!prepared) return { status: 'permission_denied' };
-  const started = await shield.start(domains, config.categories.adult);
+  // O resolvedor de filtragem cobre milhões de domínios além da lista local.
+  const resolver = RESOLVERS[pickResolver({ ...config.categories, ads: config.categories.ads ?? false })];
+  const started = await shield.start(domains, resolver.ip);
   return started ? { status: 'active', domains: domains.length } : { status: 'permission_denied' };
 }

@@ -337,7 +337,7 @@ class AcordeNativeModule : Module() {
   companion object {
     private const val VPN_REQUEST_CODE = 41_020
     /** Resolvedores permitidos: Cloudflare (padrão) e Cloudflare for Families (bloqueia conteúdo adulto). */
-    private val ALLOWED_UPSTREAMS = setOf("1.1.1.1", "1.1.1.3")
+    private val ALLOWED_UPSTREAMS = setOf("1.1.1.1", "1.1.1.3", "94.140.14.14", "94.140.14.15")
   }
 }
 

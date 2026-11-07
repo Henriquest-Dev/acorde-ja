@@ -1,30 +1,35 @@
-# iOS — Screen Time API
+# iPhone e iPad
 
-## O que está implementado (`modules/acorde-native/ios/AcordeNativeModule.swift`)
+## Resposta curta: o bloqueio funciona no iPhone?
 
-- `requestFamilyControlsAuthorization()` — `AuthorizationCenter.requestAuthorization(for: .individual)`.
-- `getPermissionStatus()` / `getNativeCapabilities()` — estado real da autorização.
-- `presentAppPicker()` — `FamilyActivityPicker` (SwiftUI) apresentado a partir do React Native; a
-  selecção é guardada com `PropertyListEncoder` em `UserDefaults`.
-- `startEnforcement()` / `stopEnforcement()` — escudo `ManagedSettingsStore` sobre as aplicações,
-  categorias e domínios seleccionados (usado no modo foco e nos horários).
-- `startShield()` / `stopShield()` — filtro web `.auto(...)` do sistema.
+| Funcionalidade | iPhone sem conta Apple Developer | iPhone com app nativa (conta Apple Developer, $99/ano) |
+|---|---|---|
+| Bloquear sites adultos | ✅ perfil DNS (Proteção → iPhone e iPad) | ✅ |
+| Bloquear anúncios e rastreadores | ✅ perfil DNS | ✅ |
+| Bloquear sites de apostas | ⚠️ só com resolvedor próprio (NextDNS / AdGuard DNS privado) em `EXPO_PUBLIC_IOS_DOH_URL` | ✅ |
+| Protecção que não se pode desligar | ⚠️ só em iPhone supervisionado (Apple Configurator) | ⚠️ idem |
+| Limites de tempo por app, bloqueio de apps | ❌ | ✅ Screen Time API (FamilyControls) |
 
-## Limitações impostas pela Apple
+A Apple não permite instalar apps fora da App Store/TestFlight sem conta de programador paga
+(excepto lojas alternativas na UE). Por isso, sem essa conta, a protecção no iPhone é feita com
+um **perfil de configuração DNS-over-HTTPS** (`com.apple.dnsSettings.managed`), gerado pelo offly
+(`buildMobileConfig` em `packages/core/src/shield`):
 
-- **Sem minutos por aplicação**: o aplicativo não pode ler tempos de utilização; só uma extensão
-  `DeviceActivityReport` pode mostrá-los, dentro da sua própria vista. O dashboard iOS mostra um
-  estado explicativo, nunca valores estimados.
-- **Tokens opacos**: as aplicações escolhidas não têm nome nem bundle id acessíveis.
-- **Limites com contagem**: exigem uma extensão `DeviceActivityMonitor` (alvo separado) que aplica
-  o escudo ao atingir o limiar `DeviceActivityEvent`. Planeado para a Fase 5 (requer config plugin
-  para criar o alvo da extensão e um App Group partilhado).
+- Funciona em todas as apps e navegadores, sem instalar nada.
+- Filtros públicos verificados: AdGuard DNS Family (adultos + anúncios), AdGuard DNS (anúncios),
+  Cloudflare for Families (adultos).
+- O utilizador pode removê-lo em Definições → Geral → VPN e gestão de dispositivos, a não ser
+  que o iPhone esteja supervisionado.
+- Instalação: abrir o offly web no Safari do iPhone → Proteção → iPhone e iPad → Gerar perfil;
+  ou enviar o ficheiro a partir do Android (AirDrop/e-mail).
 
-## Requisitos para compilar/publicar
+## App nativa (Screen Time API) — `modules/acorde-native/ios/AcordeNativeModule.swift`
 
-1. Entitlement `com.apple.developer.family-controls` (já declarado em `app.json`) — pedir a versão
-   *Distribution* à Apple.
-2. iOS 16.4+.
-3. `npx expo prebuild -p ios && npx pod-install`, depois compilar no Xcode.
+- `requestFamilyControlsAuthorization()`, `presentAppPicker()` (FamilyActivityPicker),
+  `startEnforcement()` (ManagedSettingsStore), `startShield()` (filtro web do sistema).
+- Limitações da Apple: o app não lê minutos por aplicação; tokens opacos; limites com contagem
+  exigem uma extensão `DeviceActivityMonitor` (planeada).
+- Requisitos: conta Apple Developer, entitlement `com.apple.developer.family-controls`
+  (Distribution pedido à Apple), iOS 16.4+, compilação em macOS/Xcode ou EAS Build.
 
-> Estado: o código Swift **não foi compilado** neste ambiente (Linux, sem Xcode). Ver docs/status.md.
+> Estado: o código Swift **não foi compilado** neste ambiente (Linux, sem Xcode).

@@ -187,3 +187,21 @@ describe('Digital Shield', () => {
     expect(evaluateDomain('xvideos.com', { ...cfg, strictMode: true }, new Date()).blocked).toBe(true);
   });
 });
+
+describe('resolvedores e perfil iPhone', async () => {
+  const { pickResolver, buildMobileConfig, DEFAULT_SHIELD: D } = await import('./index');
+  it('escolhe o resolvedor pelas categorias', () => {
+    expect(pickResolver({ ...D.categories, adult: true, ads: true })).toBe('adguard_family');
+    expect(pickResolver({ ...D.categories, ads: true })).toBe('adguard');
+    expect(pickResolver({ ...D.categories, adult: true })).toBe('cloudflare_family');
+    expect(pickResolver(D.categories)).toBe('cloudflare');
+  });
+  it('gera um .mobileconfig válido com DNS-over-HTTPS', () => {
+    const x = buildMobileConfig({ resolver: 'adguard_family', profileUuid: '11111111-2222-3333-4444-555555555555', payloadUuid: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee' });
+    expect(x).toContain('<string>com.apple.dnsSettings.managed</string>');
+    expect(x).toContain('<string>https://family.adguard-dns.com/dns-query</string>');
+    expect(x).toContain('<string>HTTPS</string>');
+    expect(x).toContain('11111111-2222-3333-4444-555555555555'.toUpperCase());
+    expect(x.startsWith('<?xml')).toBe(true);
+  });
+});

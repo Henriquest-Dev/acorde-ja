@@ -159,9 +159,9 @@ export const shield = {
     if (!AcordeNative) return false;
     return AcordeNative.prepareShield();
   },
-  async start(domains: string[], familyFilter: boolean): Promise<boolean> {
+  async start(domains: string[], upstreamIp: string): Promise<boolean> {
     if (!AcordeNative) return false;
-    return AcordeNative.startShield(domains, familyFilter ? '1.1.1.3' : '1.1.1.1');
+    return AcordeNative.startShield(domains, upstreamIp);
   },
   async stop(): Promise<void> {
     await AcordeNative?.stopShield();

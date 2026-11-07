@@ -42,4 +42,17 @@ class ForegroundTrackerTest {
     assertNull(t.current)
     assertEquals(20_000L, t.finish(100_000)[yt]!!.foregroundMs)
   }
+
+  @Test
+  fun distribuiTempoPorHoraNumaSoPassagem() {
+    val h = 3_600_000L
+    val t = ForegroundTracker(0, 3 * h, emptySet())
+    t.resume("com.a", "Main", h - 600_000) // 10 min antes da 1.ª hora acabar
+    t.pause("com.a", "Main", h + 1_200_000) // até 20 min da 2.ª hora
+    t.resume("com.b", "Main", 2 * h + 60_000)
+    t.finish(2 * h + 120_000)
+    assertEquals(600_000L, t.hourly[0])
+    assertEquals(1_200_000L, t.hourly[1])
+    assertEquals(60_000L, t.hourly[2])
+  }
 }
