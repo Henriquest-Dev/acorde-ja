@@ -172,8 +172,8 @@ def s06():
         cube('bl%d' % i, (-0.4 + i * 0.25, 1.6, 0.48), (0.2, 0.2, 0.2), mat('bm%d' % i, c, 0.5), 0.015)
     aim(area_light('hall', (-1.0, 0.2, 2.0), (0, 0, 0), 160, (1.0, 0.75, 0.45), 1.5), (-0.1, 1.6, 0.3))
     p = kid()
-    p['root'].location = (1.15, 0.9, 0)
-    p['root'].rotation_euler = (0, 0, R(25))
+    p['root'].location = (0.9, 1.0, 0)
+    p['root'].rotation_euler = (0, 0, R(20))
     sit(p, 0.14)
     p['armL'].rotation_euler = (R(-55), 0, R(10))
     p['armR'].rotation_euler = (R(-55), 0, R(-10))
@@ -181,7 +181,7 @@ def s06():
     set_face(p, screen_eyes=True, smile=-0.1, gaze=(0, -0.7))
     slab('tablet', (0, -0.3, 0.45), (0.46, 0.04, 0.32), BLUE, 6.0, parent=p['hips'])
     aim(area_light('tabletlight', (1.4, 0.0, 0.6), (0, 0, 0), 60, BLUE, 0.6), tuple(head_pos(p)))
-    camera((0.5, -2.1, 0.9), (0.45, 1.6, 0.5), lens=34, dof_dist=3.5, fstop=2.6)
+    camera((0.4, -2.3, 0.9), (0.4, 1.6, 0.5), lens=28, dof_dist=3.7, fstop=2.8)
 
 
 # ---------------------------------------------------------------- OS ANOS
@@ -334,10 +334,11 @@ def s13():
 
 def s14():
     night_room(moon=6)
-    p = teen_on_bed(lean=32, nod=34, arms=-70, expr=dict(brow=1.0, lid=0.55, smile=-0.9, gaze=(0, -1)), glow=34)
+    p = teen_on_bed(lean=18, nod=16, arms=-75, expr=dict(brow=1.0, lid=0.55, smile=-0.9, gaze=(0, -1)), glow=34)
     p['phone'] = None
     tear(p, 'R', 0.2)
-    cam_on_face(p, dist=1.9, side=0.35, up=-0.05, lens=38, fstop=2.8)
+    hp = head_pos(p)
+    camera((hp.x + 0.9, hp.y - 1.6, hp.z - 0.3), tuple(hp), lens=40, dof_dist=1.9, fstop=2.8)
 
 
 def s15():
@@ -421,9 +422,9 @@ def s21():
     cube('floor', (0, 0, -1), (9, 4, 0.1), mat('fl', (0.01, 0.01, 0.01), 0.3), 0.01)
     white = (1, 1, 1)
     # olho do Offy
-    cube('offy_eye', (0, 0, 3.15), (0.7, 0.06, 0.42), mat('ew', (0.95, 0.95, 0.97), 0.3, emit=2.5, emit_color=white), 0.12)
-    cube('offy_pupil', (0.02, -0.04, 3.15), (0.24, 0.05, 0.3), mat('ep', (0.01, 0.01, 0.015), 0.2), 0.05)
-    cube('offy_spark', (0.07, -0.075, 3.24), (0.05, 0.02, 0.05), mat('es', white, 0.2, emit=8.0), 0.01)
+    cube('offy_eye', (0, 0, 3.15), (0.9, 0.06, 0.55), mat('ew', (0.95, 0.95, 0.97), 0.3, emit=2.5, emit_color=white), 0.22)
+    cube('offy_pupil', (0.04, -0.04, 3.13), (0.3, 0.05, 0.3), mat('ep', (0.01, 0.01, 0.015), 0.2), 0.13)
+    cube('offy_spark', (0.11, -0.075, 3.23), (0.06, 0.02, 0.06), mat('es', white, 0.2, emit=8.0), 0.01)
     sun_logo((0, 0, 2.3), 0.55)
     text3d('COMENTE UMA PALAVRA', (0, 0, 1.7), 0.14, white, 4.0)
     cube('divider', (0, 0, 0.95), (0.012, 0.012, 1.0), mat('dv', white, 0.4, emit=3.0), 0.003)
