@@ -220,17 +220,17 @@ def s07():
     text3d('NOVEMBRO', (-0.9, 3.08, 1.55), 0.1, (0.6, 0.1, 0.1), 0.0, extrude=0.01)
     aim(area_light('dusk', (-3.2, -1.2, 2.0), (0, 0, 0), 260, (1.0, 0.55, 0.3), 2.2), (0.1, 0, 0.5))
     p = teen()
-    p['root'].location = (0.4, 0.1, 0)
-    p['root'].rotation_euler = (0, 0, R(-38))
+    p['root'].location = (0.15, 0.1, 0)
+    p['root'].rotation_euler = (0, 0, R(-30))
     sit(p, 0.0)
-    p['hips'].rotation_euler = (R(25), 0, 0)
+    p['hips'].rotation_euler = (R(12), 0, 0)
     p['armL'].rotation_euler = (R(-80), 0, R(22))
     p['armR'].rotation_euler = (R(-80), 0, R(-22))
     p['head'].rotation_euler = (R(25), 0, 0)
     set_face(p, lid=0.45, brow=0.25, smile=-0.25, gaze=(-0.2, -0.8))
     slab('phone', (0, -0.52, 0.72), (0.22, 0.03, 0.42), BLUE, 5.0, parent=p['hips'], rot=(R(-12), 0, 0))
     aim(area_light('screenlight', (0.9, -0.8, 1.2), (0, 0, 0), 45, BLUE, 0.4), tuple(head_pos(p)))
-    camera((1.1, -2.9, 0.9), (0, 0.4, 0.8), lens=34, dof_dist=3.1, fstop=2.2)
+    camera((1.0, -3.5, 1.0), (0.0, 0.2, 0.75), lens=28, dof_dist=3.6, fstop=2.4)
 
 
 def s08():
@@ -239,15 +239,15 @@ def s08():
     aim(area_light('dusk', (-3.5, -1.0, 2.5), (0, 0, 0), 700, (1.0, 0.6, 0.35), 3.0), (0, 0.8, 0.8))
     for i, (y, col) in enumerate(((0.0, (0.2, 0.5, 0.3)), (0.9, (0.7, 0.2, 0.2)), (1.8, (0.9, 0.8, 0.2)))):
         f = friend(col)
-        f['root'].location = (-2.6, y, 0)
+        f['root'].location = (-2.2, y - 0.3, 0)
         f['root'].rotation_euler = (0, 0, R(90))
         if i == 1:
             f['armR'].rotation_euler = (0, R(-150), 0)
         set_face(f, smile=0.6, mouth_open=0.3 if i == 1 else 0, brow_lift=0.1)
-    cube('ball', (-2.2, 0.9, 0.12), (0.22, 0.22, 0.22), mat('ball', (0.95, 0.95, 0.95), 0.4), 0.05)
+    cube('ball', (-1.7, 0.6, 0.12), (0.22, 0.22, 0.22), mat('ball', (0.95, 0.95, 0.95), 0.4), 0.05)
     p = teen()
-    p['root'].location = (0.9, 0.9, 0)
-    p['root'].rotation_euler = (0, 0, R(-70))
+    p['root'].location = (0.3, 0.9, 0)
+    p['root'].rotation_euler = (0, 0, R(-25))
     sit(p, 0.0)
     p['hips'].rotation_euler = (R(15), 0, 0)
     p['armL'].rotation_euler = (R(-85), 0, R(24))
@@ -256,28 +256,28 @@ def s08():
     set_face(p, brow=0.4, smile=-0.2, gaze=(-0.1, -0.9), lid=0.15)
     slab('phone', (0, -0.52, 0.72), (0.22, 0.03, 0.42), BLUE, 5.0, parent=p['hips'], rot=(R(-12), 0, 0))
     aim(area_light('screenlight', (1.5, 0.5, 1.2), (0, 0, 0), 40, BLUE, 0.4), tuple(head_pos(p)))
-    camera((2.3, -2.3, 1.2), (-0.6, 0.9, 0.9), lens=34, dof_dist=3.6, fstop=2.4)
+    camera((0.4, -3.4, 1.25), (-0.8, 0.9, 0.9), lens=26, dof_dist=4.4, fstop=2.8)
 
 
 def s09():
     start(False, (0.1, 0.08, 0.08), 0.15)
-    cube('table', (0, 1.2, 0.72), (2.6, 1.3, 0.08), mat('table', (0.45, 0.3, 0.18), 0.5), 0.02)
-    for x in (-1.15, 1.15):
-        for y in (0.7, 1.7):
+    cube('table', (0, 1.2, 0.72), (1.9, 1.1, 0.08), mat('table', (0.45, 0.3, 0.18), 0.5), 0.02)
+    for x in (-0.85, 0.85):
+        for y in (0.75, 1.65):
             cube('leg', (x, y, 0.35), (0.1, 0.1, 0.7), mat('tl', (0.35, 0.22, 0.13), 0.6), 0.01)
-    for x, rot in ((-1.9, 90), (1.9, -90)):
+    for x, rot in ((-1.45, 90), (1.45, -90)):
         cube('chair', (x, 1.2, 0.22), (0.5, 0.55, 0.44), mat('chair', (0.3, 0.2, 0.14), 0.7), 0.03)
-        cube('plate', (x * 0.62, 1.2, 0.78), (0.5, 0.5, 0.03), mat('plate', (0.92, 0.92, 0.9), 0.3), 0.01)
-        cube('food', (x * 0.62, 1.2, 0.83), (0.22, 0.22, 0.08), mat('food', (0.55, 0.4, 0.2), 0.7), 0.02)
+        cube('plate', (x * 0.5, 1.2, 0.78), (0.5, 0.5, 0.03), mat('plate', (0.92, 0.92, 0.9), 0.3), 0.01)
+        cube('food', (x * 0.5, 1.2, 0.83), (0.22, 0.22, 0.08), mat('food', (0.55, 0.4, 0.2), 0.7), 0.02)
     aim(area_light('lamp', (0, 1.2, 2.8), (0, 0, 0), 120, (1.0, 0.75, 0.45), 1.2), (0, 1.2, 0.8))
     m = mom()
-    m['root'].location = (-1.9, 1.2, 0.0)
+    m['root'].location = (-1.45, 1.2, 0.0)
     m['root'].rotation_euler = (0, 0, R(90))
     sit(m, 0.5)
     m['armR'].rotation_euler = (R(-40), 0, R(-15))
     set_face(m, mouth_open=0.5, brow=0.5, smile=-0.1, gaze=(0.8, 0))
     p = teen()
-    p['root'].location = (1.9, 1.2, 0.0)
+    p['root'].location = (1.45, 1.2, 0.0)
     p['root'].rotation_euler = (0, 0, R(-90))
     sit(p, 0.5)
     p['hips'].rotation_euler = (R(15), 0, 0)
@@ -287,17 +287,17 @@ def s09():
     set_face(p, lid=0.4, smile=-0.1, brow=0.1, gaze=(0, -0.9), screen_eyes=True)
     slab('phone', (0, -0.5, 0.5), (0.22, 0.03, 0.42), BLUE, 5.0, parent=p['hips'], rot=(R(-12), 0, 0))
     aim(area_light('screenlight', (1.2, 1.0, 1.1), (0, 0, 0), 45, BLUE, 0.4), tuple(head_pos(p)))
-    camera((0.3, -3.0, 2.3), (0.0, 1.2, 0.9), lens=34, dof_dist=4.0, fstop=3.0)
+    camera((0.2, -3.0, 2.0), (0.0, 1.2, 1.0), lens=26, dof_dist=4.2, fstop=3.0)
 
 
 def s10():
     night_room()
     p = teen_on_bed(expr=dict(brow=0.9, lid=0.0, smile=-0.6, gaze=(0, -0.4), brow_lift=0.3), phone=False, glow=0)
-    ph = cube('bigphone', (0.05, 0.25, 1.45), (0.62, 0.04, 1.1), mat('pscreen', (0.02, 0.02, 0.04), 0.2, emit=0.3, emit_color=(0.2, 0.3, 0.6)), 0.03)
-    text3d('9H 41MIN', (0.05, 0.2, 1.55), 0.13, (1, 1, 1), 5.0, extrude=0.004)
-    text3d('POR DIA', (0.05, 0.2, 1.25), 0.06, (0.5, 0.75, 1.0), 4.0, extrude=0.004)
-    aim(area_light('screenlight', (0.05, -0.2, 1.4), (0, 0, 0), 120, BLUE, 0.8), tuple(head_pos(p)))
-    camera((0.05, -0.9, 1.45), (0.0, 1.4, 1.45), lens=45, dof_dist=1.15, fstop=1.6)
+    ph = cube('bigphone', (0.05, 0.15, 1.2), (0.32, 0.03, 0.58), mat('pscreen', (0.02, 0.02, 0.04), 0.2, emit=0.3, emit_color=(0.2, 0.3, 0.6)), 0.03)
+    text3d('9H 41MIN', (0.05, 0.12, 1.26), 0.055, (1, 1, 1), 5.0, extrude=0.002)
+    text3d('POR DIA', (0.05, 0.12, 1.1), 0.028, (0.5, 0.75, 1.0), 4.0, extrude=0.002)
+    aim(area_light('screenlight', (0.05, -0.2, 1.3), (0, 0, 0), 60, BLUE, 0.8), tuple(head_pos(p)))
+    camera((0.05, -0.85, 1.5), (0.0, 1.4, 1.55), lens=40, dof_dist=1.0, fstop=2.0)
 
 
 # ---------------------------------------------------------------- O FUNDO
@@ -307,7 +307,7 @@ def s11():
     cube('clock', (1.35, 1.78, 0.82), (0.42, 0.14, 0.2), mat('clockb', (0.04, 0.04, 0.05), 0.4), 0.02)
     text3d('03:00', (1.35, 1.7, 0.78), 0.12, (1.0, 0.15, 0.1), 6.0, extrude=0.004)
     p = teen_on_bed(expr=dict(screen_eyes=True, brow=0.55, smile=-0.35, gaze=(0, -0.8), lid=0.1))
-    camera((2.6, 0.1, 1.3), (-0.1, 1.7, 1.0), lens=34, dof_dist=3.0, fstop=2.0)
+    camera((2.5, -0.9, 1.35), (0.35, 1.7, 1.0), lens=26, dof_dist=3.4, fstop=2.2)
 
 
 def s12():
@@ -318,26 +318,26 @@ def s12():
     p = teen_on_bed(arms=-20, lean=5, nod=0, phone=False, glow=0, expr=dict(brow=0.9, smile=0.5, gaze=(-1, 0), lid=0.05))
     p['head'].rotation_euler = (0, 0, R(55))
     aim(area_light('face', (1.2, -0.8, 1.6), (0, 0, 0), 35, (0.5, 0.6, 1.0), 0.8), tuple(head_pos(p)))
-    camera((2.2, -1.3, 1.45), (-1.2, 1.2, 1.1), lens=32, dof_dist=3.3, fstop=2.4)
+    cam_on_face(p, dist=2.3, side=0.5, up=0.15, lens=34, fstop=2.4)
 
 
 def s13():
     night_room(moon=8)
-    p = teen_on_bed(lean=20, nod=12, expr=dict(brow=1.0, lid=0.15, smile=-0.7, gaze=(0, -0.9), screen_eyes=True), glow=60)
+    p = teen_on_bed(lean=20, nod=12, expr=dict(brow=1.0, lid=0.15, smile=-0.7, gaze=(0, -0.9), screen_eyes=True), glow=22)
     hx, hy = -0.1, 1.45
     for i, a in enumerate((-80, -50, -20, 20, 50, 80)):
         ang = R(a)
         px, py = hx + math.sin(ang) * 1.5, hy - math.cos(ang) * 0.9 - 0.2
-        s = slab('screen%d' % i, (px, py, 1.1 + 0.25 * (i % 2)), (0.5, 0.03, 0.9), BLUE, 1.6, rot=(R(-8), 0, math.atan2(hx - px, -(hy - py))))
-    camera((0.1, -0.25, 1.2), (-0.1, 1.5, 1.05), lens=40, dof_dist=1.8, fstop=1.8)
+        s = slab('screen%d' % i, (px, py, 1.1 + 0.25 * (i % 2)), (0.5, 0.03, 0.9), BLUE, 0.7, rot=(R(-8), 0, math.atan2(hx - px, -(hy - py))))
+    cam_on_face(p, dist=1.9, side=0.15, up=0.1, lens=40, fstop=2.8)
 
 
 def s14():
     night_room(moon=6)
-    p = teen_on_bed(lean=32, nod=34, arms=-70, expr=dict(brow=1.0, lid=0.55, smile=-0.9, gaze=(0, -1)), glow=14)
+    p = teen_on_bed(lean=32, nod=34, arms=-70, expr=dict(brow=1.0, lid=0.55, smile=-0.9, gaze=(0, -1)), glow=34)
     p['phone'] = None
     tear(p, 'R', 0.2)
-    camera((1.1, -0.7, 0.95), (-0.1, 1.5, 1.0), lens=36, dof_dist=2.4, fstop=1.8)
+    cam_on_face(p, dist=1.9, side=0.35, up=-0.05, lens=38, fstop=2.8)
 
 
 def s15():
@@ -350,18 +350,18 @@ def s15():
 def s16():
     night_room(moon=14)
     p = teen_on_bed(phone=False, glow=0, lean=14, nod=14, expr=dict(brow=-0.15, lid=0.1, smile=-0.1, gaze=(0, -0.9)))
-    cube('bigphone', (0.05, 0.25, 1.45), (0.62, 0.04, 1.1), mat('pscreen2', (0.01, 0.01, 0.015), 0.2), 0.03)
-    text3d('04:59', (0.05, 0.2, 1.38), 0.2, (1, 1, 1), 5.0, extrude=0.004)
-    sun_logo((0.05, 0.2, 1.72), 0.22)
-    aim(area_light('screenlight', (0.05, -0.2, 1.5), (0, 0, 0), 55, (0.8, 0.85, 1.0), 0.8), tuple(head_pos(p)))
-    camera((0.05, -0.9, 1.45), (0.0, 1.4, 1.45), lens=45, dof_dist=1.15, fstop=1.6)
+    cube('bigphone', (0.05, 0.15, 1.2), (0.32, 0.03, 0.58), mat('pscreen2', (0.01, 0.01, 0.015), 0.2), 0.03)
+    text3d('04:59', (0.05, 0.12, 1.15), 0.1, (1, 1, 1), 5.0, extrude=0.003)
+    sun_logo((0.05, 0.12, 1.33), 0.11)
+    aim(area_light('screenlight', (0.05, -0.2, 1.3), (0, 0, 0), 40, (0.8, 0.85, 1.0), 0.8), tuple(head_pos(p)))
+    camera((0.05, -0.85, 1.5), (0.0, 1.4, 1.55), lens=40, dof_dist=1.0, fstop=2.0)
 
 
 def s17():
     night_room(moon=60)
-    p = teen_on_bed(lean=8, nod=8, arms=-80, expr=dict(brow=0.35, lid=0.3, smile=0.05, gaze=(0, -0.4)), glow=22)
+    p = teen_on_bed(lean=8, nod=8, arms=-80, phone=False, expr=dict(brow=0.35, lid=0.3, smile=0.05, gaze=(0, -0.4)), glow=22)
     aim(area_light('rim', (-2.5, 0.8, 1.9), (0, 0, 0), 120, (0.6, 0.7, 1.0), 1.2), tuple(head_pos(p)))
-    cam_on_face(p, dist=1.25, side=0.3, up=0.05, lens=50, fstop=1.8)
+    cam_on_face(p, dist=1.7, side=0.3, up=0.05, lens=45, fstop=2.4)
 
 
 def s18():
@@ -397,8 +397,8 @@ def s19():
             o.data.materials.clear()
             o.data.materials.append(ghost)
     wood_blocks(8, origin=(-0.9, 0.5), size=0.2)
-    text3d('DIA 1 DE 30', (-0.6, 0.2, 2.75), 0.32, (1, 1, 1), 4.0, extrude=0.015)
-    camera((1.3, -1.9, 1.5), (-1.7, 0.7, 1.2), lens=32, dof_dist=3.2, fstop=2.4)
+    text3d('DIA 1 DE 30', (-1.3, 0.3, 2.35), 0.22, (1, 1, 1), 4.0, extrude=0.012)
+    camera((1.6, -2.4, 1.5), (-1.5, 0.6, 1.3), lens=26, dof_dist=4.0, fstop=2.6)
 
 
 def s20():
@@ -421,11 +421,11 @@ def s21():
     cube('floor', (0, 0, -1), (9, 4, 0.1), mat('fl', (0.01, 0.01, 0.01), 0.3), 0.01)
     white = (1, 1, 1)
     # olho do Offy
-    cube('offy_eye', (0, 0, 3.15), (0.7, 0.06, 0.42), mat('ew', (0.95, 0.95, 0.97), 0.3, emit=0.6, emit_color=white), 0.12)
+    cube('offy_eye', (0, 0, 3.15), (0.7, 0.06, 0.42), mat('ew', (0.95, 0.95, 0.97), 0.3, emit=2.5, emit_color=white), 0.12)
     cube('offy_pupil', (0.02, -0.04, 3.15), (0.24, 0.05, 0.3), mat('ep', (0.01, 0.01, 0.015), 0.2), 0.05)
     cube('offy_spark', (0.07, -0.075, 3.24), (0.05, 0.02, 0.05), mat('es', white, 0.2, emit=8.0), 0.01)
-    sun_logo((0, 0, 2.35), 0.42)
-    text3d('COMENTE UMA PALAVRA', (0, 0, 1.75), 0.15, white, 4.0)
+    sun_logo((0, 0, 2.3), 0.55)
+    text3d('COMENTE UMA PALAVRA', (0, 0, 1.7), 0.14, white, 4.0)
     cube('divider', (0, 0, 0.95), (0.012, 0.012, 1.0), mat('dv', white, 0.4, emit=3.0), 0.003)
     text3d('BLOCO', (-0.6, 0, 0.9), 0.26, (1.0, 0.8, 0.45), 4.0)
     text3d('RUA', (0.6, 0, 0.9), 0.26, (0.55, 0.75, 1.0), 4.0)

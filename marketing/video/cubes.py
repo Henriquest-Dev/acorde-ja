@@ -215,7 +215,7 @@ def text3d(body, loc, size=0.3, color=(1, 1, 1), emit=3.0, rot=(math.radians(90)
     return o
 
 
-def sun_logo(loc, size=0.5, color=(1, 1, 1), emit=4.0, rot=(math.radians(90), 0, 0)):
+def sun_logo(loc, size=0.5, color=(1, 1, 1), emit=4.0, rot=(0, 0, 0)):
     """Sol a nascer feito de cubos (logótipo do offly)."""
     root = empty('sunlogo', loc)
     root.rotation_euler = rot
