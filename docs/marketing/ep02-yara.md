@@ -73,18 +73,33 @@ Narradora: Yara, mulher negra, voz feminina, jovem, de Brasília (português do 
 Texto em português do Brasil. Etiquetas de emoção em inglês. Sem `<break>` (o v3 não aceita); pausas com reticências.
 
 ```
-[quietly, nostalgic] Eu tinha uma mesa cheia de apostilas... e um plano. Hoje eu estudo. [sighs] Eu disse isso muitas vezes.
-[flat] Aí o telemóvel acendeu. Só para ver uma coisa. [tired] E foram dias... que eu nem vi passar.
-[sarcastic, quietly] Um vídeo de cubos. Mais um. Mais um. [flat] Nove horas, numa semana. [exhales] Eu vi o relatório.
-[strained] Na prova, as letras começaram a flutuar... [whispers] E eu não lembrava de nada.
-[flat] Reprovada. [exhales] Meu nome, em branco.
-[quietly] Mas o tempo não volta... e a tela me deixou ver isso.
-[calm, firm] Eu baixei um aplicativo. Ele mostra quanto eu estudo, e quanto eu fico no celular. [softly] Bloqueei a rede social. Vinte e cinco minutos... de cada vez.
-[warm] Na segunda prova, as letras ficaram paradas. [exhales] Eu passei.
-[friendly] Dois caminhos. A mesma Yara. Qual você escolhe? Comenta A ou B.
+[quietly, nostalgic] Eu tinha uma mesa cheia de apostilas... um quarto cheio de coisas que eu amo... e um plano. Hoje eu estudo. [sighs] Eu disse isso muitas vezes.
+[softly] Na parede, um pôster dizia: menos tela, mais vida. [flat] Eu olhei... e virei o rosto.
+[flat] Aí o celular acendeu. Só para ver uma coisa. [tired] Foram dias... e eu nem vi passar.
+
+[sarcastic, quietly] Um vídeo de bonequinhos. Mais um. Mais um. [flat] A caneta caiu e eu nem olhei. [tired] Minha mãe chamou da porta. Eu disse: já vou. [exhales] E não fui.
+[quietly] As amigas mandaram: bora estudar junto? [flat] Eu deixei no visto.
+[flat] Nove horas no celular, numa semana. [whispers] Eu vi o relatório... e fingi que não vi.
+[quietly] O calendário foi perdendo as folhas. E eu continuei deitada, com a luz azul no rosto.
+
+[strained] No dia da prova, eu abri a folha... [whispers] e as letras começaram a flutuar. [strained, voice breaking] Eu li a primeira questão três vezes. E não lembrava de nada.
+[flat] Levantei. Saí da sala. [exhales] Reprovada. Meu nome... em branco.
+[whispers] Fiquei sentada no corredor, olhando a tela apagada. [quietly] Pela primeira vez, ela não tinha nada para me mostrar.
+
+[whispers] Então o tempo voltou. [quietly] Ou melhor... eu quis voltar.
+[calm] Mesma mesa. Mesmo quarto. Mesmo celular. [softly] Só que dessa vez, eu baixei o offly.
+[warm] Ele mostrou quanto eu estudava... e quanto eu ficava na tela. [flat] A barra do celular era enorme. A do estudo, quase invisível. [exhales] Doeu. Mas foi justo. [quietly] Ele também mostrou o horário em que eu mais fugia: domingo, de noite. Bem quando eu dizia que ia recomeçar.
+[calm, firm] Bloqueei a rede social. Vinte e cinco minutos de foco... depois cinco de pausa. [softly] Pus um cartão no espelho: hoje, um tema. Mais um visto. Mais um dia.
+
+[quietly] Na semana da prova, eu respirei fundo. [warm] As letras estavam paradas. Eu conhecia cada uma.
+[softly] Eu escrevi... e o relógio andou no ritmo normal.
+[excited, softly] Aprovada. [exhales] Minha mãe sorriu na porta... e o quarto ficou dourado.
+
+[quietly] Eu não virei gênia. [softly] Eu só parei de fugir. [quietly] E descobri que o tempo nunca tinha sumido. Eu é que tinha entregado.
+[friendly] Duas Yaras. O mesmo quarto. A mesma prova. [curious] A diferença foi o que eu fiz com o tempo. Qual você escolhe? Comenta A ou B.
 ```
 
-**Duração estimada:** cerca de 140 palavras, perto de 2 minutos com as pausas. Ajusto cada plano ao áudio real quando o tiveres.
+**Duração estimada:** cerca de 357 palavras; com o ritmo medido no episódio do Pedro (2,9 palavras por segundo), dá perto de 122 s.
 
 ## Cena nova: a Laura (a pedido: cadernos e notificação)
 

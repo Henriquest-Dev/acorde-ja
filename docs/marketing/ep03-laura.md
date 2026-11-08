@@ -19,12 +19,15 @@
 ## Narração (um bloco, ElevenLabs v3)
 
 ```
-[quietly, determined] Eu decidi. [softly] Vestibular é daqui a pouco, e eu vou estudar. Vou arrumar tudo.
-[flat] Cadernos empilhados. Cada um no seu lugar... [sighs] Pronto. Agora eu começo.
-[whispers] Aí o celular acendeu. [flat] Uma notificação. Só uma. [exhales] E eu peguei.
+[quietly, determined] Eu decidi. Daqui a poucos meses é o vestibular, e eu vou estudar de verdade. [softly] Dessa vez, eu vou arrumar tudo antes de começar.
+[flat] Primeiro, os cadernos. Um por cima do outro. Cada matéria no seu lugar. [exhales] A torre ficou perfeita... e eu fiquei olhando para ela.
+[quietly] Respirei fundo. Peguei o lápis. [softly] Agora eu começo.
+[whispers] Aí o celular acendeu. [flat] Uma notificação. Só uma. Eu só ia ver... [exhales] E eu peguei. [quietly] Eu sempre achei que era só um minutinho.
+[tired] Dois minutos viraram vinte. Eu nem percebi que a luz da janela já tinha mudado. Vinte viraram a tarde.
+[whispers, tired] Quando eu olhei de novo... a torre de cadernos continuava lá. Esperando. [sighs] Todo mundo já passou por isso.
 ```
 
-Duração estimada: cerca de 50 palavras, perto de 40 s com as pausas. Ajusto ao áudio real quando o tiveres.
+Duração estimada: cerca de 115 palavras, perto de 39 s ao ritmo medido (2,9 palavras por segundo).
 
 ## Legendas
 - Pixel branco com contorno preto, 1 a 3 palavras, como nos outros vídeos.
