@@ -92,6 +92,9 @@ def flicker(name, t0, t1, lo, hi, step=0.1, seed=1):
 def cam_path(seq, focus=None):
     """seq: [(t, loc, target)]; interpola posição e rotação (look-at)."""
     cam = bpy.context.scene.camera
+    if cam is None:
+        from cubes import camera as _mk
+        cam = _mk(seq[0][1], seq[0][2], lens=30, dof_dist=(focus[0][1] if focus else 3.0), fstop=3.2)
     prev = None
     for t, l, tg in seq:
         cam.location = l
