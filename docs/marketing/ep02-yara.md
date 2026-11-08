@@ -82,6 +82,25 @@ Texto em português do Brasil. Etiquetas de emoção em inglês. Sem `<break>` (
 
 **Duração estimada:** cerca de 140 palavras, perto de 2 minutos com as pausas. Ajusto cada plano ao áudio real quando o tiveres.
 
+## Cena nova: a Laura (a pedido: cadernos e notificação)
+
+Laura volta a aparecer como uma terceira cena curta, com a mesma luz quente da linha B, mas com a mesa vazia de
+estudo. Não escreve nada no telemóvel: empilha cadernos e depois pega no telemóvel por causa de uma notificação.
+
+| Tempo | O que se vê e se ouve |
+|---|---|
+| 0:00 a 0:04 | Mesa de estudo da Laura, camisola amarela. Ela empilha cadernos um a um, uma torre que treme a cada livro. Som de papel. |
+| 0:04 a 0:08 | A torre fica alta. Ela pousa o último caderno e olha para a torre. Ao lado, o telemóvel está virado para cima e fica parado. |
+| 0:08 a 0:12 | Um bip. O ecrã acende com uma notificação. A Laura olha para a torre de cadernos, depois para o telemóvel. Pega no telemóvel. A torre fica sozinha na mesa. |
+
+Narração desta cena (ElevenLabs v3):
+```
+[quietly] A Laura empilhou os cadernos... [flat] e ficou olhando pra torre. [sighs] Já faz tanto tempo que ela não estuda.
+[whispers] Então o celular vibrou. [exhales] E ela pegou.
+```
+
+Pergunta: esta cena entra no início (antes da Yara), como ponte para a linha A, ou no meio, como segundo caminho?
+
 ## Animação (tudo se mexe, a 30 fps)
 - Calendário a folhear, para a frente na linha A e para trás na linha B.
 - Caneta que cai e rola (A) e que volta à mão (B).
