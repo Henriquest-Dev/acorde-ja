@@ -105,6 +105,35 @@ Narração desta cena (ElevenLabs v3):
 
 Pergunta: esta cena entra no início (antes da Yara), como ponte para a linha A, ou no meio, como segundo caminho?
 
+## Cenário: quarto da Yara (mobiliado, feminino)
+
+Nada de quarto vazio. Cada objeto conta algo sobre a rotina dela e aparece no vídeo.
+
+**Móveis**
+- Cama de cubos com colcha lilás e almofadas (uma com a estampa de bolinhas), encostada à parede do fundo.
+- Mesa de estudo grande, com gaveta e um vaso de planta de cubos verdes.
+- Estante branca com livros, caixas de organização coloridas e um abajur de cubos.
+- Tapete felpudo cor de pêssego sob a mesa.
+- Cadeira de estudo com almofada.
+
+**Enfeites e pôsteres**
+- Pôster do **offly**, na parede, com o sol do logótipo e «Menos tela. Mais vida.». Aparece no plano de abertura.
+- Dois pôsteres de artistas e de um filme de ficção científica (sem marcas reais: versão genérica).
+- Quadro de cortiça com um calendário de cubos, com a data do vestibular marcada num círculo.
+- Fotografias emolduradas de cubos (família, amigas).
+- Luzes de fita quente em cima da cama.
+
+**Luz**
+- Lâmpada de mesa quente (linha B) e luz azul do ecrã (linha A), como nas outras cenas.
+
+**Onde aparece no vídeo**
+- 0:00 a 0:06: pôster do offly e o quarto inteiro, para situar o espaço.
+- 0:15 a 0:45 (linha A): o quarto azul, com as plantas e os pôsteres à sombra.
+- 1:08 a 1:30 (linha B): o quarto dourado, com o pôster do offly em destaque, quando ela instala o app.
+
+**Nota técnica**
+- Estes objetos entram no próximo render da Yara. O render da Laura está a correr agora e não o interrompo.
+
 ## Animação (tudo se mexe, a 30 fps)
 - Calendário a folhear, para a frente na linha A e para trás na linha B.
 - Caneta que cai e rola (A) e que volta à mão (B).
