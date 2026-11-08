@@ -10,7 +10,9 @@
 
 ## Personagem
 
-- **Yara** (18 anos): cabelo cacheado em cubos, óculos de aro grosso, moletom cinzento. Mesa de estudo cheia de apostilas.
+- **Yara** (18 anos): mulher negra, pele castanho-escura, cabelo muito volumoso e cacheado em cubos, em forma de nuvem (cerca de 1,6 vez a largura da cabeça). Óculos de aro grosso, moletom cinzento. Mesa de estudo cheia de apostilas.
+  - Na rig 3D: a cabeça leva um volume de cubos de cabelo por cima e aos lados, que acompanha o movimento da cabeça.
+  - Tons de pele: castanho-escuro com brilho suave na luz quente; nas cenas azuis, o contraste fica no rosto.
 - **Mãe** (só voz e sombra na porta).
 - **Os cubos do Instagram:** pequenos personagens de cubos a dançar nos vídeos que a Yara vê. É a própria estética
   do canal, dentro da história.
@@ -65,6 +67,8 @@
 | 1:54 a 2:00 | Pergunta em letras pixel: `QUAL CAMINHO VOCÊ ESCOLHE? COMENTE A OU B.` O olho do Offy abre no canto. `offly. Menos tela. Mais vida.` |
 
 ## Narração (um bloco, ElevenLabs v3)
+
+Narradora: Yara, mulher negra, voz feminina, jovem, de Brasília (português do Brasil).
 
 Texto em português do Brasil. Etiquetas de emoção em inglês. Sem `<break>` (o v3 não aceita); pausas com reticências.
 
