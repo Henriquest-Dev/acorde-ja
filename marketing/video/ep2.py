@@ -82,6 +82,7 @@ def room(mood='warm'):
     cube('wall_back', (0, 3.2, 2), (9, 0.1, 4), mat('wallb', lilac, 0.8), 0.02)
     cube('wall_left', (-3.4, 0, 2), (0.1, 9, 4), mat('wallL', lilac, 0.8), 0.02)
     cube('rug', (-0.3, 0.9, 0.012), (2.8, 2.2, 0.03), mat('rug', peach, 0.9), 0.012)
+    cube('ceiling', (0, 0, 4.05), (9, 9, 0.1), mat('ceil_m', (0.92, 0.88, 0.92), 0.9), 0.02)
     # janela à esquerda
     ep1.window({'warm': (1.0, 0.8, 0.5), 'blue': (0.18, 0.25, 0.45), 'gold': (1.0, 0.7, 0.35)}[mood], {'warm': 5.0, 'blue': 1.2, 'gold': 7.0}[mood], y=0.6)
     # cama com colcha lilás e almofadas
