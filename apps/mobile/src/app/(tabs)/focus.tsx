@@ -24,6 +24,7 @@ import {
 import { useFocusHistory, useLimits } from '@/hooks/queries';
 import { kvGet, kvSet } from '@/repositories/kv';
 import { useFocus } from '@/stores/focus';
+import { AMBIENT_LABEL, playAmbient, stopAmbient } from '@/services/ambient';
 import { usePrefs } from '@/stores/prefs';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radii, spacing } from '@/theme/tokens';
@@ -72,6 +73,12 @@ export default function Focus() {
   }, [focus.timer.status, history]);
 
   const running = focus.timer.status === 'running';
+
+  // Som de fundo durante a sessão (ficheiros locais, funciona offline).
+  useEffect(() => {
+    void playAmbient(running ? prefs.focus.sound : 'none');
+  }, [running, prefs.focus.sound]);
+  useEffect(() => () => stopAmbient(), []);
   const paused = focus.timer.status === 'paused';
   const active = running || paused;
   const remaining = active ? remainingMs(focus.timer, now) : prefs.focus.minutes * 60_000;
@@ -212,6 +219,20 @@ function FocusSettings({
         Duração: {prefs.focus.minutes} minutos
       </AppText>
       <AppSlider value={prefs.focus.minutes} min={5} max={120} step={5} onChange={(v) => void setFocus({ minutes: v })} accessibilityLabel="Duração da sessão" formatValue={(v) => `${v} minutos`} />
+      <AppText variant="small" tone="secondary" style={{ marginTop: spacing.lg }}>
+        Som de fundo
+      </AppText>
+      <View style={{ flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', marginTop: spacing.sm }}>
+        {(['none', 'rain', 'waves', 'forest'] as const).map((snd) => (
+          <AppButton
+            key={snd}
+            label={AMBIENT_LABEL[snd]}
+            size="sm"
+            variant={prefs.focus.sound === snd ? 'primary' : 'secondary'}
+            onPress={() => void setFocus({ sound: snd })}
+          />
+        ))}
+      </View>
       <View style={styles.settingRow}>
         <View style={{ flex: 1 }}>
           <AppText variant="bodyStrong">Técnica Pomodoro</AppText>

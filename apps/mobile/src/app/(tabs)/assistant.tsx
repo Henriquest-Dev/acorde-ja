@@ -6,7 +6,8 @@ import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppBottomSheet, AppButton, AppLogo, AppText } from '@/components';
+import { AppBottomSheet, AppButton, AppText, LeafBackdrop, Offy } from '@/components';
+import { speak } from '@/services/coach';
 import { useToday } from '@/hooks/queries';
 import { kvGet, kvSet } from '@/repositories/kv';
 import { addMessage, listMessages, type ChatMessage } from '@/repositories/chat';
@@ -17,7 +18,11 @@ import { usePrefs } from '@/stores/prefs';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, radii, spacing } from '@/theme/tokens';
 
-const GREETING = 'Olá! Como posso ajudar-te hoje?';
+const greeting = (name: string) => (name ? `Olá, ${name}. Estou aqui contigo. Como te sentes agora?` : 'Olá. Estou aqui contigo. Como te sentes agora?');
+
+const nowMs = () => Date.now();
+
+const SUGGESTIONS = ['Estou ansioso e não paro de pegar no telemóvel', 'Ajuda-me a concentrar no estudo', 'Quero dormir mais cedo', 'Preciso de uma pausa'];
 
 const OFFLINE_TEXT: Record<AssistantUnavailableError['reason'], string> = {
   no_backend: 'O assistente precisa de ligação ao servidor do offly, que não está configurado nesta instalação.',
@@ -55,17 +60,17 @@ export default function Assistant() {
 
   const online = isBackendConfigured && !!session;
   const messages: ChatMessage[] = [
-    { id: 'greeting', conversationId: conv.data?.id ?? '', role: 'assistant', content: GREETING, kind: 'text', createdAt: 0 },
+    { id: 'greeting', conversationId: conv.data?.id ?? '', role: 'assistant', content: greeting(prefs.displayName.trim()), kind: 'text', createdAt: 0 },
     ...(conv.data?.messages ?? []),
   ];
 
   const push = async (m: Omit<ChatMessage, 'id' | 'conversationId' | 'createdAt'>) => {
     if (!conv.data) return;
-    await addMessage({ ...m, id: randomUUID(), conversationId: conv.data.id, createdAt: Date.now() });
+    await addMessage({ ...m, id: randomUUID(), conversationId: conv.data.id, createdAt: nowMs() });
   };
 
-  const send = async () => {
-    const message = text.trim();
+  const send = async (preset?: string) => {
+    const message = (preset ?? text).trim();
     if (!message || !conv.data || sending) return;
     if (!prefs.aiConsent && isBackendConfigured) {
       setConsent(true);
@@ -98,17 +103,19 @@ export default function Assistant() {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: colors.background }}>
+      <LeafBackdrop />
       <View style={[styles.header, { paddingTop: insets.top + spacing.md, borderBottomColor: colors.border }]}>
-        <View style={[styles.avatar, { borderColor: colors.borderStrong }]}>
-          <AppLogo size={26} />
-        </View>
+        <Offy size={44} mood={sending ? 'thinking' : 'idle'} testID="offy-header" />
         <View style={{ flex: 1 }}>
           <AppText variant="small" weight="semibold">
-            Assistente offly
+            Offy
           </AppText>
-          <AppText variant="caption" tone="muted" style={{ fontSize: 10 }}>
-            {online ? 'Online' : 'Offline'}
-          </AppText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <View style={[styles.status, { backgroundColor: online ? colors.text : 'transparent', borderColor: colors.textMuted }]} />
+            <AppText variant="caption" tone="muted" style={{ fontSize: 10 }}>
+              {sending ? 'A pensar…' : online ? 'Online' : 'Offline'}
+            </AppText>
+          </View>
         </View>
         <Pressable
           onPress={() => router.push('/help-now')}
@@ -128,12 +135,36 @@ export default function Assistant() {
         keyExtractor={(m) => m.id}
         contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
-        renderItem={({ item }) => <Bubble message={item} />}
+        renderItem={({ item }) => <Bubble message={item} voice={online && prefs.voiceCoach} />}
+        ListHeaderComponent={
+          <View style={styles.hero}>
+            <Offy size={112} mood={sending ? 'thinking' : 'idle'} testID="offy-hero" />
+            <AppText variant="caption" tone="muted" align="center" style={{ marginTop: spacing.sm }}>
+              Sem pressa. Escreve como se fosse a um amigo.
+            </AppText>
+          </View>
+        }
         ListFooterComponent={
           sending ? (
-            <AppText variant="caption" tone="muted" style={{ marginTop: spacing.sm }}>
-              A escrever…
-            </AppText>
+            <View style={[styles.bubble, styles.theirs, styles.thinking, { backgroundColor: colors.card, borderColor: colors.border }]} testID="offy-thinking">
+              <Offy size={28} mood="thinking" />
+              <AppText variant="caption" tone="muted">
+                O Offy está a pensar…
+              </AppText>
+            </View>
+          ) : (conv.data?.messages.length ?? 0) === 0 ? (
+            <View style={styles.chips}>
+              {SUGGESTIONS.map((q) => (
+                <Pressable
+                  key={q}
+                  onPress={() => void send(q)}
+                  accessibilityRole="button"
+                  style={[styles.chip, { borderColor: colors.border, backgroundColor: colors.card }]}
+                >
+                  <AppText variant="caption">{q}</AppText>
+                </Pressable>
+              ))}
+            </View>
           ) : undefined
         }
       />
@@ -157,7 +188,7 @@ export default function Assistant() {
           testID="chat-input"
         />
         <Pressable
-          onPress={send}
+          onPress={() => void send()}
           disabled={!text.trim() || sending}
           accessibilityRole="button"
           accessibilityLabel="Enviar"
@@ -190,8 +221,9 @@ export default function Assistant() {
   );
 }
 
-function Bubble({ message }: { message: ChatMessage }) {
+function Bubble({ message, voice }: { message: ChatMessage; voice: boolean }) {
   const { colors } = useTheme();
+  const [playing, setPlaying] = useState(false);
   if (message.kind.startsWith('card:')) {
     const card = message.kind.slice(5);
     const meta =
@@ -232,18 +264,41 @@ function Bubble({ message }: { message: ChatMessage }) {
         { backgroundColor: mine ? colors.elevated : colors.card, borderColor: colors.border },
       ]}
     >
-      <AppText variant="small" style={{ fontSize: 13, lineHeight: 19 }}>
+      <AppText variant="small" style={{ fontSize: 14, lineHeight: 21 }}>
         {message.content}
       </AppText>
+      {!mine && voice && message.id !== 'greeting' ? (
+        <Pressable
+          onPress={async () => {
+            setPlaying(true);
+            await speak(message.content);
+            setTimeout(() => setPlaying(false), 1500);
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="Ouvir esta resposta"
+          hitSlop={8}
+          style={styles.listen}
+        >
+          <Feather name={playing ? 'volume-2' : 'volume-1'} size={13} color={colors.textMuted} />
+          <AppText variant="caption" tone="muted" style={{ fontSize: 11 }}>
+            {playing ? 'A falar…' : 'Ouvir'}
+          </AppText>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingHorizontal: spacing.lg, paddingBottom: spacing.md, borderBottomWidth: StyleSheet.hairlineWidth },
-  avatar: { width: 36, height: 36, borderRadius: 18, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  status: { width: 6, height: 6, borderRadius: 3, borderWidth: 1 },
+  hero: { alignItems: 'center', paddingTop: spacing.lg, paddingBottom: spacing.md },
+  thinking: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.md },
+  chips: { gap: spacing.sm, marginTop: spacing.lg, alignItems: 'flex-start' },
+  chip: { borderWidth: StyleSheet.hairlineWidth, borderRadius: radii.pill, paddingHorizontal: 14, paddingVertical: 9 },
+  listen: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6, alignSelf: 'flex-start' },
   helpBtn: { borderWidth: 1, borderRadius: radii.pill, paddingHorizontal: 10, paddingVertical: 6 },
-  bubble: { maxWidth: '82%', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth },
+  bubble: { maxWidth: '84%', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 20, borderWidth: StyleSheet.hairlineWidth },
   mine: { alignSelf: 'flex-end', borderBottomRightRadius: 4 },
   theirs: { alignSelf: 'flex-start', borderBottomLeftRadius: 4 },
   card: { flexDirection: 'row', alignItems: 'center', padding: spacing.lg, borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, maxWidth: '86%' },

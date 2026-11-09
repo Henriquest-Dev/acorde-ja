@@ -13,3 +13,4 @@ export * from './layout';
 export * from './brand';
 export * from './domain';
 export * from './motion';
+export * from './offy';

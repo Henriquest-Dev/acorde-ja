@@ -6,10 +6,14 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppButton, AppText } from '@/components';
+import { AppButton, AppText, LeafBackdrop, Offy } from '@/components';
+import { AMBIENT_LABEL, playAmbient, stopAmbient, type AmbientSound } from '@/services/ambient';
+import { usePrefs } from '@/stores/prefs';
 import { saveHelpOutcome } from '@/repositories/chat';
 import { useTheme } from '@/theme/ThemeProvider';
-import { spacing } from '@/theme/tokens';
+import { radii, spacing } from '@/theme/tokens';
+
+const SOUNDS: AmbientSound[] = ['none', 'rain', 'waves', 'forest'];
 
 const TOTAL_MS = 2 * 60_000;
 const INHALE = 4000;
@@ -22,7 +26,9 @@ export default function Breathing() {
   const reduce = useReducedMotion();
   const [startedAt] = useState(() => Date.now());
   const [now, setNow] = useState(startedAt);
+  const { prefs, update } = usePrefs();
   const scale = useSharedValue(0.6);
+  const ring = useSharedValue(0);
   const elapsed = now - startedAt;
   const done = elapsed >= TOTAL_MS;
   const phase = elapsed % (INHALE + EXHALE) < INHALE ? 'in' : 'out';
@@ -35,9 +41,21 @@ export default function Breathing() {
   useEffect(() => {
     if (done || reduce) return;
     scale.value = withTiming(phase === 'in' ? 1 : 0.6, { duration: phase === 'in' ? INHALE : EXHALE, easing: Easing.inOut(Easing.sin) });
-  }, [phase, done, reduce, scale]);
+    // Uma onda ténue sai do círculo no início de cada expiração.
+    if (phase === 'out') {
+      ring.value = 0;
+      ring.value = withTiming(1, { duration: EXHALE, easing: Easing.out(Easing.quad) });
+    }
+  }, [phase, done, reduce, scale, ring]);
+
+  // Som de fundo: começa ao abrir, pára ao sair ou ao terminar.
+  useEffect(() => {
+    void playAmbient(done ? 'none' : prefs.calmSound);
+  }, [prefs.calmSound, done]);
+  useEffect(() => () => stopAmbient(), []);
 
   const circle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const wave = useAnimatedStyle(() => ({ opacity: (1 - ring.value) * 0.35, transform: [{ scale: 0.6 + ring.value * 0.55 }] }));
 
   const finish = async (outcome: 'helped' | 'partly' | 'not_helped') => {
     await saveHelpOutcome({ id: randomUUID(), difficulty: 'impulse', strategy: 'breathing', outcome });
@@ -49,11 +67,16 @@ export default function Breathing() {
       <Pressable onPress={() => goBack()} accessibilityRole="button" accessibilityLabel="Fechar" hitSlop={12} style={{ alignSelf: 'flex-end' }}>
         <Feather name="x" size={24} color={colors.text} />
       </Pressable>
-      <AppText variant="h2" align="center">
-        Exercício de respiração
-      </AppText>
+      <LeafBackdrop opacity={0.06} />
+      <View style={{ alignItems: 'center', gap: spacing.sm }}>
+        <Offy size={84} mood={done ? 'idle' : 'calm'} testID="offy-calm" />
+        <AppText variant="h2" align="center">
+          {done ? 'Estás mais calmo' : 'Respira comigo'}
+        </AppText>
+      </View>
       <View style={styles.center}>
         <View style={styles.stage}>
+          <Animated.View style={[styles.circle, { borderColor: colors.text, position: 'absolute' }, wave]} />
           <Animated.View style={[styles.circle, { borderColor: colors.text, backgroundColor: colors.card }, circle]} />
           <View style={[StyleSheet.absoluteFill, styles.stageText]}>
             <AppText variant="h2" accessibilityLiveRegion="polite">
@@ -77,9 +100,31 @@ export default function Breathing() {
           <AppButton label="Não ajudou" variant="ghost" onPress={() => void finish('not_helped')} />
         </View>
       ) : (
-        <AppText variant="small" tone="muted" align="center">
-          Acompanhe o círculo. Inspire pelo nariz, expire devagar pela boca.
-        </AppText>
+        <View style={{ gap: spacing.lg }}>
+          <AppText variant="small" tone="muted" align="center">
+            Acompanhe o círculo. Inspire pelo nariz, expire devagar pela boca.
+          </AppText>
+          <View style={styles.sounds} accessibilityRole="radiogroup" accessibilityLabel="Som de fundo">
+            {SOUNDS.map((s) => {
+              const on = prefs.calmSound === s;
+              return (
+                <Pressable
+                  key={s}
+                  onPress={() => void update({ calmSound: s })}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: on }}
+                  style={[styles.sound, { borderColor: on ? colors.text : colors.border, backgroundColor: on ? colors.text : 'transparent' }]}
+                  testID={`calm-sound-${s}`}
+                >
+                  <Feather name={s === 'none' ? 'volume-x' : s === 'rain' ? 'cloud-drizzle' : s === 'waves' ? 'wind' : 'feather'} size={14} color={on ? colors.background : colors.text} />
+                  <AppText variant="caption" style={{ color: on ? colors.background : colors.text }}>
+                    {AMBIENT_LABEL[s]}
+                  </AppText>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
       )}
     </View>
   );
@@ -91,4 +136,6 @@ const styles = StyleSheet.create({
   stage: { width: 240, height: 240 },
   stageText: { alignItems: 'center', justifyContent: 'center' },
   circle: { width: 240, height: 240, borderRadius: 120, borderWidth: 2 },
+  sounds: { flexDirection: 'row', justifyContent: 'center', gap: spacing.sm, flexWrap: 'wrap' },
+  sound: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: radii.pill, borderWidth: 1 },
 });

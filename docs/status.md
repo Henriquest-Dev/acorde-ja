@@ -37,11 +37,12 @@ Legenda: ✅ implementado e verificado neste ambiente · 🟡 implementado, veri
 | Bloqueio activo — Limite atingido | ✅ + ecrã nativo por sobreposição no Android ⚠️ |
 | Aviso de limite 80% | ✅ + notificação nativa ⚠️ |
 | Modo Foco | ✅ temporizador por timestamps, Pomodoro, restrição de apps, notas |
-| Assistente IA | ✅ UI, consentimento, modo offline · resposta do modelo requer Supabase + chave |
+| Assistente IA | ✅ Offy animado (pisca, pensa, calma), fundo de folhas, sugestões, botão Ouvir, modo offline · resposta do modelo requer Supabase + chave |
+| Calma e sons | ✅ respiração com o Offy de olhos fechados; sons locais em ciclo (chuva, ondas, floresta) também no Foco; offline |
 | Proteção | ✅ toggles, modo restrito com pausa, horário, diagnóstico |
 | Relatórios | ✅ dia/semana/mês, comparação, gráfico interactivo, CSV/PDF |
 | Hábitos | ✅ criar/editar/frequência/lembretes/calendário/arquivar |
-| Família | 🟡 RPCs e RLS testados; UI requer Supabase configurado |
+| Família | ✅ painel do responsável (apps usadas, foco, bloqueios, limites por telemóvel), limites definidos pelo responsável aplicados e guardados no telemóvel do membro (funcionam offline); RLS testado · ⏳ aplicar a migração `20261109000003_family_dashboard.sql` no Supabase |
 | Configurações | ✅ todas as entradas com ecrã funcional |
 
 ## Android (Kotlin)

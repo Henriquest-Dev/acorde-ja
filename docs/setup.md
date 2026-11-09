@@ -69,7 +69,7 @@ O app já aponta para o projecto (URL e chave pública em `apps/mobile/.env.loca
 Para criar o esquema num projecto vazio, há duas formas:
 
 1. **SQL Editor (mais simples):** Dashboard → SQL Editor → New query → colar o conteúdo de `supabase/setup.sql`
-   → Run, uma única vez. Cria 27 tabelas, 64 índices, 69 políticas de RLS e as funções.
+   → Run, uma única vez. Cria todas as tabelas, índices, políticas de RLS e funções (incluindo a conta família).
 2. **Management API:** com um token pessoal (`sbp_...`, criado em supabase.com/dashboard/account/tokens) é possível
    aplicar as migrações a partir de uma sessão do Claude Code.
 
@@ -81,4 +81,44 @@ Depois, em Authentication → URL Configuration, acrescentar `acordeja://auth/ca
 - `supabase/functions/assistant`: conversa com `nvidia/nemotron-3.5-super-vl:free`.
 - `supabase/functions/coach`: `decide` (tempo extra, `parallel/decisions-fast:free`) e `speak` (voz, `fish-audio/s2.1-pro-free:free`, MP3).
 - Segredo obrigatório no Supabase: `OPENROUTER_API_KEY` (Dashboard → Edge Functions → Secrets). Nunca no app.
-- Publicar: `supabase functions deploy assistant coach --project-ref ecqtiefjnpeqmwjuldre`.
+
+## Publicar as Edge Functions
+
+As funções vivem em `supabase/functions/` (`assistant`, `coach`, `delete-account`, `billing-webhook`; `_shared` é
+código comum e não se publica sozinho). Enquanto não forem publicadas, o app responde "assistente indisponível" e
+tudo o resto (bloqueio, limites, foco, relógio, respiração, sons) continua a funcionar offline.
+
+### 1. Guardar os segredos (uma vez)
+
+Dashboard → **Edge Functions** → **Secrets** → **Add new secret**:
+
+| Nome | Valor | Obrigatório |
+|---|---|---|
+| `OPENROUTER_API_KEY` | a chave do OpenRouter (criar uma nova; a que passou no chat deve ser revogada) | sim |
+| `AI_DAILY_MESSAGE_LIMIT` | mensagens por dia e por pessoa (ex.: `40`) | não |
+| `AI_REQUIRE_ENTITLEMENT` | `false` na fase de testes (sem paywall) | não |
+| `BILLING_WEBHOOK_SECRET` | só quando houver pagamentos | não |
+
+`SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` já existem em todas as funções; não é preciso criá-los.
+
+### 2. Publicar (no computador, com a CLI)
+
+```bash
+npm i -g supabase            # ou: brew install supabase/tap/supabase
+supabase login               # abre o browser e guarda o token
+cd acorde-ja                 # raiz do repositório
+supabase functions deploy assistant coach delete-account --project-ref ecqtiefjnpeqmwjuldre
+supabase functions deploy billing-webhook --no-verify-jwt --project-ref ecqtiefjnpeqmwjuldre
+```
+
+- `billing-webhook` usa `--no-verify-jwt` porque é chamado pelo fornecedor de pagamentos (valida a assinatura própria).
+- As outras exigem a sessão do utilizador (JWT), por isso só quem tem conta as pode usar.
+- Não é preciso Docker para publicar.
+
+### 3. Confirmar
+
+Dashboard → Edge Functions: as quatro aparecem com estado **Active**. No app: Assistente → escrever uma mensagem;
+Configurações → Assistente e voz → **Ouvir um exemplo**. Os registos de erros ficam em Edge Functions → *função* → **Logs**.
+
+**Alternativa sem computador:** criar um token pessoal em supabase.com/dashboard/account/tokens (começa por `sbp_`)
+e guardá-lo como credencial da sessão do Claude Code para `api.supabase.com`; a publicação passa a ser feita daqui.

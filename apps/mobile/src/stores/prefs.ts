@@ -27,7 +27,7 @@ export interface Prefs {
   focus: {
     minutes: number;
     pomodoro: boolean;
-    sound: 'none' | 'rain' | 'waves';
+    sound: 'none' | 'rain' | 'waves' | 'forest';
     weeklyGoalMinutes: number;
   };
   /** Ids das apps restringidas durante sessões de foco. */
@@ -37,6 +37,8 @@ export interface Prefs {
   displayName: string;
   /** O assistente fala em voz alta (calma, incentivo) nos momentos difíceis. */
   voiceCoach: boolean;
+  /** Som de fundo do ecrã de calma. */
+  calmSound: 'none' | 'rain' | 'waves' | 'forest';
 }
 
 export interface LauncherPrefs {
@@ -72,6 +74,7 @@ export const DEFAULT_PREFS: Prefs = {
   launcher: { enabled: false, favorites: [], hidden: [], intentionSeconds: 10, showUsage: true, lockDuringChallenge: true },
   displayName: '',
   voiceCoach: true,
+  calmSound: 'rain',
 };
 
 const KEY = 'prefs';

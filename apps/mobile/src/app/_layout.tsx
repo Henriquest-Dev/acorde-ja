@@ -12,6 +12,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppButton, AppErrorState, AppLogo, AppText, AppToastHost } from '@/components';
 import { getDb } from '@/database/db';
+import { installDevWebHook } from '@/dev/webHook';
 import { ensureDefaultLimits, ensureDefaultSchedule } from '@/repositories/limits';
 import { configureNotifications } from '@/services/notifications';
 import { enforceChallengeLock } from '@/services/challenge';
@@ -26,6 +27,7 @@ void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 15_000 } },
 });
+installDevWebHook(queryClient);
 
 AppState.addEventListener('change', (s) => focusManager.setFocused(s === 'active'));
 
