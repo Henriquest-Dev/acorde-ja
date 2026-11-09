@@ -15,6 +15,7 @@ import { getDb } from '@/database/db';
 import { ensureDefaultLimits, ensureDefaultSchedule } from '@/repositories/limits';
 import { configureNotifications } from '@/services/notifications';
 import { enforceChallengeLock } from '@/services/challenge';
+import { refreshFamilyLink } from '@/services/family';
 import { flushSync } from '@/services/sync';
 import { syncRulesToNative } from '@/services/usage';
 import { usePrefs } from '@/stores/prefs';
@@ -73,6 +74,9 @@ export default function RootLayout() {
       void syncRulesToNative().catch(() => undefined);
       void enforceChallengeLock().catch(() => undefined);
       void flushSync().catch(() => undefined);
+      void refreshFamilyLink()
+        .then((r) => (r?.limitsChanged ? queryClient.invalidateQueries({ queryKey: ['limits'] }) : undefined))
+        .catch(() => undefined);
       void queryClient.invalidateQueries({ queryKey: ['today'] });
     });
     return () => sub.remove();

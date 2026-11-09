@@ -154,4 +154,8 @@ export const MIGRATIONS: string[] = [
     PRIMARY KEY (challenge_id, day)
   );
   `,
+  // 4 — limites definidos pelo responsável da conta família (não editáveis no telemóvel do membro)
+  `
+  ALTER TABLE app_limits ADD COLUMN managed INTEGER NOT NULL DEFAULT 0;
+  `,
 ];

@@ -124,7 +124,7 @@ export default function Family() {
                 title={m.displayName}
                 subtitle={m.status === 'invited' ? 'Convite pendente' : age(m)}
                 chevron
-                onPress={() => toast(m.role === 'guardian' ? 'Encarregado de educação do grupo.' : 'Os detalhes partilhados são apenas totais diários.')}
+                onPress={() => toast(m.role === 'guardian' ? 'Encarregado de educação do grupo.' : 'O encarregado vê o tempo por app, o foco, os bloqueios e os limites. Nunca mensagens nem sites.')}
               />
             ))}
           </View>
@@ -138,6 +138,14 @@ export default function Family() {
                 yTicks={['4h', '3h', '2h', '1h', '0h']}
               />
               <View style={{ gap: spacing.md, marginTop: spacing.xl }}>
+                <ListRow
+                  icon={{ set: 'feather', name: 'smartphone' }}
+                  title="Painel da família"
+                  subtitle="Apps usadas, foco, bloqueios e limites de cada telemóvel"
+                  chevron
+                  onPress={() => router.push('/family/dashboard')}
+                  testID="family-dashboard-link"
+                />
                 <ListRow
                   icon={{ set: 'mci', name: 'timer-plus-outline' }}
                   title="Pedir tempo adicional"
@@ -157,7 +165,7 @@ export default function Family() {
             </>
           ) : (
             <AppText variant="small" tone="muted" style={{ marginTop: spacing.xl }}>
-              O seu encarregado vê apenas o total diário de tempo de ecrã — nunca as suas mensagens, sites ou conversas.
+              O seu encarregado vê o tempo em cada app, os minutos de foco, os bloqueios e os limites, e pode definir limites neste telemóvel. Nunca vê as suas mensagens, sites ou conversas.
             </AppText>
           )}
           <AppText variant="caption" tone="muted" style={{ marginTop: spacing.xl }}>
@@ -181,7 +189,7 @@ export default function Family() {
           <AppInput label="O seu nome" value={displayName} onChangeText={setDisplayName} />
           <AppInput label="Ano de nascimento (opcional)" value={birthYear} onChangeText={setBirthYear} keyboardType="number-pad" maxLength={4} />
           <AppText variant="caption" tone="muted">
-            Ao juntar-se, o encarregado passa a ver o total diário do seu tempo de ecrã. Pode sair a qualquer momento.
+            Ao juntar-se, o encarregado passa a ver o tempo em cada app, o foco, os bloqueios e os limites deste telemóvel, e pode definir limites que só ele altera. Nunca vê mensagens, sites ou conversas. Pode sair a qualquer momento.
           </AppText>
           <AppButton
             label="Juntar-me"

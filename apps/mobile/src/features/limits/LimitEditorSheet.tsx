@@ -75,8 +75,16 @@ function Editor({ limit, onClose, allowDelete }: { limit: AppLimit; onClose: () 
       <View style={{ marginVertical: spacing.xl, opacity: enabled ? 1 : 0.4 }} pointerEvents={enabled ? 'auto' : 'none'}>
         <AppSlider value={minutes} min={5} max={240} step={5} onChange={setMinutes} accessibilityLabel="Minutos por dia" formatValue={(v) => `${v} minutos`} />
       </View>
-      <AppButton label="Guardar" onPress={save} loading={saving} testID="limit-save" />
-      {allowDelete ? <AppButton label="Remover aplicação" variant="ghost" onPress={remove} disabled={saving} style={{ marginTop: spacing.sm }} /> : null}
+      {limit.managed ? (
+        <AppText variant="small" tone="muted" align="center" testID="limit-managed">
+          Este limite foi definido pelo responsável da família. Só ele o pode alterar.
+        </AppText>
+      ) : (
+        <>
+          <AppButton label="Guardar" onPress={save} loading={saving} testID="limit-save" />
+          {allowDelete ? <AppButton label="Remover aplicação" variant="ghost" onPress={remove} disabled={saving} style={{ marginTop: spacing.sm }} /> : null}
+        </>
+      )}
     </AppBottomSheet>
   );
 }

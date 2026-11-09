@@ -145,6 +145,41 @@ select pg_temp.assert((select status from public.accountability_links) = 'active
 select pg_temp.assert((select count(*) from public.app_limits) = 0, 'parceiro não ganha acesso aos limites');
 reset role;
 
+-- 10b. Conta família: painel do responsável e limites geridos
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+insert into public.devices (id, platform, os_version, app_version) values ('55555555-5555-5555-5555-555555555555', 'android', '14', '0.3.0');
+insert into public.focus_sessions (id, started_at, ended_at, planned_ms, actual_ms, status, mode) values
+  ('66666666-6666-6666-6666-666666666666', now(), now(), 1500000, 1500000, 'completed', 'timer');
+insert into public.block_events (id, app_id, kind, day) values ('77777777-7777-7777-7777-777777777777', 'instagram', 'blocked', current_date);
+do $$ begin
+  perform public.family_dashboard(7);
+  raise exception 'FALHOU: membro abriu o painel do responsável';
+exception when insufficient_privilege then raise notice 'ok — só o responsável abre o painel';
+end $$;
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select public.family_dashboard(7) as dash \gset
+select pg_temp.assert(jsonb_array_length((:'dash'::jsonb) -> 'members') = 1, 'painel mostra o telemóvel adicionado');
+select pg_temp.assert(((:'dash'::jsonb) -> 'members' -> 0 -> 'devices' -> 0 ->> 'platform') = 'android', 'painel mostra o dispositivo');
+select pg_temp.assert(jsonb_array_length((:'dash'::jsonb) -> 'members' -> 0 -> 'usage') = 2, 'painel mostra as apps usadas');
+select pg_temp.assert(((:'dash'::jsonb) -> 'members' -> 0 -> 'focus' -> 0 ->> 'minutes')::int = 25, 'painel mostra o tempo de foco');
+select pg_temp.assert(((:'dash'::jsonb) -> 'members' -> 0 -> 'blocks' -> 0 ->> 'count')::int = 1, 'painel mostra os bloqueios');
+select public.family_set_member_limit((select id from public.family_members where role = 'member'), 'tiktok', 'TikTok', array['com.zhiliaoapp.musically'], 20, true);
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+select pg_temp.assert((select count(*) from public.my_managed_limits()) = 1, 'membro recebe o limite definido pelo responsável');
+update public.app_limits set limit_minutes = 600 where app_id = 'tiktok';
+delete from public.app_limits where app_id = 'tiktok';
+reset role;
+select pg_temp.assert((select limit_minutes from public.app_limits where app_id = 'tiktok') = 20, 'membro não altera nem apaga o limite gerido');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000d');
+do $$ begin
+  perform public.family_set_member_limit((select id from public.family_members limit 1), 'x', 'X', '{}', 5, true);
+  raise exception 'FALHOU: estranho definiu limite';
+exception when insufficient_privilege then raise notice 'ok — estranho não define limites';
+end $$;
+reset role;
+
 -- 11. Saída do encarregado elimina o grupo (sem menores sob controlo órfão)
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
 select public.leave_family_group();

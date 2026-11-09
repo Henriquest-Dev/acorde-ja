@@ -10,6 +10,8 @@ export interface AppLimit {
   sort: number;
   /** Momento a partir do qual o limite conta (no próprio dia, o uso anterior não esgota o limite). */
   sinceMs: number;
+  /** Definido pelo responsável da conta família: só ele o altera. */
+  managed: boolean;
 }
 
 interface LimitRow {
@@ -20,6 +22,7 @@ interface LimitRow {
   enabled: number;
   sort: number;
   since_ms: number;
+  managed: number;
 }
 
 const toLimit = (r: LimitRow): AppLimit => ({
@@ -30,6 +33,7 @@ const toLimit = (r: LimitRow): AppLimit => ({
   enabled: r.enabled === 1,
   sort: r.sort,
   sinceMs: r.since_ms,
+  managed: r.managed === 1,
 });
 
 export async function listLimits(): Promise<AppLimit[]> {
@@ -60,7 +64,7 @@ export async function ensureDefaultLimits(): Promise<void> {
   });
 }
 
-export async function upsertLimit(limit: Omit<AppLimit, 'sort' | 'sinceMs'> & { sort?: number }): Promise<AppLimit> {
+export async function upsertLimit(limit: Omit<AppLimit, 'sort' | 'sinceMs' | 'managed'> & { sort?: number; managed?: boolean }): Promise<AppLimit> {
   appLimitSchema.parse(limit);
   const db = await getDb();
   // Novo limite, ou limite reactivado: passa a contar a partir de agora.
@@ -68,11 +72,11 @@ export async function upsertLimit(limit: Omit<AppLimit, 'sort' | 'sinceMs'> & { 
   const sinceMs = !prev || (prev.enabled === 0 && limit.enabled) ? Date.now() : prev.since_ms;
   const sort = limit.sort ?? (await db.getFirstAsync<{ s: number }>('SELECT COALESCE(MAX(sort), -1) + 1 AS s FROM app_limits'))?.s ?? 0;
   await db.runAsync(
-    `INSERT INTO app_limits (app_id, name, package_names, limit_minutes, enabled, sort, updated_at, since_ms)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO app_limits (app_id, name, package_names, limit_minutes, enabled, sort, updated_at, since_ms, managed)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(app_id) DO UPDATE SET name = excluded.name, package_names = excluded.package_names,
        limit_minutes = excluded.limit_minutes, enabled = excluded.enabled, updated_at = excluded.updated_at,
-       since_ms = excluded.since_ms`,
+       since_ms = excluded.since_ms, managed = excluded.managed`,
     limit.appId,
     limit.name,
     JSON.stringify(limit.packageNames),
@@ -81,8 +85,41 @@ export async function upsertLimit(limit: Omit<AppLimit, 'sort' | 'sinceMs'> & { 
     sort,
     Date.now(),
     sinceMs,
+    limit.managed ? 1 : 0,
   );
-  return { ...limit, sort, sinceMs };
+  return { ...limit, sort, sinceMs, managed: !!limit.managed };
+}
+
+export interface ManagedLimit {
+  appId: string;
+  name: string;
+  packageNames: string[];
+  limitMinutes: number;
+  enabled: boolean;
+}
+
+/**
+ * Aplica os limites definidos pelo responsável (vindos do servidor). Devolve true se algo mudou.
+ * Depois de aplicados ficam guardados localmente e o bloqueio funciona sem internet.
+ */
+export async function applyManagedLimits(list: ManagedLimit[]): Promise<boolean> {
+  const current = await listLimits();
+  let changed = false;
+  for (const m of list) {
+    const prev = current.find((c) => c.appId === m.appId);
+    const same = prev && prev.managed && prev.limitMinutes === m.limitMinutes && prev.enabled === m.enabled && prev.name === m.name;
+    if (same) continue;
+    await upsertLimit({ appId: m.appId, name: m.name, packageNames: m.packageNames, limitMinutes: m.limitMinutes, enabled: m.enabled, managed: true });
+    changed = true;
+  }
+  const keep = new Set(list.map((m) => m.appId));
+  for (const c of current) {
+    if (c.managed && !keep.has(c.appId)) {
+      await deleteLimit(c.appId);
+      changed = true;
+    }
+  }
+  return changed;
 }
 
 /** No fim do onboarding: todos os limites passam a contar a partir de agora. */
