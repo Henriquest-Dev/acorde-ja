@@ -7,10 +7,13 @@ alter table public.app_limits add column if not exists managed_by uuid reference
 create index if not exists app_limits_managed_by on public.app_limits (managed_by);
 
 -- Um limite definido pelo responsável não pode ser alterado nem apagado pelo membro.
+drop policy if exists app_limits_managed_no_insert on public.app_limits;
 create policy app_limits_managed_no_insert on public.app_limits as restrictive for insert to authenticated
   with check (managed_by is null);
+drop policy if exists app_limits_managed_no_update on public.app_limits;
 create policy app_limits_managed_no_update on public.app_limits as restrictive for update to authenticated
   using (managed_by is null) with check (managed_by is null);
+drop policy if exists app_limits_managed_no_delete on public.app_limits;
 create policy app_limits_managed_no_delete on public.app_limits as restrictive for delete to authenticated
   using (managed_by is null);
 
