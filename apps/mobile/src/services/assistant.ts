@@ -32,12 +32,12 @@ export async function sendToAssistant(params: {
   if (!sb) throw new AssistantUnavailableError('no_backend');
   const { data: session } = await sb.auth.getSession();
   if (!session.session) throw new AssistantUnavailableError('no_session');
-  const { goals } = usePrefs.getState().prefs;
+  const { goals, displayName } = usePrefs.getState().prefs;
   const { data, error, response } = await sb.functions.invoke<AssistantReply>('assistant', {
     body: {
       conversationId: params.conversationId,
       message: params.message,
-      context: { goals, todayUsedMinutes: params.todayUsedMinutes, todayLimitMinutes: params.todayLimitMinutes },
+      context: { goals, name: displayName || null, todayUsedMinutes: params.todayUsedMinutes, todayLimitMinutes: params.todayLimitMinutes },
     },
   });
   if (error || !data) {

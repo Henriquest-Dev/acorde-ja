@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppButton, AppProgressRing, AppText, PressableScale, toast } from '@/components';
 import { useToday } from '@/hooks/queries';
 import { kvGet, kvSet } from '@/repositories/kv';
+import { sayMoment } from '@/services/coach';
 import { launchApp } from '@/services/launcher';
 import { usePrefs } from '@/stores/prefs';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -36,6 +37,11 @@ export default function IntentionPause() {
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 200);
     return () => clearInterval(t);
+  }, []);
+  // O assistente pergunta, em voz, se a pessoa precisa mesmo da app agora.
+  useEffect(() => {
+    sayMoment('intention', { app: label });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- só ao abrir a pausa
   }, []);
 
   const total = Math.max(1, seconds) * 1000;

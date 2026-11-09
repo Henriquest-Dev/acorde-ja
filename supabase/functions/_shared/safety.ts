@@ -35,6 +35,8 @@ O teu papel:
 - Ajudar a reduzir o uso compulsivo de aplicações, pornografia ou apostas, com estratégias práticas e voluntárias.
 - Em momentos de impulso: validar o sentimento, propor uma pausa breve (respiração, mudar de divisão, beber água, caminhar) e uma actividade alternativa.
 - Ajudar a criar planos de redução gradual realistas (pequenos passos semanais).
+- Acompanhar o ecrã inicial do offly: quando a pessoa quer abrir uma app limitada ou pedir mais tempo, ajudas a decidir com calma; as decisões de tempo extra são tomadas pelo offly, não por ti.
+- Quando souberes o nome da pessoa, usa-o de vez em quando, com naturalidade.
 - Explicar estatísticas apenas com os números fornecidos no contexto. Se não houver números, diz que não os tens — nunca inventes dados.
 
 Limites obrigatórios:
@@ -65,12 +67,15 @@ export function extractCards(text: string): { text: string; cards: Card[] } {
 }
 
 /** Contexto mínimo e agregado enviado ao modelo. */
-export function buildContextNote(ctx: { goals?: string[]; todayUsedMinutes?: number | null; todayLimitMinutes?: number | null } | undefined): string {
+export function buildContextNote(
+  ctx: { goals?: string[]; todayUsedMinutes?: number | null; todayLimitMinutes?: number | null; name?: string | null } | undefined,
+): string {
   if (!ctx) return 'Sem contexto adicional.';
+  const name = String(ctx.name ?? '').replace(/[^\p{L}\p{M}' -]/gu, '').trim().slice(0, 24);
   const goals = (ctx.goals ?? []).slice(0, 6).join(', ') || 'nenhum indicado';
   const usage =
     ctx.todayUsedMinutes != null && ctx.todayLimitMinutes != null
       ? `${ctx.todayUsedMinutes} de ${ctx.todayLimitMinutes} minutos permitidos nas apps controladas hoje`
       : 'sem dados de utilização de hoje';
-  return `Objectivos do utilizador: ${goals}. Utilização: ${usage}.`;
+  return `${name.length >= 2 ? `Nome: ${name}. ` : ''}Objectivos do utilizador: ${goals}. Utilização: ${usage}.`;
 }

@@ -8,6 +8,7 @@ import { AppCard, AppHeader, AppSwitch, AppText, FadeInItem, ListRow, PressableS
 import { MindfulPause } from '@/components/MindfulPause';
 import { qk, useActiveChallenges, useInvalidate, useSchedules } from '@/hooks/queries';
 import { GOAL_CATEGORY } from '@/services/challenge';
+import { sayMoment } from '@/services/coach';
 import { getCapabilities, openSystemSettings, shield } from '@/native/device';
 import { NIGHT_SCHEDULE_ID, upsertSchedule } from '@/repositories/limits';
 import { applyShield } from '@/services/shield';
@@ -88,7 +89,10 @@ export default function Protection() {
             <AppSwitch
               value={prefs.shield.categories.adult}
               onValueChange={(v) => {
-                if (!v && lockedCategories.includes('adult')) return toast(lockMessage, 'error');
+                if (!v && lockedCategories.includes('adult')) {
+                  sayMoment('giveUp');
+                  return toast(lockMessage, 'error');
+                }
                 if (!v && prefs.shield.strictMode) return toast('O modo restrito impede desligar esta protecção.', 'error');
                 void setShield({ categories: { ...prefs.shield.categories, adult: v } });
               }}
@@ -104,7 +108,10 @@ export default function Protection() {
             <AppSwitch
               value={prefs.shield.categories.gambling}
               onValueChange={(v) => {
-                if (!v && lockedCategories.includes('gambling')) return toast(lockMessage, 'error');
+                if (!v && lockedCategories.includes('gambling')) {
+                  sayMoment('giveUp');
+                  return toast(lockMessage, 'error');
+                }
                 if (!v && prefs.shield.strictMode) return toast('O modo restrito impede desligar esta protecção.', 'error');
                 void setShield({ categories: { ...prefs.shield.categories, gambling: v } });
               }}

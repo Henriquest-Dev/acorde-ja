@@ -1,13 +1,13 @@
-// Edge Function: assistente Acorde Já.
-// - A chave ANTHROPIC_API_KEY existe apenas nos segredos do Supabase.
+// Edge Function: assistente do offly (conversa).
+// - Modelo: Nemotron (NVIDIA) através do OpenRouter; a chave OPENROUTER_API_KEY existe apenas nos segredos do Supabase.
 // - Autentica o utilizador pelo JWT, aplica limite diário e (opcional) entitlement.
 // - Detecta sinais de crise antes de chamar o modelo.
 // - Guarda apenas a conversa do próprio utilizador (retenção de 90 dias).
-import Anthropic from 'npm:@anthropic-ai/sdk@1.3.0';
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { chatBody } from '../_shared/coach.ts';
+import { orPost } from '../_shared/openrouter.ts';
 import { CRISIS_REPLY, SYSTEM_PROMPT, buildContextNote, detectCrisis, extractCards } from '../_shared/safety.ts';
 
-const MODEL = 'claude-opus-5-5';
 const DAILY_MESSAGE_LIMIT = Number(Deno.env.get('AI_DAILY_MESSAGE_LIMIT') ?? '40');
 const HISTORY_TURNS = 12;
 const REQUIRE_ENTITLEMENT = Deno.env.get('AI_REQUIRE_ENTITLEMENT') === 'true';
@@ -19,8 +19,6 @@ const cors = {
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
-
-const anthropic = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY') });
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -74,50 +72,34 @@ Deno.serve(async (req) => {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(HISTORY_TURNS);
-  const messages: Anthropic.Beta.BetaMessageParam[] = (history ?? [])
+  const messages = (history ?? [])
     .reverse()
     .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content as string }));
   // A conversa tem de começar no utilizador.
   while (messages.length && messages[0]!.role !== 'user') messages.shift();
 
   try {
-    const res = await anthropic.beta.messages.create({
-      model: MODEL,
-      max_tokens: 16000,
-      // Conversa curta: esforço baixo controla custo e latência.
-      output_config: { effort: 'low' },
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
-      // Prompt de sistema estável e cacheado; o contexto variável vai numa mensagem de sistema no fim.
-      system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-      // Mensagem de sistema a meio da conversa: não invalida o prefixo em cache.
-      messages: [...messages, { role: 'system', content: buildContextNote(body.context) }],
-    });
-    if (res.stop_reason === 'refusal') {
-      const fallbackText = 'Não consigo ajudar com isso. Se precisares de apoio imediato, experimenta o exercício de respiração ou fala com alguém de confiança.';
-      await admin.from('ai_messages').insert({ conversation_id: conversationId, user_id: user.id, role: 'assistant', content: fallbackText });
-      return json({ reply: fallbackText, conversationId, cards: ['breathing'], crisis: false });
+    const system = `${SYSTEM_PROMPT}\n\nContexto: ${buildContextNote(body.context)}`;
+    const res = await orPost('/api/v1/chat/completions', chatBody(system, messages));
+    if (res.status === 429) return json({ error: 'rate_limited' }, 429);
+    if (!res.ok) {
+      console.error('openrouter_error', res.status, (await res.text()).slice(0, 300));
+      return json({ error: 'model_unavailable' }, 502);
     }
-    const raw = res.content
-      .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === 'text')
-      .map((b) => b.text)
-      .join('\n');
+    const out = await res.json();
+    const raw = String(out?.choices?.[0]?.message?.content ?? '').trim();
+    if (!raw) return json({ error: 'model_unavailable' }, 502);
     const { text, cards } = extractCards(raw);
     await admin.from('ai_messages').insert({
       conversation_id: conversationId,
       user_id: user.id,
       role: 'assistant',
       content: text.slice(0, 8000),
-      input_tokens: res.usage.input_tokens,
-      output_tokens: res.usage.output_tokens,
+      input_tokens: out?.usage?.prompt_tokens ?? null,
+      output_tokens: out?.usage?.completion_tokens ?? null,
     });
     return json({ reply: text, conversationId, cards, crisis: false });
   } catch (e) {
-    if (e instanceof Anthropic.RateLimitError) return json({ error: 'rate_limited' }, 429);
-    if (e instanceof Anthropic.APIError) {
-      console.error('anthropic_error', e.status, e.message);
-      return json({ error: 'model_unavailable' }, 502);
-    }
     console.error('assistant_error', e);
     return json({ error: 'internal' }, 500);
   }

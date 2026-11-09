@@ -21,6 +21,7 @@ Legenda: ✅ implementado e verificado neste ambiente · 🟡 implementado, veri
 | Proteção no iPhone sem App Store | ✅ perfil DNS-over-HTTPS (adultos, anúncios); apostas só com resolvedor próprio — ver ios.md |
 | Bloqueio de anúncios (Android) | ✅ VPN local + AdGuard DNS como resolvedor |
 | Bloqueio do YouTube/Shorts ao reabrir | ✅ ecrã de bloqueio volta sempre que a app reabre; «bloqueio reforçado» opcional (acessibilidade) fecha de imediato |
+| Assistente (conversa, decisão, voz) | ✅ código: Nemotron (chat), Parallel Decisions (tempo extra) e Fish Audio (voz) via OpenRouter, com regras fixas do offly por cima; ⏳ falta publicar as funções `assistant` e `coach` e o segredo OPENROUTER_API_KEY no Supabase |
 | Pagamentos | ✅ gateway externo via webhook assinado (docs/billing.md); sem RevenueCat |
 
 ## Ecrãs da imagem de referência

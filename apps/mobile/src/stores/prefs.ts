@@ -33,6 +33,10 @@ export interface Prefs {
   /** Ids das apps restringidas durante sessões de foco. */
   focusBlockedApps: string[];
   launcher: LauncherPrefs;
+  /** Nome pelo qual o assistente chama a pessoa (opcional). */
+  displayName: string;
+  /** O assistente fala em voz alta (calma, incentivo) nos momentos difíceis. */
+  voiceCoach: boolean;
 }
 
 export interface LauncherPrefs {
@@ -66,6 +70,8 @@ export const DEFAULT_PREFS: Prefs = {
   focus: { minutes: 25, pomodoro: false, sound: 'none', weeklyGoalMinutes: 300 },
   focusBlockedApps: [],
   launcher: { enabled: false, favorites: [], hidden: [], intentionSeconds: 10, showUsage: true, lockDuringChallenge: true },
+  displayName: '',
+  voiceCoach: true,
 };
 
 const KEY = 'prefs';

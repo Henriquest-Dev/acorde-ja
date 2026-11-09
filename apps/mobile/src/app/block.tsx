@@ -8,6 +8,7 @@ import {
   formatClock,
   grantException,
   nextLocalMidnight,
+  todaySummary,
   type OverrideReason,
 } from '@acorde/core';
 import { Feather } from '@expo/vector-icons';
@@ -27,9 +28,10 @@ import {
   BrandIcon,
   toast,
 } from '@/components';
-import { qk, useInvalidate, useToday } from '@/hooks/queries';
+import { qk, useActiveChallenges, useHabitsWeek, useInvalidate, useToday } from '@/hooks/queries';
 import { goHome } from '@/native/device';
 import { insertException } from '@/repositories/usage';
+import { decideExtraTime, sayMoment, speak, type DecisionResult } from '@/services/coach';
 import { enqueueSync } from '@/services/sync';
 import { syncRulesToNative } from '@/services/usage';
 import { usePrefs } from '@/stores/prefs';
@@ -68,6 +70,15 @@ export default function BlockScreen() {
   const rules = usePrefs((s) => s.prefs.rules) ?? DEFAULT_RULE_SETTINGS;
   const [sheet, setSheet] = useState<'suggestions' | 'extra' | null>(view === 'extra' ? 'extra' : view === 'suggestions' ? 'suggestions' : null);
   const app = data?.apps.find((a) => a.appId === appId);
+  const challenges = useActiveChallenges();
+  const habits = useHabitsWeek(new Date());
+  const habitToday = habits.data ? todaySummary(habits.data.habits, habits.data.entries, new Date()) : { due: 0, done: 0 };
+  const isBlocked = app?.state === RuleState.BLOCKED || app?.state === RuleState.SCHEDULED_BLOCK;
+  // A voz do offly no momento do bloqueio (uma vez por abertura do ecrã).
+  useEffect(() => {
+    if (isBlocked && app && view !== 'extra') sayMoment('limit', { app: app.name });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- só ao abrir o ecrã
+  }, [isBlocked]);
 
   const close = async () => {
     if (!(await goHome().catch(() => false))) router.replace('/');
@@ -164,6 +175,13 @@ export default function BlockScreen() {
           denial={permission.allowed ? null : permission.reason}
           onClose={() => setSheet(null)}
           result={app}
+          context={{
+            limitMinutes: app.limitMinutes,
+            usedMinutes: data?.measured ? Math.floor(app.usedMs / MINUTE) : null,
+            challengeActive: (challenges.data?.length ?? 0) > 0,
+            habitsDue: habitToday.due,
+            habitsDone: habitToday.done,
+          }}
         />
       ) : null}
     </>
@@ -176,12 +194,14 @@ function ExtraTimeSheet({
   denial,
   onClose,
   result,
+  context,
 }: {
   appId: string;
   appName: string;
   denial: string | null;
   onClose: () => void;
   result: Parameters<typeof grantException>[0]['result'];
+  context: { limitMinutes: number; usedMinutes: number | null; challengeActive: boolean; habitsDue: number; habitsDone: number };
 }) {
   const rules = usePrefs((s) => s.prefs.rules);
   const invalidate = useInvalidate();
@@ -189,6 +209,27 @@ function ExtraTimeSheet({
   const [pauseStartedAt, setPauseStartedAt] = useState<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [saving, setSaving] = useState(false);
+  const [asking, setAsking] = useState(false);
+  const [advice, setAdvice] = useState<DecisionResult | null>(null);
+
+  /** O assistente do offly decide (servidor: Parallel Decisions + regras do offly) e fala a decisão. */
+  const ask = async () => {
+    setAsking(true);
+    const d = await decideExtraTime({
+      app: appName,
+      reason,
+      limitMinutes: context.limitMinutes,
+      usedMinutes: context.usedMinutes,
+      requestsToday: result.exceptionsUsed,
+      challengeActive: context.challengeActive,
+      habitsDue: context.habitsDue,
+      habitsDone: context.habitsDone,
+    });
+    setAsking(false);
+    setAdvice(d);
+    void speak(d.message);
+    if (d.decision !== 'deny' && (d.requirement === 'none' || d.requirement === 'breathe')) setPauseStartedAt(Date.now());
+  };
 
   useEffect(() => {
     if (pauseStartedAt === null) return;
@@ -196,7 +237,8 @@ function ExtraTimeSheet({
     return () => clearInterval(t);
   }, [pauseStartedAt]);
 
-  const pauseMs = rules.mindfulPauseSeconds * 1000;
+  // «Esperar» = pausa de respiração de pelo menos 2 minutos antes de poder ter mais tempo.
+  const pauseMs = Math.max(rules.mindfulPauseSeconds, advice?.decision === 'wait' || advice?.requirement === 'breathe' ? 120 : 0) * 1000;
   const remaining = pauseStartedAt === null ? pauseMs : Math.max(0, pauseMs - (now - pauseStartedAt));
 
   const grant = async () => {
@@ -242,13 +284,33 @@ function ExtraTimeSheet({
           </AppText>
           <AppButton label="Compreendo" onPress={onClose} />
         </View>
+      ) : advice && (advice.decision === 'deny' || advice.requirement === 'habit' || advice.requirement === 'focus') ? (
+        <View style={{ gap: spacing.lg }} testID="coach-advice">
+          <AppText variant="body">{advice.message}</AppText>
+          {advice.decision === 'deny' ? (
+            <>
+              <AppButton label="Respirar comigo" onPress={() => router.replace('/breathing')} />
+              <AppButton label="Compreendo" variant="ghost" onPress={onClose} />
+            </>
+          ) : advice.requirement === 'habit' ? (
+            <>
+              <AppButton label="Ir aos hábitos de hoje" onPress={() => router.replace('/habits')} />
+              <AppButton label="Afinal não preciso" variant="ghost" onPress={onClose} />
+            </>
+          ) : (
+            <>
+              <AppButton label="Começar 10 minutos de foco" onPress={() => router.replace({ pathname: '/focus', params: { autostart: '1' } })} />
+              <AppButton label="Afinal não preciso" variant="ghost" onPress={onClose} />
+            </>
+          )}
+        </View>
       ) : pauseStartedAt === null ? (
         <View style={{ gap: spacing.lg }} testID={`extra-${appId}`}>
           <AppText variant="small" tone="secondary">
-            Porque precisa de mais tempo? Depois faremos uma pausa consciente de {rules.mindfulPauseSeconds} segundos.
+            Porque precisa de mais tempo? O assistente do offly ajuda a decidir.
           </AppText>
           <AppRadioGroup options={REASONS} value={reason} onChange={setReason} />
-          <AppButton label="Iniciar pausa consciente" onPress={() => setPauseStartedAt(Date.now())} />
+          <AppButton label="Pedir ao offly" loading={asking} onPress={() => void ask()} testID="coach-ask" />
         </View>
       ) : (
         <View style={{ alignItems: 'center', gap: spacing.lg }}>
@@ -256,7 +318,7 @@ function ExtraTimeSheet({
             <AppText variant="h2">{formatClock(remaining)}</AppText>
           </AppProgressRing>
           <AppText variant="body" tone="secondary" align="center">
-            Inspire devagar… expire devagar.{'\n'}Ainda quer mesmo voltar ao {appName}?
+            {advice?.message ?? `Inspire devagar… expire devagar.\nAinda quer mesmo voltar ao ${appName}?`}
           </AppText>
           <AppButton
             label={remaining > 0 ? 'Aguarde…' : `Conceder +${rules.exceptionMinutes} minutos`}

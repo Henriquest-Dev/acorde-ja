@@ -75,3 +75,10 @@ Para criar o esquema num projecto vazio, há duas formas:
 
 Depois, em Authentication → URL Configuration, acrescentar `acordeja://auth/callback` às Redirect URLs.
 `supabase/setup.sql` é gerado a partir de `supabase/migrations/` e não deve ser editado à mão.
+
+## Assistente (OpenRouter)
+
+- `supabase/functions/assistant`: conversa com `nvidia/nemotron-3.5-super-vl:free`.
+- `supabase/functions/coach`: `decide` (tempo extra, `parallel/decisions-fast:free`) e `speak` (voz, `fish-audio/s2.1-pro-free:free`, MP3).
+- Segredo obrigatório no Supabase: `OPENROUTER_API_KEY` (Dashboard → Edge Functions → Secrets). Nunca no app.
+- Publicar: `supabase functions deploy assistant coach --project-ref ecqtiefjnpeqmwjuldre`.

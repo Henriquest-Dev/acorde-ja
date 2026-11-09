@@ -17,6 +17,7 @@ const ITEMS: { title: string; icon: RowIcon; href: Href }[] = [
 ];
 
 const MORE: { title: string; icon: RowIcon; href: Href }[] = [
+  { title: 'Assistente e voz', icon: { set: 'feather', name: 'mic' }, href: '/settings/assistant' },
   { title: 'Planos e faturação', icon: { set: 'feather', name: 'credit-card' }, href: '/settings/billing' },
   { title: 'Launcher', icon: { set: 'feather', name: 'smartphone' }, href: '/settings/launcher' },
   { title: 'Permissões do sistema', icon: { set: 'mci', name: 'shield-check-outline' }, href: '/settings/permissions' },

@@ -31,6 +31,7 @@ import { ChallengeSetup } from '@/features/challenge/ChallengeSetup';
 import { useActiveChallenges } from '@/hooks/queries';
 import { shield } from '@/native/device';
 import { checkIn } from '@/services/challenge';
+import { sayMoment } from '@/services/coach';
 import { usePrefs } from '@/stores/prefs';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radii, spacing } from '@/theme/tokens';
@@ -81,6 +82,7 @@ export default function ChallengeScreen() {
       setReveal(todayCell.reward);
     } else {
       setRelapseInfo(true);
+      sayMoment('relapse');
     }
   };
 
