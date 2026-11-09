@@ -55,7 +55,8 @@ class BlockOverlay(private val context: Context) {
    */
   fun show(appId: String, packageName: String?, appName: String, title: String, message: String, allowExtra: Boolean, until: Long) {
     if (!canShow()) return
-    if (shownForApp == appId && view != null) return
+    // Se o sistema retirou a janela (ou ela deixou de estar visível), volta a mostrá-la.
+    if (shownForApp == appId && isShowing()) return
     hide()
     val d = context.resources.displayMetrics.density
     fun dp(v: Int) = (v * d).toInt()
@@ -122,7 +123,8 @@ class BlockOverlay(private val context: Context) {
     val buttons = mutableListOf<View>()
     buttons += button("Ver sugestões", true, 0) { openApp("block?appId=$appId&view=suggestions") }
     if (allowExtra) buttons += button("Pedir tempo extra", false, 12) { openApp("block?appId=$appId&view=extra") }
-    buttons += button("Fechar", false, 12) { goHome(context); hide() }
+    // «Fechar» leva ao ecrã inicial e só depois retira o bloqueio, para a app nunca ficar visível.
+    buttons += button("Fechar", false, 12) { goHome(context); ui.postDelayed({ hide() }, 900) }
     buttons.forEach { column.addView(it) }
 
     val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -163,6 +165,8 @@ class BlockOverlay(private val context: Context) {
     ticker = tick
     ui.post(tick)
   }
+
+  fun isShowing(): Boolean = view?.let { it.isAttachedToWindow && it.windowVisibility == View.VISIBLE } ?: false
 
   fun hide() {
     ticker?.let { ui.removeCallbacks(it) }

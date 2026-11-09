@@ -68,6 +68,14 @@ class AcordeNativeModule : Module() {
       }, fallback = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS))
     }
 
+    AsyncFunction("isStrongBlockEnabled") {
+      BlockAccessibilityService.isEnabled(context)
+    }
+
+    AsyncFunction("openAccessibilitySettings") {
+      openSettings(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+    }
+
     AsyncFunction("requestOverlayPermission") {
       openSettings(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${context.packageName}")))
     }

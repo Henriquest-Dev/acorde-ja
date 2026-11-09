@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="offly_accessibility_label">offly: bloqueio reforçado</string>
+    <string name="offly_accessibility_description">Fecha de imediato as apps que já atingiram o limite que definiu no offly (por exemplo, o YouTube e os Shorts). Só vê qual é a app em primeiro plano; não lê nem guarda o conteúdo do ecrã.</string>
+</resources>

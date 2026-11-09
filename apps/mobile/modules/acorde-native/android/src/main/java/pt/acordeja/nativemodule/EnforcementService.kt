@@ -1,5 +1,6 @@
 package pt.acordeja.nativemodule
 
+import android.app.ActivityManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -32,6 +33,9 @@ class EnforcementService : Service() {
   private var cacheDay: String? = null
   private var lastWall = 0L
   private var lastElapsed = 0L
+  /** App bloqueada que o serviço de acessibilidade viu abrir agora (usada num só ciclo). */
+  @Volatile private var forcedPkg: String? = null
+  @Volatile private var forcedAt = 0L
 
   private val loop = object : Runnable {
     override fun run() {
@@ -46,6 +50,7 @@ class EnforcementService : Service() {
     super.onCreate()
     store = RuleStore(this)
     overlay = BlockOverlay(this)
+    current = this
     Notifier.ensureChannels(this)
     val notification = Notifier.serviceNotification(this)
     if (Build.VERSION.SDK_INT >= 34) {
@@ -57,12 +62,25 @@ class EnforcementService : Service() {
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     if (intent?.action == ACTION_INVALIDATE) cacheByStart.clear()
+    if (intent?.action == ACTION_BLOCK_NOW) intent.getStringExtra(EXTRA_PKG)?.let { markForced(it) }
     handler.removeCallbacks(loop)
     handler.post(loop)
     return START_STICKY
   }
 
+  /** Chamado pelo serviço de acessibilidade: verifica já, sem esperar pelo próximo segundo. */
+  fun requestBlock(pkg: String) {
+    markForced(pkg)
+    handler.post { runCatching { tick() } }
+  }
+
+  private fun markForced(pkg: String) {
+    forcedPkg = pkg
+    forcedAt = SystemClock.elapsedRealtime()
+  }
+
   override fun onDestroy() {
+    if (current === this) current = null
     handler.removeCallbacks(loop)
     overlay.hide()
     super.onDestroy()
@@ -100,7 +118,11 @@ class EnforcementService : Service() {
       cacheDay = day
     }
     fun usageFrom(start: Long) = cacheByStart.getOrPut(start) { UsageCalculator.query(this, start, now) }
-    val foreground = UsageCalculator.currentForegroundPackage(this, now)
+    // O UsageStats regista a mudança de app com atraso; o serviço de acessibilidade
+    // (se activo) avisa no próprio instante, e essa indicação vale para um só ciclo.
+    val forced = forcedPkg?.takeIf { elapsed - forcedAt < FORCED_MS }
+    forcedPkg = null
+    val foreground = forced ?: UsageCalculator.currentForegroundPackage(this, now)
     val sinceCache = elapsed - cacheAtElapsed
 
     var blockedForeground: Pair<RuleStore.Limit, RuleEvaluator.Evaluation>? = null
@@ -153,6 +175,15 @@ class EnforcementService : Service() {
     if (elapsed - lastHomeAt > HOME_THROTTLE_MS) {
       lastHomeAt = elapsed
       BlockOverlay.goHome(this)
+      // Já no ecrã inicial, pára a reprodução que tenha ficado em segundo plano (áudio dos Shorts).
+      if (pkg != null) handler.postDelayed({ stopInBackground(pkg) }, 900)
+    }
+  }
+
+  private fun stopInBackground(pkg: String) {
+    runCatching {
+      val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+      am.killBackgroundProcesses(pkg)
     }
   }
 
@@ -198,8 +229,23 @@ class EnforcementService : Service() {
   companion object {
     const val NOTIFICATION_ID = 4101
     const val ACTION_INVALIDATE = "pt.acordeja.INVALIDATE"
+    const val ACTION_BLOCK_NOW = "pt.acordeja.BLOCK_NOW"
+    const val EXTRA_PKG = "pkg"
     private const val TICK_MS = 1_000L
-    private const val HOME_THROTTLE_MS = 1_500L
+    private const val HOME_THROTTLE_MS = 900L
+    private const val FORCED_MS = 4_000L
+
+    /** Instância activa (mesmo processo), para o serviço de acessibilidade pedir um bloqueio imediato. */
+    @Volatile var current: EnforcementService? = null
+      private set
+
+    fun blockNow(context: Context, pkg: String) {
+      current?.let { it.requestBlock(pkg); return }
+      runCatching {
+        val intent = Intent(context, EnforcementService::class.java).setAction(ACTION_BLOCK_NOW).putExtra(EXTRA_PKG, pkg)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context.startForegroundService(intent) else context.startService(intent)
+      }
+    }
     private const val RECALC_MS = 15_000L
     private const val CLOCK_TOLERANCE_MS = 2 * 60_000L
 

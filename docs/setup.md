@@ -61,3 +61,17 @@ npm run test:db          # migrações + 28 testes de RLS num PostgreSQL 16 temp
   `specialUse`, `SYSTEM_ALERT_WINDOW` e `VpnService` (formulário de declaração de VPN, com a
   justificação de filtragem local de DNS sem envio de tráfego para servidores próprios).
 - iOS: pedir o entitlement *Family Controls (Distribution)* à Apple antes de submeter.
+
+## Supabase do offly (projecto ecqtiefjnpeqmwjuldre)
+
+O app já aponta para o projecto (URL e chave pública em `apps/mobile/.env.local`, que não vai para o Git).
+
+Para criar o esquema num projecto vazio, há duas formas:
+
+1. **SQL Editor (mais simples):** Dashboard → SQL Editor → New query → colar o conteúdo de `supabase/setup.sql`
+   → Run, uma única vez. Cria 27 tabelas, 64 índices, 69 políticas de RLS e as funções.
+2. **Management API:** com um token pessoal (`sbp_...`, criado em supabase.com/dashboard/account/tokens) é possível
+   aplicar as migrações a partir de uma sessão do Claude Code.
+
+Depois, em Authentication → URL Configuration, acrescentar `acordeja://auth/callback` às Redirect URLs.
+`supabase/setup.sql` é gerado a partir de `supabase/migrations/` e não deve ser editado à mão.

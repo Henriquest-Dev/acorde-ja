@@ -84,6 +84,18 @@ export async function requestOverlay(): Promise<void> {
   await AcordeNative.requestOverlayPermission();
 }
 
+/** «Bloqueio reforçado» (Android): serviço de acessibilidade que fecha de imediato as apps bloqueadas. */
+export const strongBlock = {
+  async isEnabled(): Promise<boolean> {
+    if (Platform.OS !== 'android' || !AcordeNative?.isStrongBlockEnabled) return false;
+    return AcordeNative.isStrongBlockEnabled();
+  },
+  async open(): Promise<void> {
+    if (!AcordeNative?.openAccessibilitySettings) throw new NativeUnavailableError();
+    await AcordeNative.openAccessibilitySettings();
+  },
+};
+
 export async function getInstalledApps(): Promise<InstalledApp[]> {
   if (!AcordeNative) return [];
   return AcordeNative.getInstalledApps();

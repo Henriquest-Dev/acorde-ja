@@ -12,6 +12,7 @@ const PERMISSIONS: { title: string; why: string }[] = [
   { title: 'Acesso aos dados de utilização', why: 'Para medir quanto tempo usa cada app e aplicar os limites que definiu. Os dados ficam no seu telemóvel.' },
   { title: 'Sobrepor a outras apps', why: 'Para mostrar o ecrã de pausa quando um limite termina.' },
   { title: 'VPN local', why: 'Filtra pedidos DNS no próprio telemóvel para bloquear os sites que escolheu. Não é uma VPN de terceiros: o tráfego não passa pelos nossos servidores e não guardamos histórico de navegação.' },
+  { title: 'Bloqueio reforçado (acessibilidade, opcional)', why: 'Só para saber que app está aberta e fechar de imediato a que já esgotou o limite, como o YouTube e os Shorts. Não lê nem guarda o conteúdo do ecrã.' },
   { title: 'Notificações', why: 'Avisos de limite, lembretes de hábitos e o serviço que mantém os bloqueios activos.' },
 ];
 

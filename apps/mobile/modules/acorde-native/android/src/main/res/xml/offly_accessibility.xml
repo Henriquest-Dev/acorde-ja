@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Só recebe mudanças de janela (nome do pacote). Não lê o conteúdo do ecrã. -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:notificationTimeout="80"
+    android:canRetrieveWindowContent="false"
+    android:description="@string/offly_accessibility_description" />

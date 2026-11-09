@@ -17,6 +17,9 @@ export interface AcordeNativeModule {
   /** Abre o ecrã do sistema para conceder acesso. O estado deve ser relido ao regressar. */
   requestUsagePermission(): Promise<void>;
   requestOverlayPermission(): Promise<void>;
+  /** Android: o «bloqueio reforçado» (serviço de acessibilidade) está activo? */
+  isStrongBlockEnabled?(): Promise<boolean>;
+  openAccessibilitySettings?(): Promise<void>;
   getInstalledApps(): Promise<InstalledApp[]>;
   getUsageStats(startMs: number, endMs: number): Promise<UsageQueryResult>;
   /** Configuração completa das regras, serializada em JSON (ver NativeRuleConfig). */
