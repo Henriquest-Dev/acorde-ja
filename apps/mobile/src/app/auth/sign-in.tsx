@@ -13,6 +13,8 @@ import { spacing } from '@/theme/tokens';
 
 type Form = z.infer<typeof signInSchema>;
 
+const OAUTH = (process.env.EXPO_PUBLIC_AUTH_PROVIDERS ?? '').split(',').map((x) => x.trim().toLowerCase());
+
 export default function SignIn() {
   const [busy, setBusy] = useState(false);
   const { control, handleSubmit, formState } = useForm<Form>({ resolver: zodResolver(signInSchema), defaultValues: { email: '', password: '' } });
@@ -60,8 +62,9 @@ export default function SignIn() {
           <Controller control={control} name="password" render={({ field }) => <AppInput label="Palavra-passe" secureTextEntry autoComplete="password" value={field.value} onChangeText={field.onChange} error={formState.errors.password?.message} />} />
           <AppButton label="Entrar" onPress={submit} loading={busy} />
           <AppButton label="Esqueci-me da palavra-passe" variant="ghost" size="sm" onPress={() => router.push('/auth/forgot')} />
-          <AppButton label="Continuar com Google" variant="subtle" onPress={() => void oauth('google')} />
-          {Platform.OS === 'ios' ? <AppButton label="Continuar com Apple" variant="subtle" onPress={() => void oauth('apple')} /> : null}
+          {/* Só aparecem quando o fornecedor está activo no Supabase (EXPO_PUBLIC_AUTH_PROVIDERS=google,apple). */}
+          {OAUTH.includes('google') ? <AppButton label="Continuar com Google" variant="subtle" onPress={() => void oauth('google')} /> : null}
+          {Platform.OS === 'ios' && OAUTH.includes('apple') ? <AppButton label="Continuar com Apple" variant="subtle" onPress={() => void oauth('apple')} /> : null}
           <AppButton label="Criar conta" variant="secondary" onPress={() => router.replace('/auth/sign-up')} />
         </View>
       )}
