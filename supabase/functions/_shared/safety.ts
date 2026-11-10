@@ -28,12 +28,19 @@ export function crisisReply(ctx?: { language?: string | null; emergency?: string
   const crisis = String(ctx?.crisis ?? '').replace(/[^\d +]/g, '').slice(0, 18);
   const crisisName = String(ctx?.crisisName ?? '').slice(0, 60);
   if (!emergency && !crisis) return CRISIS_REPLY;
-  const you = br ? 'você' : 'tu';
+  if (br) {
+    return (
+      'Obrigado por me contar isso. O que você está sentindo é importante e você não precisa passar por isso sozinho. ' +
+      (emergency ? `Se você está em perigo ou pensando em se machucar, ligue agora para o ${emergency}. ` : '') +
+      (crisis ? `Você também pode conversar agora com ${crisisName || 'a linha de apoio emocional'}: ${crisis}. ` : '') +
+      'Se puder, chame alguém de confiança e fique perto dessa pessoa. Eu sou só um assistente e não substituo ajuda profissional, mas estou aqui com você.'
+    );
+  }
   return (
-    `Obrigado por me dizer${br ? '' : 'es'} isto. O que ${br ? 'você está' : 'estás'} a sentir é importante e não ${br ? 'precisa' : 'tens de'} passar por isto sozinho. ` +
-    (emergency ? `Se ${br ? 'está' : 'estás'} em perigo ou a pensar fazer-${br ? 'se' : 'te'} mal, liga já para o ${emergency}. ` : '') +
-    (crisis ? `${br ? 'Você também pode' : 'Podes também'} falar agora com ${crisisName || 'a linha de apoio emocional'}: ${crisis}. ` : '') +
-    `Se puder${br ? '' : 'es'}, contacta alguém de confiança e fica perto dessa pessoa. Eu sou apenas um assistente e não substituo ajuda profissional, mas estou aqui com ${you}.`
+    'Obrigado por me dizeres isto. O que estás a sentir é importante e não tens de passar por isto sozinho. ' +
+    (emergency ? `Se estás em perigo ou a pensar fazer-te mal, liga já para o ${emergency}. ` : '') +
+    (crisis ? `Podes também falar agora com ${crisisName || 'a linha de apoio emocional'}: ${crisis}. ` : '') +
+    'Se puderes, contacta alguém de confiança e fica perto dessa pessoa. Eu sou apenas um assistente e não substituo ajuda profissional, mas estou aqui contigo.'
   );
 }
 
