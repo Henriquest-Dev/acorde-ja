@@ -1,7 +1,7 @@
 import { formatClock, formatDuration, remainingMs, startOfWeek } from '@acorde/core';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import {
   AppBottomSheet,
@@ -74,11 +74,21 @@ export default function Focus() {
 
   const running = focus.timer.status === 'running';
 
-  // Som de fundo durante a sessão (ficheiros locais, funciona offline).
+  // Som de fundo só enquanto a sessão corre E este ecrã está aberto (ao mudar de separador, pára).
+  const [visible, setVisible] = useState(true);
+  useFocusEffect(
+    useCallback(() => {
+      setVisible(true);
+      return () => {
+        setVisible(false);
+        stopAmbient(true);
+      };
+    }, []),
+  );
   useEffect(() => {
-    void playAmbient(running ? prefs.focus.sound : 'none');
-  }, [running, prefs.focus.sound]);
-  useEffect(() => () => stopAmbient(), []);
+    void playAmbient(running && visible ? prefs.focus.sound : 'none');
+  }, [running, visible, prefs.focus.sound]);
+  useEffect(() => () => stopAmbient(true), []);
   const paused = focus.timer.status === 'paused';
   const active = running || paused;
   const remaining = active ? remainingMs(focus.timer, now) : prefs.focus.minutes * 60_000;
@@ -136,6 +146,19 @@ export default function Focus() {
             testID="focus-play"
           >
             <Feather name={running ? 'pause' : 'play'} size={26} color={colors.onAccent} style={{ marginLeft: running ? 0 : 3 }} />
+          </Pressable>
+          <Pressable
+            onPress={() => void update((p) => ({ focus: { ...p.focus, sound: p.focus.sound === 'none' ? 'rain' : 'none' } }))}
+            accessibilityRole="button"
+            accessibilityLabel={prefs.focus.sound === 'none' ? 'Ligar som de fundo' : 'Desligar som de fundo'}
+            hitSlop={10}
+            style={styles.soundToggle}
+            testID="focus-sound"
+          >
+            <Feather name={prefs.focus.sound === 'none' ? 'volume-x' : 'volume-2'} size={16} color={colors.textMuted} />
+            <AppText variant="caption" tone="muted">
+              {prefs.focus.sound === 'none' ? 'Sem som' : `Som: ${AMBIENT_LABEL[prefs.focus.sound]}`}
+            </AppText>
           </Pressable>
           {active ? (
             <AppButton label="Terminar sessão" variant="ghost" size="sm" onPress={() => void focus.cancel()} style={{ marginTop: spacing.sm }} />
@@ -327,6 +350,7 @@ function NotesSheet({ visible, onClose }: { visible: boolean; onClose: () => voi
 }
 
 const styles = StyleSheet.create({
+  soundToggle: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: spacing.md },
   play: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginTop: spacing.xxl },
   activities: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.xxxl },
   activity: { flex: 1, alignItems: 'center', paddingVertical: spacing.sm },

@@ -52,7 +52,7 @@ export default function Breathing() {
   useEffect(() => {
     void playAmbient(done ? 'none' : prefs.calmSound);
   }, [prefs.calmSound, done]);
-  useEffect(() => () => stopAmbient(), []);
+  useEffect(() => () => stopAmbient(true), []);
 
   const circle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const wave = useAnimatedStyle(() => ({ opacity: (1 - ring.value) * 0.35, transform: [{ scale: 0.6 + ring.value * 0.55 }] }));
@@ -64,9 +64,30 @@ export default function Breathing() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background, paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + spacing.xl }]}>
-      <Pressable onPress={() => goBack()} accessibilityRole="button" accessibilityLabel="Fechar" hitSlop={12} style={{ alignSelf: 'flex-end' }}>
-        <Feather name="x" size={24} color={colors.text} />
-      </Pressable>
+      <View style={styles.topBar}>
+        <Pressable
+          onPress={() => void update({ calmSound: prefs.calmSound === 'none' ? 'rain' : 'none' })}
+          accessibilityRole="button"
+          accessibilityLabel={prefs.calmSound === 'none' ? 'Ligar o som' : 'Desligar o som'}
+          hitSlop={12}
+          style={[styles.soundBtn, { borderColor: colors.border }]}
+          testID="calm-mute"
+        >
+          <Feather name={prefs.calmSound === 'none' ? 'volume-x' : 'volume-2'} size={18} color={colors.text} />
+          <AppText variant="caption">{prefs.calmSound === 'none' ? 'Som desligado' : 'Desligar som'}</AppText>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            stopAmbient(true);
+            goBack();
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="Fechar"
+          hitSlop={12}
+        >
+          <Feather name="x" size={24} color={colors.text} />
+        </Pressable>
+      </View>
       <LeafBackdrop opacity={0.06} />
       <View style={{ alignItems: 'center', gap: spacing.sm }}>
         <Offy size={84} mood={done ? 'idle' : 'calm'} testID="offy-calm" />
@@ -132,6 +153,8 @@ export default function Breathing() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, paddingHorizontal: 24 },
+  topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  soundBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   stage: { width: 240, height: 240 },
   stageText: { alignItems: 'center', justifyContent: 'center' },
