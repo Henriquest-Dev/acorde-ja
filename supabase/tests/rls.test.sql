@@ -180,6 +180,22 @@ exception when insufficient_privilege then raise notice 'ok — estranho não de
 end $$;
 reset role;
 
+-- 10c. Conta família partilhada: o membro usa o plano do responsável e não pode comprar
+insert into public.entitlements (user_id, entitlement, expires_at) values ('00000000-0000-0000-0000-00000000000a', 'family', now() + interval '30 days');
+select pg_temp.assert(public.has_entitlement('00000000-0000-0000-0000-00000000000b', 'family'), 'membro herda o plano do responsável');
+select pg_temp.assert(not public.has_entitlement('00000000-0000-0000-0000-00000000000d', 'family'), 'estranho não herda o plano');
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000b');
+select public.my_plan() as plan_b \gset
+select pg_temp.assert(((:'plan_b'::jsonb) ->> 'can_purchase')::boolean = false, 'membro da família não pode comprar');
+select pg_temp.assert(((:'plan_b'::jsonb) ->> 'family_member')::boolean, 'app sabe que é membro da família');
+select pg_temp.assert((:'plan_b'::jsonb) -> 'entitlements' ? 'family', 'membro vê o plano partilhado');
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
+select public.my_plan() as plan_a \gset
+select pg_temp.assert(((:'plan_a'::jsonb) ->> 'can_purchase')::boolean, 'responsável pode comprar');
+reset role;
+delete from public.entitlements where user_id = '00000000-0000-0000-0000-00000000000a';
+
 -- 11. Saída do encarregado elimina o grupo (sem menores sob controlo órfão)
 select pg_temp.as_user('00000000-0000-0000-0000-00000000000a');
 select public.leave_family_group();

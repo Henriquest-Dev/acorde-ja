@@ -34,7 +34,31 @@ export class SignInRequiredError extends Error {
   }
 }
 
+export class FamilyMemberError extends Error {
+  constructor(paidBy: string | null) {
+    super(`Estás incluído no plano da família${paidBy ? ` de ${paidBy}` : ''}. Só o responsável gere os pagamentos.`);
+    this.name = 'FamilyMemberError';
+  }
+}
+
 export type Entitlement = 'pro' | 'pro_ai' | 'family';
+
+export interface PlanInfo {
+  /** Membro de um grupo família: usa o plano do responsável. */
+  familyMember: boolean;
+  canPurchase: boolean;
+  paidBy: string | null;
+}
+
+/** Quem paga o plano desta conta (membros da família não podem comprar). */
+export async function fetchPlanInfo(): Promise<PlanInfo> {
+  const sb = getSupabase();
+  if (!sb) return { familyMember: false, canPurchase: true, paidBy: null };
+  const { data, error } = await sb.rpc('my_plan');
+  if (error || !data) return { familyMember: false, canPurchase: true, paidBy: null };
+  const d = data as { family_member?: boolean; can_purchase?: boolean; paid_by?: string | null };
+  return { familyMember: d.family_member === true, canPurchase: d.can_purchase !== false, paidBy: d.paid_by ?? null };
+}
 
 export interface EntitlementState {
   entitlements: Entitlement[];
@@ -66,6 +90,8 @@ async function currentUser() {
 export async function purchase(planId: PlanId, price: PlanPrice): Promise<EntitlementState> {
   if (!isBillingConfigured || !checkoutUrl) throw new BillingNotConfiguredError();
   const user = await currentUser();
+  const info = await fetchPlanInfo();
+  if (!info.canPurchase) throw new FamilyMemberError(info.paidBy);
   await WebBrowser.openBrowserAsync(buildCheckoutUrl(checkoutUrl, { planId, productId: price.productId, userId: user.id, email: user.email }));
   return fetchEntitlements();
 }

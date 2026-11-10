@@ -224,3 +224,43 @@ export async function leaveFamilyGroup() {
   const { error } = await requireSupabase().rpc('leave_family_group');
   if (error) throw error;
 }
+
+/**
+ * Pedido feito ao Offy no chat («adiciona o telemóvel do meu filho»): devolve o código do grupo
+ * para partilhar, criando o grupo primeiro se ainda não existir. Quem pede passa a ser o responsável.
+ */
+export async function familyInviteForChat(displayName: string): Promise<{ code: string; groupName: string; created: boolean }> {
+  const sb = requireSupabase();
+  const { data: user } = await sb.auth.getUser();
+  if (!user.user) throw new Error('no_session');
+  const read = async () => {
+    const { data } = await sb
+      .from('family_members')
+      .select('role, family_groups(name, invite_code)')
+      .eq('user_id', user.user!.id)
+      .eq('status', 'active')
+      .maybeSingle();
+    const g = data?.family_groups as unknown as { name: string; invite_code: string } | null;
+    return g ? { role: data!.role as string, name: g.name, code: g.invite_code } : null;
+  };
+  let mine = await read();
+  if (mine && mine.role !== 'guardian') throw new Error('not_guardian');
+  let created = false;
+  if (!mine) {
+    const name = displayName.trim().length >= 2 ? displayName.trim().slice(0, 40) : 'Responsável';
+    await createFamilyGroup(`Família de ${name}`.slice(0, 60), name);
+    created = true;
+    mine = await read();
+  }
+  if (!mine) throw new Error('no_group');
+  return { code: mine.code, groupName: mine.name, created };
+}
+
+/** A mensagem pede para adicionar um telemóvel / pessoa à conta família? */
+export function wantsFamilyInvite(text: string): boolean {
+  const t = text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+  return (
+    /(adicion|acrescent|junt|liga|ligar|conect|meter|por|inclu)\w*\b.{0,40}\b(telemovel|celular|telefone|filh|crianca|mae|pai|famil|irma|esposa|marido|namorad)/.test(t) ||
+    /(conta|grupo|plano) (de )?famil/.test(t)
+  );
+}

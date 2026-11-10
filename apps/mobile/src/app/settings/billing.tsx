@@ -1,22 +1,63 @@
-import { Feather } from '@expo/vector-icons';
-import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { AppButton, AppHeader, AppText, FadeInItem, PressableScale, Screen, SectionTitle, SegmentedControl, toast } from '@/components';
-import { BillingNotConfiguredError, SignInRequiredError, fetchEntitlements, openBillingPortal, purchase, restorePurchases } from '@/features/billing/billing';
-import { COMPARISON, PLANS, formatUsd, yearlySavings, type BillingPeriod, type Plan, type PlanPrice } from '@/features/billing/plans';
-import { useTheme } from '@/theme/ThemeProvider';
-import { radii, spacing } from '@/theme/tokens';
+import { Feather } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import {
+  AppButton,
+  AppHeader,
+  AppText,
+  FadeInItem,
+  PressableScale,
+  Screen,
+  SectionTitle,
+  SegmentedControl,
+  toast,
+} from "@/components";
+import {
+  BillingNotConfiguredError,
+  FamilyMemberError,
+  SignInRequiredError,
+  fetchEntitlements,
+  fetchPlanInfo,
+  openBillingPortal,
+  purchase,
+  restorePurchases,
+} from "@/features/billing/billing";
+import {
+  COMPARISON,
+  PLANS,
+  formatUsd,
+  yearlySavings,
+  type BillingPeriod,
+  type Plan,
+  type PlanPrice,
+} from "@/features/billing/plans";
+import { useTheme } from "@/theme/ThemeProvider";
+import { radii, spacing } from "@/theme/tokens";
 
 /** Planos e faturação — tabela de planos em USD, mensal ou anual. */
 export default function Billing() {
   const { colors } = useTheme();
-  const [period, setPeriod] = useState<BillingPeriod>('yearly');
-  const [selected, setSelected] = useState<Plan['id']>('pro');
+  const [period, setPeriod] = useState<BillingPeriod>("yearly");
+  const [selected, setSelected] = useState<Plan["id"]>("pro");
   const [busy, setBusy] = useState(false);
-  const ent = useQuery({ queryKey: ['entitlements'], queryFn: fetchEntitlements });
+  const ent = useQuery({
+    queryKey: ["entitlements"],
+    queryFn: fetchEntitlements,
+  });
+  const planInfo = useQuery({
+    queryKey: ["plan-info"],
+    queryFn: fetchPlanInfo,
+  });
+  const member = planInfo.data?.familyMember === true;
   const current = ent.data?.entitlements ?? [];
-  const currentName = current.includes('family') ? 'Família' : current.includes('pro_ai') ? 'Pro + IA' : current.includes('pro') ? 'Pro' : null;
+  const currentName = current.includes("family")
+    ? "Família"
+    : current.includes("pro_ai")
+      ? "Pro + IA"
+      : current.includes("pro")
+        ? "Pro"
+        : null;
   const plan = PLANS.find((p) => p.id === selected)!;
   const price = priceFor(plan, period);
 
@@ -26,20 +67,31 @@ export default function Billing() {
     try {
       const state = await purchase(plan.id, price.price);
       void ent.refetch();
-      toast(state.entitlements.length ? 'Plano activo. Obrigado!' : 'Assim que o pagamento for confirmado, o plano fica activo. Toque em «Restaurar compras» para verificar.');
+      toast(
+        state.entitlements.length
+          ? "Plano activo. Obrigado!"
+          : "Assim que o pagamento for confirmado, o plano fica activo. Toque em «Restaurar compras» para verificar.",
+      );
     } catch (e) {
-      toast(e instanceof BillingNotConfiguredError || e instanceof SignInRequiredError ? e.message : 'Não foi possível abrir o pagamento.', 'error');
+      toast(
+        e instanceof BillingNotConfiguredError ||
+          e instanceof SignInRequiredError ||
+          e instanceof FamilyMemberError
+          ? e.message
+          : "Não foi possível abrir o pagamento.",
+        "error",
+      );
     } finally {
       setBusy(false);
     }
   };
 
   const cta =
-    plan.id === 'free'
-      ? 'Continuar grátis'
-      : plan.trialDays && price?.kind === 'yearly'
+    plan.id === "free"
+      ? "Continuar grátis"
+      : plan.trialDays && price?.kind === "yearly"
         ? `Começar ${plan.trialDays} dias grátis`
-        : price?.kind === 'once'
+        : price?.kind === "once"
           ? `Comprar por ${formatUsd(price.price.usd)}`
           : `Subscrever por ${formatUsd(price?.price.usd ?? 0)}`;
 
@@ -47,36 +99,95 @@ export default function Billing() {
     <Screen
       testID="billing"
       footer={
-        <View style={{ gap: spacing.sm }}>
-          <AppButton label={cta} onPress={plan.id === 'free' ? () => toast('Está no plano Grátis.') : buy} loading={busy} testID="billing-cta" />
-          <AppText variant="caption" tone="muted" align="center">
-            {plan.id === 'free' || price?.kind === 'once'
-              ? 'Sem renovação automática.'
-              : `Renova automaticamente. Cancele quando quiser, sem custos.${plan.trialDays && price?.kind === 'yearly' ? ' Não é cobrado durante o teste.' : ''}`}
-          </AppText>
-        </View>
+        member ? (
+          <View
+            style={[
+              styles.memberCard,
+              { borderColor: colors.border, backgroundColor: colors.card },
+            ]}
+            testID="billing-family-member"
+          >
+            <Feather name="users" size={18} color={colors.text} />
+            <View style={{ flex: 1 }}>
+              <AppText variant="bodyStrong">
+                Incluído no plano da família
+              </AppText>
+              <AppText variant="small" tone="secondary">
+                {planInfo.data?.paidBy
+                  ? `Quem paga é ${planInfo.data.paidBy}, o responsável do grupo.`
+                  : "Quem paga é o responsável do grupo."}{" "}
+                Não precisas de pagar nada.
+              </AppText>
+            </View>
+          </View>
+        ) : (
+          <View style={{ gap: spacing.sm }}>
+            <AppButton
+              label={cta}
+              onPress={
+                plan.id === "free" ? () => toast("Está no plano Grátis.") : buy
+              }
+              loading={busy}
+              testID="billing-cta"
+            />
+            <AppText variant="caption" tone="muted" align="center">
+              {plan.id === "free" || price?.kind === "once"
+                ? "Sem renovação automática."
+                : `Renova automaticamente. Cancele quando quiser, sem custos.${plan.trialDays && price?.kind === "yearly" ? " Não é cobrado durante o teste." : ""}`}
+            </AppText>
+          </View>
+        )
       }
     >
       <AppHeader title="Planos" back />
       <FadeInItem index={0}>
-        <AppText variant="display" style={{ fontSize: 40, letterSpacing: -1.5 }}>
-          offly <AppText variant="display" tone="muted" style={{ fontSize: 40, letterSpacing: -1.5 }}>Pro</AppText>
+        <AppText
+          variant="display"
+          style={{ fontSize: 40, letterSpacing: -1.5 }}
+        >
+          offly{" "}
+          <AppText
+            variant="display"
+            tone="muted"
+            style={{ fontSize: 40, letterSpacing: -1.5 }}
+          >
+            Pro
+          </AppText>
         </AppText>
-        <AppText variant="body" tone="secondary" style={{ marginTop: spacing.xs }}>
+        <AppText
+          variant="body"
+          tone="secondary"
+          style={{ marginTop: spacing.xs }}
+        >
           Menos tela. Mais vida. Escolha o plano certo para si.
         </AppText>
       </FadeInItem>
 
       {currentName ? (
-        <View style={[styles.current, { borderColor: colors.text }]} testID="billing-current">
+        <View
+          style={[styles.current, { borderColor: colors.text }]}
+          testID="billing-current"
+        >
           <Feather name="check-circle" size={18} color={colors.text} />
           <View style={{ flex: 1 }}>
             <AppText variant="bodyStrong">Plano actual: {currentName}</AppText>
             <AppText variant="caption" tone="muted">
-              {ent.data?.expiresAt ? `Renova ou termina a ${new Date(ent.data.expiresAt).toLocaleDateString('pt-PT')}` : 'Sem data de fim'}
+              {ent.data?.expiresAt
+                ? `Renova ou termina a ${new Date(ent.data.expiresAt).toLocaleDateString("pt-PT")}`
+                : "Sem data de fim"}
             </AppText>
           </View>
-          <AppText variant="small" style={{ textDecorationLine: 'underline' }} onPress={() => void openBillingPortal().then((ok) => (ok ? undefined : toast('Para gerir a subscrição, contacte o suporte.')))}>
+          <AppText
+            variant="small"
+            style={{ textDecorationLine: "underline" }}
+            onPress={() =>
+              void openBillingPortal().then((ok) =>
+                ok
+                  ? undefined
+                  : toast("Para gerir a subscrição, contacte o suporte."),
+              )
+            }
+          >
             Gerir
           </AppText>
         </View>
@@ -85,8 +196,11 @@ export default function Billing() {
       <View style={{ marginTop: spacing.xl }}>
         <SegmentedControl
           options={[
-            { value: 'yearly', label: `Anual · poupe ${yearlySavings(PLANS[1]!)}%` },
-            { value: 'monthly', label: 'Mensal' },
+            {
+              value: "yearly",
+              label: `Anual · poupe ${yearlySavings(PLANS[1]!)}%`,
+            },
+            { value: "monthly", label: "Mensal" },
           ]}
           value={period}
           onChange={setPeriod}
@@ -104,18 +218,44 @@ export default function Billing() {
                 onPress={() => setSelected(p.id)}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: active }}
-                accessibilityLabel={`${p.name}${pr ? `, ${formatUsd(pr.price.usd)} ${pr.suffix}` : ''}`}
-                style={[styles.plan, { backgroundColor: colors.card, borderColor: active ? colors.text : colors.border, borderWidth: active ? 2 : 1 }]}
+                accessibilityLabel={`${p.name}${pr ? `, ${formatUsd(pr.price.usd)} ${pr.suffix}` : ""}`}
+                style={[
+                  styles.plan,
+                  {
+                    backgroundColor: colors.card,
+                    borderColor: active ? colors.text : colors.border,
+                    borderWidth: active ? 2 : 1,
+                  },
+                ]}
                 scaleTo={0.98}
                 testID={`plan-${p.id}`}
               >
                 <View style={styles.planTop}>
                   <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: spacing.sm,
+                      }}
+                    >
                       <AppText variant="h3">{p.name}</AppText>
                       {p.highlight ? (
-                        <View style={[styles.badge, { backgroundColor: colors.accent }]}>
-                          <AppText variant="caption" weight="bold" style={{ color: colors.onAccent, fontSize: 10, letterSpacing: 0.8 }}>
+                        <View
+                          style={[
+                            styles.badge,
+                            { backgroundColor: colors.accent },
+                          ]}
+                        >
+                          <AppText
+                            variant="caption"
+                            weight="bold"
+                            style={{
+                              color: colors.onAccent,
+                              fontSize: 10,
+                              letterSpacing: 0.8,
+                            }}
+                          >
                             {p.highlight.toUpperCase()}
                           </AppText>
                         </View>
@@ -125,25 +265,43 @@ export default function Billing() {
                       {p.tagline}
                     </AppText>
                   </View>
-                  <View style={{ alignItems: 'flex-end' }}>
+                  <View style={{ alignItems: "flex-end" }}>
                     <AppText variant="h2" style={{ fontSize: 24 }}>
-                      {p.id === 'free' ? '$0' : pr ? formatUsd(pr.price.usd) : '—'}
+                      {p.id === "free"
+                        ? "$0"
+                        : pr
+                          ? formatUsd(pr.price.usd)
+                          : "—"}
                     </AppText>
                     <AppText variant="caption" tone="muted">
-                      {p.id === 'free' ? 'para sempre' : pr?.suffix ?? 'só anual'}
+                      {p.id === "free"
+                        ? "para sempre"
+                        : (pr?.suffix ?? "só anual")}
                     </AppText>
                   </View>
                 </View>
-                {pr?.kind === 'yearly' && p.prices.monthly ? (
-                  <AppText variant="caption" tone="secondary" style={{ marginTop: spacing.xs }}>
-                    Equivale a {formatUsd(pr.price.usd / 12)}/mês · poupa {yearlySavings(p)}%
-                    {p.trialDays ? ` · ${p.trialDays} dias grátis` : ''}
+                {pr?.kind === "yearly" && p.prices.monthly ? (
+                  <AppText
+                    variant="caption"
+                    tone="secondary"
+                    style={{ marginTop: spacing.xs }}
+                  >
+                    Equivale a {formatUsd(pr.price.usd / 12)}/mês · poupa{" "}
+                    {yearlySavings(p)}%
+                    {p.trialDays ? ` · ${p.trialDays} dias grátis` : ""}
                   </AppText>
                 ) : null}
                 {active ? (
                   <View style={{ gap: 6, marginTop: spacing.md }}>
                     {p.features.map((f) => (
-                      <View key={f} style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                      <View
+                        key={f}
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: spacing.sm,
+                        }}
+                      >
                         <Feather name="check" size={14} color={colors.text} />
                         <AppText variant="small" tone="secondary">
                           {f}
@@ -159,32 +317,61 @@ export default function Billing() {
       </View>
 
       <SectionTitle>Comparar planos</SectionTitle>
-      <View style={[styles.table, { borderColor: colors.border }]} testID="billing-table">
+      <View
+        style={[styles.table, { borderColor: colors.border }]}
+        testID="billing-table"
+      >
         <View style={[styles.tr, { borderBottomColor: colors.border }]}>
           <AppText variant="caption" tone="muted" style={styles.th}>
-            {' '}
+            {" "}
           </AppText>
-          {['Grátis', 'Pro', 'Pro+IA', 'Família'].map((h) => (
-            <AppText key={h} variant="caption" weight="semibold" align="center" style={styles.td}>
+          {["Grátis", "Pro", "Pro+IA", "Família"].map((h) => (
+            <AppText
+              key={h}
+              variant="caption"
+              weight="semibold"
+              align="center"
+              style={styles.td}
+            >
               {h}
             </AppText>
           ))}
         </View>
         {COMPARISON.map((row, i) => (
-          <View key={row.feature} style={[styles.tr, { borderBottomColor: colors.border, borderBottomWidth: i === COMPARISON.length - 1 ? 0 : StyleSheet.hairlineWidth }]}>
+          <View
+            key={row.feature}
+            style={[
+              styles.tr,
+              {
+                borderBottomColor: colors.border,
+                borderBottomWidth:
+                  i === COMPARISON.length - 1 ? 0 : StyleSheet.hairlineWidth,
+              },
+            ]}
+          >
             <AppText variant="caption" tone="secondary" style={styles.th}>
               {row.feature}
             </AppText>
-            {(['free', 'pro', 'pro_ai', 'family'] as const).map((k) => {
+            {(["free", "pro", "pro_ai", "family"] as const).map((k) => {
               const v = row.values[k];
               return (
-                <View key={k} style={[styles.td, { alignItems: 'center' }]}>
-                  {typeof v === 'string' ? (
+                <View key={k} style={[styles.td, { alignItems: "center" }]}>
+                  {typeof v === "string" ? (
                     <AppText variant="caption">{v}</AppText>
                   ) : v ? (
-                    <Feather name="check" size={14} color={colors.text} accessibilityLabel="Incluído" />
+                    <Feather
+                      name="check"
+                      size={14}
+                      color={colors.text}
+                      accessibilityLabel="Incluído"
+                    />
                   ) : (
-                    <Feather name="minus" size={14} color={colors.textMuted} accessibilityLabel="Não incluído" />
+                    <Feather
+                      name="minus"
+                      size={14}
+                      color={colors.textMuted}
+                      accessibilityLabel="Não incluído"
+                    />
                   )}
                 </View>
               );
@@ -202,34 +389,83 @@ export default function Billing() {
           void restorePurchases()
             .then((st) => {
               void ent.refetch();
-              toast(st.entitlements.length ? 'Plano restaurado.' : 'Não encontrámos um plano activo nesta conta.');
+              toast(
+                st.entitlements.length
+                  ? "Plano restaurado."
+                  : "Não encontrámos um plano activo nesta conta.",
+              );
             })
-            .catch((e) => toast(e instanceof BillingNotConfiguredError || e instanceof SignInRequiredError ? e.message : 'Não foi possível restaurar.', 'error'))
+            .catch((e) =>
+              toast(
+                e instanceof BillingNotConfiguredError ||
+                  e instanceof SignInRequiredError ||
+                  e instanceof FamilyMemberError
+                  ? e.message
+                  : "Não foi possível restaurar.",
+                "error",
+              ),
+            )
         }
       />
-      <AppText variant="caption" tone="muted" align="center" style={{ marginTop: spacing.sm }}>
-        Preços em dólares americanos (USD). O pagamento é processado por um parceiro de pagamentos seguro; o offly nunca vê os dados do seu cartão. Se a subscrição terminar durante um
-        desafio, a proteção mantém-se até à data escolhida.
+      <AppText
+        variant="caption"
+        tone="muted"
+        align="center"
+        style={{ marginTop: spacing.sm }}
+      >
+        Preços em dólares americanos (USD). O pagamento é processado por um
+        parceiro de pagamentos seguro; o offly nunca vê os dados do seu cartão.
+        Se a subscrição terminar durante um desafio, a proteção mantém-se até à
+        data escolhida.
       </AppText>
     </Screen>
   );
 }
 
-function priceFor(plan: Plan, period: BillingPeriod): { price: PlanPrice; suffix: string; kind: BillingPeriod | 'once' } | null {
-  if (plan.prices.once) return { price: plan.prices.once, suffix: 'uma vez', kind: 'once' };
+function priceFor(
+  plan: Plan,
+  period: BillingPeriod,
+): { price: PlanPrice; suffix: string; kind: BillingPeriod | "once" } | null {
+  if (plan.prices.once)
+    return { price: plan.prices.once, suffix: "uma vez", kind: "once" };
   const p = plan.prices[period] ?? plan.prices.yearly;
   if (!p) return null;
-  const kind = plan.prices[period] ? period : 'yearly';
-  return { price: p, suffix: kind === 'yearly' ? '/ano' : '/mês', kind };
+  const kind = plan.prices[period] ? period : "yearly";
+  return { price: p, suffix: kind === "yearly" ? "/ano" : "/mês", kind };
 }
 
 const styles = StyleSheet.create({
+  memberCard: {
+    flexDirection: "row",
+    gap: 12,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
   plan: { borderRadius: radii.lg, padding: spacing.lg },
-  current: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, borderWidth: 1, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.xl },
-  planTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  current: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    borderWidth: 1,
+    borderRadius: radii.lg,
+    padding: spacing.lg,
+    marginTop: spacing.xl,
+  },
+  planTop: { flexDirection: "row", alignItems: "center", gap: spacing.md },
   badge: { borderRadius: radii.pill, paddingHorizontal: 8, paddingVertical: 2 },
-  table: { borderWidth: StyleSheet.hairlineWidth, borderRadius: radii.md, overflow: 'hidden' },
-  tr: { flexDirection: 'row', alignItems: 'center', minHeight: 40, borderBottomWidth: StyleSheet.hairlineWidth, paddingHorizontal: spacing.sm },
+  table: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: radii.md,
+    overflow: "hidden",
+  },
+  tr: {
+    flexDirection: "row",
+    alignItems: "center",
+    minHeight: 40,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: spacing.sm,
+  },
   th: { flex: 1.7, paddingVertical: 8 },
   td: { flex: 1 },
 });
