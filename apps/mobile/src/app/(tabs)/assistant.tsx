@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppBottomSheet, AppButton, AppText, LeafBackdrop, Offy } from '@/components';
+import { AppBottomSheet, AppButton, AppText, LeafBackdrop, MOOD_LABEL, Offy, moodFromText, type OffyMood } from '@/components';
 import { speak } from '@/services/coach';
 import { useToday } from '@/hooks/queries';
 import { kvGet, kvSet } from '@/repositories/kv';
@@ -64,6 +64,13 @@ export default function Assistant() {
     ...(conv.data?.messages ?? []),
   ];
 
+  // Emoção do Offy: acompanha a última coisa que a pessoa disse; senão, como está a correr o dia.
+  const lastUser = [...(conv.data?.messages ?? [])].reverse().find((m) => m.role === 'user');
+  const snap = today.data;
+  const dayMood: OffyMood =
+    snap?.measured && snap.totals.limitMs > 0 ? (snap.totals.usedMs >= snap.totals.limitMs ? 'calm' : snap.totals.usedMs < snap.totals.limitMs * 0.8 ? 'joy' : 'idle') : 'idle';
+  const mood: OffyMood = sending ? 'thinking' : (lastUser && moodFromText(lastUser.content)) || dayMood;
+
   const push = async (m: Omit<ChatMessage, 'id' | 'conversationId' | 'createdAt'>) => {
     if (!conv.data) return;
     await addMessage({ ...m, id: randomUUID(), conversationId: conv.data.id, createdAt: nowMs() });
@@ -105,7 +112,7 @@ export default function Assistant() {
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1, backgroundColor: colors.background }}>
       <LeafBackdrop />
       <View style={[styles.header, { paddingTop: insets.top + spacing.md, borderBottomColor: colors.border }]}>
-        <Offy size={44} mood={sending ? 'thinking' : 'idle'} testID="offy-header" />
+        <Offy size={44} mood={mood} testID="offy-header" />
         <View style={{ flex: 1 }}>
           <AppText variant="small" weight="semibold">
             Offy
@@ -113,7 +120,7 @@ export default function Assistant() {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <View style={[styles.status, { backgroundColor: online ? colors.text : 'transparent', borderColor: colors.textMuted }]} />
             <AppText variant="caption" tone="muted" style={{ fontSize: 10 }}>
-              {sending ? 'A pensar…' : online ? 'Online' : 'Offline'}
+              {sending ? 'A pensar…' : `${online ? 'Online' : 'Offline'} · ${MOOD_LABEL[mood]}`}
             </AppText>
           </View>
         </View>
@@ -138,7 +145,7 @@ export default function Assistant() {
         renderItem={({ item }) => <Bubble message={item} voice={online && prefs.voiceCoach} />}
         ListHeaderComponent={
           <View style={styles.hero}>
-            <Offy size={112} mood={sending ? 'thinking' : 'idle'} testID="offy-hero" />
+            <Offy size={124} mood={mood} testID="offy-hero" />
             <AppText variant="caption" tone="muted" align="center" style={{ marginTop: spacing.sm }}>
               Sem pressa. Escreve como se fosse a um amigo.
             </AppText>
@@ -171,7 +178,7 @@ export default function Assistant() {
 
       {!online ? (
         <AppText variant="caption" tone="muted" align="center" style={{ paddingHorizontal: spacing.xl, marginBottom: spacing.sm }}>
-          {isBackendConfigured ? 'Inicie sessão em Configurações → Sincronização para usar o assistente.' : OFFLINE_TEXT.no_backend}
+          {isBackendConfigured ? 'Sem ligação ao Offy agora. O bloqueio, os limites e o foco continuam a funcionar.' : OFFLINE_TEXT.no_backend}
         </AppText>
       ) : null}
 

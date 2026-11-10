@@ -37,6 +37,8 @@ export interface Prefs {
   displayName: string;
   /** O assistente fala em voz alta (calma, incentivo) nos momentos difíceis. */
   voiceCoach: boolean;
+  /** Já entrou na conta neste telemóvel (o login é o primeiro ecrã; depois disso o app funciona offline). */
+  signedIn: boolean;
   /** Som de fundo do ecrã de calma. */
   calmSound: 'none' | 'rain' | 'waves' | 'forest';
 }
@@ -75,6 +77,7 @@ export const DEFAULT_PREFS: Prefs = {
   displayName: '',
   voiceCoach: true,
   calmSound: 'rain',
+  signedIn: false,
 };
 
 const KEY = 'prefs';

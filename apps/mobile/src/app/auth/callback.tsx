@@ -20,7 +20,7 @@ export default function AuthCallback() {
     sb.auth.exchangeCodeForSession(params.code).then(({ error: e }) => {
       if (e) return setError(e.message);
       if (params.type === 'recovery') router.replace({ pathname: '/auth/forgot', params: { mode: 'reset' } });
-      else router.replace('/settings/sync');
+      else router.replace('/');
     });
   }, [params.code, params.type]);
 

@@ -17,6 +17,7 @@ import { ensureDefaultLimits, ensureDefaultSchedule } from '@/repositories/limit
 import { configureNotifications } from '@/services/notifications';
 import { enforceChallengeLock } from '@/services/challenge';
 import { refreshFamilyLink } from '@/services/family';
+import { getSupabase, isBackendConfigured } from '@/services/supabase';
 import { flushSync } from '@/services/sync';
 import { syncRulesToNative } from '@/services/usage';
 import { usePrefs } from '@/stores/prefs';
@@ -109,7 +110,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider preference={prefs.theme}>
           <QueryClientProvider client={queryClient}>
-            <Shell bootError={bootError} onRetry={retryBoot} ready={ready && loaded} onboardingDone={prefs.onboardingDone} biometricLock={prefs.biometricLock} />
+            <Shell bootError={bootError} onRetry={retryBoot} ready={ready && loaded} onboardingDone={prefs.onboardingDone} signedIn={prefs.signedIn} biometricLock={prefs.biometricLock} />
           </QueryClientProvider>
         </ThemeProvider>
       </SafeAreaProvider>
@@ -122,24 +123,51 @@ function Shell({
   onRetry,
   ready,
   onboardingDone,
+  signedIn,
   biometricLock,
 }: {
   bootError: string | null;
   onRetry: () => void;
   ready: boolean;
   onboardingDone: boolean;
+  signedIn: boolean;
   biometricLock: boolean;
 }) {
   const { colors, scheme } = useTheme();
   const segments = useSegments();
   const navState = useRootNavigationState();
 
-  // Sem onboarding concluído, qualquer rota (excepto o retorno de autenticação) leva ao onboarding.
+  // Ordem de entrada: 1) login (só a primeira vez, depois funciona offline), 2) onboarding, 3) app.
+  const needsLogin = isBackendConfigured && !signedIn;
+  const landed = useRef(false);
   useEffect(() => {
     if (!ready || !navState?.key) return;
     const first = segments[0] as string | undefined;
-    if (!onboardingDone && first !== 'onboarding' && !(first === 'auth' && segments[1] === 'callback')) router.replace('/onboarding');
-  }, [ready, navState?.key, onboardingDone, segments]);
+    const second = segments[1] as string | undefined;
+    if (first === 'auth' && second === 'callback') return;
+    if (needsLogin) {
+      // Ao abrir o app, o primeiro ecrã é sempre «Entrar» (a recuperação de palavra-passe só por escolha).
+      if (first !== 'auth' || (!landed.current && second !== 'sign-in' && second !== 'sign-up')) router.replace('/auth/sign-in');
+      landed.current = true;
+      return;
+    }
+    if (!onboardingDone && first !== 'onboarding') router.replace('/onboarding');
+  }, [ready, navState?.key, onboardingDone, needsLogin, segments]);
+
+  // A sessão do Supabase decide o «já entrou»: entrar (email, criar conta, ligação do email) ou sair.
+  // Só depois de as preferências estarem carregadas (senão gravaria os valores por defeito por cima).
+  useEffect(() => {
+    const sb = getSupabase();
+    if (!sb || !ready) return;
+    const set = (v: boolean) => {
+      if (usePrefs.getState().prefs.signedIn !== v) void usePrefs.getState().update({ signedIn: v });
+    };
+    const { data } = sb.auth.onAuthStateChange((event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) set(true);
+      if (event === 'SIGNED_OUT') set(false);
+    });
+    return () => data.subscription.unsubscribe();
+  }, [ready]);
 
   if (bootError) {
     return (
@@ -153,10 +181,10 @@ function Shell({
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background }, animation: 'fade' }}>
-        <Stack.Protected guard={!onboardingDone}>
+        <Stack.Protected guard={!onboardingDone && !needsLogin}>
           <Stack.Screen name="onboarding" />
         </Stack.Protected>
-        <Stack.Protected guard={onboardingDone}>
+        <Stack.Protected guard={onboardingDone && !needsLogin}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="block" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
           <Stack.Screen name="limit-warning" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
