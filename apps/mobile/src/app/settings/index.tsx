@@ -5,25 +5,22 @@ import { AppHeader, AppText, ListRow, Screen, type RowIcon } from '@/components'
 import { spacing } from '@/theme/tokens';
 
 const ITEMS: { title: string; icon: RowIcon; href: Href }[] = [
-  { title: 'Limites de aplicações', icon: { set: 'mci', name: 'timer-sand' }, href: '/settings/limits' },
+  { title: 'Apps que me distraem', icon: { set: 'mci', name: 'timer-sand' }, href: '/settings/limits' },
+  { title: 'Proteção', icon: { set: 'feather', name: 'shield' }, href: '/protection' },
   { title: 'Horários de bloqueio', icon: { set: 'feather', name: 'clock' }, href: '/settings/schedules' },
-  { title: 'Proteção de sites', icon: { set: 'feather', name: 'globe' }, href: '/protection' },
-  { title: 'Modo restrito', icon: { set: 'mci', name: 'timer-lock-outline' }, href: '/settings/strict' },
+  { title: 'Família', icon: { set: 'feather', name: 'users' }, href: '/family' },
+  { title: 'Offy e voz', icon: { set: 'feather', name: 'mic' }, href: '/settings/assistant' },
   { title: 'Notificações', icon: { set: 'feather', name: 'bell' }, href: '/settings/notifications' },
-  { title: 'Interface e idioma', icon: { set: 'feather', name: 'info' }, href: '/settings/appearance' },
-  { title: 'Privacidade e dados', icon: { set: 'feather', name: 'lock' }, href: '/settings/privacy' },
-  { title: 'Sincronização na nuvem', icon: { set: 'feather', name: 'cloud' }, href: '/settings/sync' },
-  { title: 'Ajuda e suporte', icon: { set: 'feather', name: 'help-circle' }, href: '/settings/help' },
 ];
 
 const MORE: { title: string; icon: RowIcon; href: Href }[] = [
-  { title: 'Assistente e voz', icon: { set: 'feather', name: 'mic' }, href: '/settings/assistant' },
-  { title: 'Planos e faturação', icon: { set: 'feather', name: 'credit-card' }, href: '/settings/billing' },
-  { title: 'Launcher', icon: { set: 'feather', name: 'smartphone' }, href: '/settings/launcher' },
-  { title: 'Permissões do sistema', icon: { set: 'mci', name: 'shield-check-outline' }, href: '/settings/permissions' },
-  { title: 'Hábitos', icon: { set: 'feather', name: 'check-square' }, href: '/habits' },
-  { title: 'Família', icon: { set: 'feather', name: 'users' }, href: '/family' },
-  { title: 'Sobre, privacidade e termos', icon: { set: 'feather', name: 'info' }, href: '/settings/about' },
+  { title: 'A minha conta', icon: { set: 'feather', name: 'user' }, href: '/settings/sync' },
+  { title: 'Planos', icon: { set: 'feather', name: 'credit-card' }, href: '/settings/billing' },
+  { title: 'Permissões do telemóvel', icon: { set: 'mci', name: 'shield-check-outline' }, href: '/settings/permissions' },
+  { title: 'Ecrã inicial (launcher)', icon: { set: 'feather', name: 'smartphone' }, href: '/settings/launcher' },
+  { title: 'Aparência', icon: { set: 'feather', name: 'sun' }, href: '/settings/appearance' },
+  { title: 'Os meus dados', icon: { set: 'feather', name: 'lock' }, href: '/settings/privacy' },
+  { title: 'Ajuda e sobre', icon: { set: 'feather', name: 'help-circle' }, href: '/settings/help' },
 ];
 
 /** Configurações — personalização e privacidade. */

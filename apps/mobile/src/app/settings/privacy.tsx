@@ -12,14 +12,11 @@ import { stopEnforcement, shield } from '@/native/device';
 import { usePrefs, type Prefs } from '@/stores/prefs';
 import { spacing } from '@/theme/tokens';
 
-const CONSENTS: { key: keyof Pick<Prefs, 'cloudSync' | 'syncSensitive' | 'aiConsent' | 'aiMemory'>; title: string; subtitle: string }[] = [
-  { key: 'cloudSync', title: 'Sincronização na nuvem', subtitle: 'Guarda limites, tempos e sessões de foco na sua conta.' },
-  { key: 'syncSensitive', title: 'Sincronizar dados sensíveis', subtitle: 'Inclui hábitos e programas de recuperação.' },
-  { key: 'aiConsent', title: 'Assistente IA', subtitle: 'Permite enviar as mensagens do chat para processamento.' },
-  { key: 'aiMemory', title: 'Memória de estratégias', subtitle: 'O assistente lembra-se das alternativas que mais o ajudaram.' },
+const CONSENTS: { key: keyof Pick<Prefs, 'aiMemory'>; title: string; subtitle: string }[] = [
+  { key: 'aiMemory', title: 'O Offy lembra-se do que te ajuda', subtitle: 'Guarda as alternativas que mais te ajudaram nos momentos difíceis.' },
 ];
 
-/** Privacidade e dados: consentimentos, bloqueio biométrico, exportação e eliminação. */
+/** Os meus dados: bloqueio com impressão digital, exportar e apagar. */
 export default function Privacy() {
   const { prefs, update, reset } = usePrefs();
   const { session } = useSession();
@@ -77,7 +74,7 @@ export default function Privacy() {
         Por defeito, tudo fica no seu dispositivo. Não lemos mensagens, palavras-passe nem dados financeiros, e não vendemos dados.
       </AppText>
 
-      <SectionTitle>Consentimentos</SectionTitle>
+      <SectionTitle>Offy</SectionTitle>
       <View style={{ gap: spacing.sm }}>
         {CONSENTS.map((c) => (
           <ListRow
@@ -88,7 +85,6 @@ export default function Privacy() {
               <AppSwitch
                 value={prefs[c.key]}
                 onValueChange={(v) => void setConsent(c.key, v)}
-                disabled={c.key === 'syncSensitive' && !prefs.cloudSync}
                 accessibilityLabel={c.title}
               />
             }

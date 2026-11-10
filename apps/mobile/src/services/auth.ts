@@ -22,8 +22,12 @@ export function useSession(): { session: Session | null; loading: boolean } {
 
 const redirectTo = () => Linking.createURL('auth/callback');
 
-export async function signUp(email: string, password: string) {
-  const { data, error } = await requireSupabase().auth.signUp({ email, password, options: { emailRedirectTo: redirectTo() } });
+export async function signUp(email: string, password: string, name?: string) {
+  const { data, error } = await requireSupabase().auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: redirectTo(), data: name ? { display_name: name.trim() } : undefined },
+  });
   if (error) throw error;
   return { needsVerification: !data.session };
 }

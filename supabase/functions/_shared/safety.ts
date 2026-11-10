@@ -21,6 +21,22 @@ export function detectCrisis(text: string): boolean {
   return CRISIS_PATTERNS.some((r) => r.test(normalized));
 }
 
+/** Resposta de crise com os números do país da pessoa (quando o app os envia). */
+export function crisisReply(ctx?: { language?: string | null; emergency?: string | null; crisis?: string | null; crisisName?: string | null }): string {
+  const br = ctx?.language === 'pt-BR';
+  const emergency = String(ctx?.emergency ?? '').replace(/[^\d +]/g, '').slice(0, 18);
+  const crisis = String(ctx?.crisis ?? '').replace(/[^\d +]/g, '').slice(0, 18);
+  const crisisName = String(ctx?.crisisName ?? '').slice(0, 60);
+  if (!emergency && !crisis) return CRISIS_REPLY;
+  const you = br ? 'você' : 'tu';
+  return (
+    `Obrigado por me dizer${br ? '' : 'es'} isto. O que ${br ? 'você está' : 'estás'} a sentir é importante e não ${br ? 'precisa' : 'tens de'} passar por isto sozinho. ` +
+    (emergency ? `Se ${br ? 'está' : 'estás'} em perigo ou a pensar fazer-${br ? 'se' : 'te'} mal, liga já para o ${emergency}. ` : '') +
+    (crisis ? `${br ? 'Você também pode' : 'Podes também'} falar agora com ${crisisName || 'a linha de apoio emocional'}: ${crisis}. ` : '') +
+    `Se puder${br ? '' : 'es'}, contacta alguém de confiança e fica perto dessa pessoa. Eu sou apenas um assistente e não substituo ajuda profissional, mas estou aqui com ${you}.`
+  );
+}
+
 export const CRISIS_REPLY =
   'Obrigado por me dizeres isto. O que estás a sentir é importante e não tens de passar por isto sozinho. ' +
   'Se estás em perigo ou a pensar fazer-te mal, liga já para o 112. ' +
@@ -29,7 +45,7 @@ export const CRISIS_REPLY =
 
 /** Instruções de sistema — estáveis (para cache de prompt) e sem dados do utilizador. */
 export const SYSTEM_PROMPT = `És o assistente do offly, uma aplicação de bem-estar digital ("Menos tela. Mais vida.").
-Falas português europeu, tratas o utilizador por "tu", com tom calmo, caloroso e sem julgamento.
+Falas a variante de português indicada no Contexto (por omissão, português europeu tratando por "tu"; no Brasil, português do Brasil tratando por "você"), com tom calmo, caloroso e sem julgamento.
 
 O teu papel:
 - Ajudar a reduzir o uso compulsivo de aplicações, pornografia ou apostas, com estratégias práticas e voluntárias.
@@ -45,8 +61,8 @@ Limites obrigatórios:
 - Nunca envergonhas, culpas ou moralizas.
 - Nunca incentivas apostas, nem dás dicas de jogo, nem formas de contornar bloqueios.
 - Não podes alterar limites, bloqueios ou definições: se o utilizador pedir, explica onde o pode fazer na aplicação.
-- Se surgirem sinais de crise, risco para a vida ou autolesão, recomenda ligar 112 ou o SNS 24 (808 24 24 24) e falar com alguém de confiança.
-- Para apostas, podes mencionar a autoexclusão no SRIJ e a Linha Vida 1414.
+- Se surgirem sinais de crise, risco para a vida ou autolesão, recomenda ligar para os números de emergência e de apoio do país da pessoa (estão no Contexto) e falar com alguém de confiança. Nunca inventes números.
+- Para apostas ou outras dependências, sugere a linha de apoio do país, se estiver no Contexto.
 
 Formato: respostas curtas (2 a 5 frases), sem listas longas, sem markdown pesado.
 Quando fizer sentido sugerir um exercício, termina a resposta com uma destas etiquetas numa linha própria: [cartao:respiracao], [cartao:foco] ou [cartao:ajuda].`;
@@ -68,9 +84,19 @@ export function extractCards(text: string): { text: string; cards: Card[] } {
 }
 
 /** Contexto mínimo e agregado enviado ao modelo. */
-export function buildContextNote(
-  ctx: { goals?: string[]; todayUsedMinutes?: number | null; todayLimitMinutes?: number | null; name?: string | null } | undefined,
-): string {
+export type ContextInput = {
+  goals?: string[];
+  todayUsedMinutes?: number | null;
+  todayLimitMinutes?: number | null;
+  name?: string | null;
+  country?: string | null;
+  language?: string | null;
+  emergency?: string | null;
+  crisis?: string | null;
+  crisisName?: string | null;
+};
+
+export function buildContextNote(ctx: ContextInput | undefined): string {
   if (!ctx) return 'Sem contexto adicional.';
   const name = String(ctx.name ?? '').replace(/[^\p{L}\p{M}' -]/gu, '').trim().slice(0, 24);
   const goals = (ctx.goals ?? []).slice(0, 6).join(', ') || 'nenhum indicado';
@@ -78,5 +104,9 @@ export function buildContextNote(
     ctx.todayUsedMinutes != null && ctx.todayLimitMinutes != null
       ? `${ctx.todayUsedMinutes} de ${ctx.todayLimitMinutes} minutos permitidos nas apps controladas hoje`
       : 'sem dados de utilização de hoje';
-  return `${name.length >= 2 ? `Nome: ${name}. ` : ''}Objectivos do utilizador: ${goals}. Utilização: ${usage}.`;
+  const lang = ctx.language === 'pt-BR' ? 'Português do Brasil (trata por você).' : 'Português europeu (trata por tu).';
+  const country = String(ctx.country ?? '').replace(/[^A-Za-z]/g, '').slice(0, 2).toUpperCase();
+  const num = (v?: string | null) => String(v ?? '').replace(/[^\d +]/g, '').slice(0, 18);
+  const lines = [num(ctx.emergency) && `emergência ${num(ctx.emergency)}`, num(ctx.crisis) && `apoio emocional ${num(ctx.crisis)}${ctx.crisisName ? ` (${String(ctx.crisisName).slice(0, 60)})` : ''}`].filter(Boolean).join(', ');
+  return `${name.length >= 2 ? `Nome: ${name}. ` : ''}${country ? `País: ${country}. ` : ''}Língua: ${lang} ${lines ? `Números de ajuda do país: ${lines}. ` : ''}Objectivos do utilizador: ${goals}. Utilização: ${usage}.`;
 }

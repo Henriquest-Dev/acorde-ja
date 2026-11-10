@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SYSTEM_PROMPT, buildContextNote, detectCrisis, extractCards } from '../../supabase/functions/_shared/safety';
+import { CRISIS_REPLY, SYSTEM_PROMPT, buildContextNote, crisisReply, detectCrisis, extractCards } from '../../supabase/functions/_shared/safety';
 
 describe('assistente — segurança', () => {
   it('detecta sinais de crise em português', () => {
@@ -27,5 +27,24 @@ describe('assistente — segurança', () => {
     for (const s of ['diagnósticos', 'envergonhas', 'incentivas apostas', 'alterar limites', 'nunca inventes dados']) {
       expect(SYSTEM_PROMPT).toContain(s);
     }
+  });
+});
+
+describe('país e língua', () => {
+  it('resposta de crise usa os números do país', () => {
+    const r = crisisReply({ language: 'pt-BR', emergency: '190', crisis: '188', crisisName: 'CVV' });
+    expect(r).toContain('190');
+    expect(r).toContain('188');
+    expect(r).toContain('você');
+    expect(r).not.toContain('112');
+  });
+  it('sem números, usa a resposta segura de base', () => {
+    expect(crisisReply({})).toBe(CRISIS_REPLY);
+  });
+  it('contexto indica a variante da língua e os números', () => {
+    const n = buildContextNote({ country: 'BR', language: 'pt-BR', emergency: '190', crisis: '188', crisisName: 'CVV' });
+    expect(n).toContain('País: BR');
+    expect(n).toContain('Português do Brasil');
+    expect(n).toContain('apoio emocional 188 (CVV)');
   });
 });

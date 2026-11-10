@@ -3,7 +3,7 @@
     "name": "offly",
     "slug": "acorde-ja",
     "scheme": "acordeja",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -14,7 +14,8 @@
       "bundleIdentifier": "pt.acordeja.app",
       "supportsTablet": false,
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Utilizamos o Face ID para proteger o acesso às suas definições do offly."
+        "NSFaceIDUsageDescription": "Utilizamos o Face ID para proteger o acesso às suas definições do offly.",
+        "NSLocationWhenInUseUsageDescription": "O offly usa a localização só uma vez, para saber o teu país e mostrar os números de ajuda certos."
       },
       "entitlements": {
         "com.apple.developer.family-controls": true
@@ -28,7 +29,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "versionCode": 7,
+      "versionCode": 8,
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
@@ -50,7 +51,10 @@
         "com.oppo.launcher.permission.READ_SETTINGS",
         "com.oppo.launcher.permission.WRITE_SETTINGS",
         "me.everything.badger.permission.BADGE_COUNT_READ",
-        "me.everything.badger.permission.BADGE_COUNT_WRITE"
+        "me.everything.badger.permission.BADGE_COUNT_WRITE",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE_LOCATION"
       ]
     },
     "web": {
@@ -101,6 +105,15 @@
           "microphonePermission": false,
           "recordAudioAndroid": false,
           "enableBackgroundPlayback": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O offly usa a localização só uma vez, para saber o teu país e mostrar os números de ajuda certos.",
+          "isAndroidBackgroundLocationEnabled": false,
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidForegroundServiceEnabled": false
         }
       ]
     ],

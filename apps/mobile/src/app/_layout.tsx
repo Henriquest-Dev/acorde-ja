@@ -17,6 +17,7 @@ import { ensureDefaultLimits, ensureDefaultSchedule } from '@/repositories/limit
 import { configureNotifications } from '@/services/notifications';
 import { enforceChallengeLock } from '@/services/challenge';
 import { refreshFamilyLink } from '@/services/family';
+import { pullProfile } from '@/services/profile';
 import { getSupabase, isBackendConfigured } from '@/services/supabase';
 import { flushSync } from '@/services/sync';
 import { syncRulesToNative } from '@/services/usage';
@@ -110,7 +111,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider preference={prefs.theme}>
           <QueryClientProvider client={queryClient}>
-            <Shell bootError={bootError} onRetry={retryBoot} ready={ready && loaded} onboardingDone={prefs.onboardingDone} signedIn={prefs.signedIn} biometricLock={prefs.biometricLock} />
+            <Shell bootError={bootError} onRetry={retryBoot} ready={ready && loaded} onboardingDone={prefs.onboardingDone} signedIn={prefs.signedIn} needsProfile={isBackendConfigured && prefs.signedIn && (prefs.displayName.trim().length < 2 || !prefs.country)} biometricLock={prefs.biometricLock} />
           </QueryClientProvider>
         </ThemeProvider>
       </SafeAreaProvider>
@@ -124,6 +125,7 @@ function Shell({
   ready,
   onboardingDone,
   signedIn,
+  needsProfile,
   biometricLock,
 }: {
   bootError: string | null;
@@ -131,6 +133,7 @@ function Shell({
   ready: boolean;
   onboardingDone: boolean;
   signedIn: boolean;
+  needsProfile: boolean;
   biometricLock: boolean;
 }) {
   const { colors, scheme } = useTheme();
@@ -151,8 +154,13 @@ function Shell({
       landed.current = true;
       return;
     }
-    if (!onboardingDone && first !== 'onboarding') router.replace('/onboarding');
-  }, [ready, navState?.key, onboardingDone, needsLogin, segments]);
+    // Depois de entrar: nome, país e números de ajuda (também para quem já tinha conta).
+    if (needsProfile) {
+      if (first !== 'profile-setup') router.replace('/profile-setup');
+      return;
+    }
+    if (!onboardingDone && first !== 'onboarding' && first !== 'profile-setup') router.replace('/onboarding');
+  }, [ready, navState?.key, onboardingDone, needsLogin, needsProfile, segments]);
 
   // A sessão do Supabase decide o «já entrou»: entrar (email, criar conta, ligação do email) ou sair.
   // Só depois de as preferências estarem carregadas (senão gravaria os valores por defeito por cima).
@@ -163,7 +171,12 @@ function Shell({
       if (usePrefs.getState().prefs.signedIn !== v) void usePrefs.getState().update({ signedIn: v });
     };
     const { data } = sb.auth.onAuthStateChange((event, session) => {
-      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) set(true);
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
+        set(true);
+        // Conta com sessão: sincronização automática (sem perguntar) e o perfil da conta no telemóvel.
+        if (!usePrefs.getState().prefs.cloudSync) void usePrefs.getState().update({ cloudSync: true, aiConsent: true });
+        void pullProfile().catch(() => undefined);
+      }
       if (event === 'SIGNED_OUT') set(false);
     });
     return () => data.subscription.unsubscribe();
@@ -193,6 +206,7 @@ function Shell({
           <Stack.Screen name="launcher" options={{ animation: 'fade', gestureEnabled: false }} />
         </Stack.Protected>
         <Stack.Screen name="auth" />
+        <Stack.Screen name="profile-setup" options={{ gestureEnabled: false }} />
       </Stack>
       {biometricLock && Platform.OS !== 'web' ? <BiometricGate /> : null}
       <AppToastHost />

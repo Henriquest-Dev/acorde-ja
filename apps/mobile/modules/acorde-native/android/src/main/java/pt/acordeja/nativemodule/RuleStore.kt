@@ -163,7 +163,7 @@ class RuleStore(context: Context) {
         List(a.length()) {
           val l = a.getJSONObject(it)
           val minutes = l.getInt("limitMinutes")
-          require(minutes in 1..720) { "limitMinutes fora do intervalo" }
+          require(minutes in 1..1440) { "limitMinutes fora do intervalo" }
           Limit(l.getString("appId"), strings(l.optJSONArray("packageNames")), minutes, l.optBoolean("enabled", true), l.optLong("sinceMs", 0L))
         }
       } ?: emptyList()

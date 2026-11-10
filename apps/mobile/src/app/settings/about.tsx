@@ -18,7 +18,7 @@ const PERMISSIONS: { title: string; why: string }[] = [
 
 const PRIVACY: string[] = [
   'Funciona sem conta: limites, tempos, hábitos e desafios ficam guardados só no dispositivo.',
-  'Com conta, só sincronizamos o que autorizar, e pode desligar a sincronização a qualquer momento.',
+  'Os teus limites e o teu progresso ficam guardados na tua conta, de forma privada.',
   'Nunca vendemos dados nem mostramos anúncios.',
   'Não guardamos os sites que visita: apenas uma contagem diária de tentativas bloqueadas.',
   'Pode exportar ou eliminar todos os seus dados em Privacidade e dados.',

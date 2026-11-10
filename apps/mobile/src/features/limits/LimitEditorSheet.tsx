@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
-import { AppBottomSheet, AppButton, AppSlider, AppSwitch, AppText, BrandIcon, toast } from '@/components';
+import { AppBottomSheet, AppButton, AppSwitch, AppText, BrandIcon, toast } from '@/components';
+import { DurationPicker } from './DurationPicker';
 import { useInvalidate, qk } from '@/hooks/queries';
 import { deleteLimit, upsertLimit, type AppLimit } from '@/repositories/limits';
 import { enqueueSync } from '@/services/sync';
@@ -8,7 +9,7 @@ import { syncRulesToNative } from '@/services/usage';
 import { spacing } from '@/theme/tokens';
 import { AcordeNative } from '../../../modules/acorde-native';
 
-/** Folha de edição de um limite diário (5 a 240 minutos, em passos de 5). */
+/** Folha de edição de um limite diário (1 minuto a 24 horas). */
 export function LimitEditorSheet({ limit, onClose, allowDelete }: { limit: AppLimit | null; onClose: () => void; allowDelete?: boolean }) {
   if (!limit) return null;
   // `key`: o estado do editor reinicia quando muda a aplicação.
@@ -24,7 +25,11 @@ function Editor({ limit, onClose, allowDelete }: { limit: AppLimit; onClose: () 
   const save = async () => {
     setSaving(true);
     try {
-      const saved = await upsertLimit({ ...limit, limitMinutes: minutes, enabled });
+      const saved = await upsertLimit({
+        ...limit,
+        limitMinutes: minutes,
+        enabled,
+      });
       await syncRulesToNative();
       await enqueueSync('app_limits', 'upsert', saved.appId, {
         app_id: saved.appId,
@@ -59,7 +64,14 @@ function Editor({ limit, onClose, allowDelete }: { limit: AppLimit; onClose: () 
 
   return (
     <AppBottomSheet visible onClose={onClose} title="Limite diário">
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.xl }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: spacing.md,
+          marginBottom: spacing.xl,
+        }}
+      >
         <BrandIcon appId={limit.appId} name={limit.name} size={40} />
         <View style={{ flex: 1 }}>
           <AppText variant="bodyStrong">{limit.name}</AppText>
@@ -69,11 +81,8 @@ function Editor({ limit, onClose, allowDelete }: { limit: AppLimit; onClose: () 
         </View>
         <AppSwitch value={enabled} onValueChange={setEnabled} accessibilityLabel="Limite activo" />
       </View>
-      <AppText variant="display" align="center" style={{ opacity: enabled ? 1 : 0.4 }}>
-        {minutes} min
-      </AppText>
-      <View style={{ marginVertical: spacing.xl, opacity: enabled ? 1 : 0.4 }} pointerEvents={enabled ? 'auto' : 'none'}>
-        <AppSlider value={minutes} min={5} max={240} step={5} onChange={setMinutes} accessibilityLabel="Minutos por dia" formatValue={(v) => `${v} minutos`} />
+      <View style={{ marginBottom: spacing.xl }}>
+        <DurationPicker value={minutes} onChange={setMinutes} disabled={!enabled || limit.managed} />
       </View>
       {limit.managed ? (
         <AppText variant="small" tone="muted" align="center" testID="limit-managed">
@@ -82,7 +91,9 @@ function Editor({ limit, onClose, allowDelete }: { limit: AppLimit; onClose: () 
       ) : (
         <>
           <AppButton label="Guardar" onPress={save} loading={saving} testID="limit-save" />
-          {allowDelete ? <AppButton label="Remover aplicação" variant="ghost" onPress={remove} disabled={saving} style={{ marginTop: spacing.sm }} /> : null}
+          {allowDelete ? (
+            <AppButton label="Remover aplicação" variant="ghost" onPress={remove} disabled={saving} style={{ marginTop: spacing.sm }} />
+          ) : null}
         </>
       )}
     </AppBottomSheet>

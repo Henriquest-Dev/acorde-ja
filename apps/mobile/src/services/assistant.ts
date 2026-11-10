@@ -1,3 +1,4 @@
+import { helpLinesFor } from '@/features/country/countries';
 import { usePrefs } from '@/stores/prefs';
 import { getSupabase } from './supabase';
 
@@ -32,12 +33,23 @@ export async function sendToAssistant(params: {
   if (!sb) throw new AssistantUnavailableError('no_backend');
   const { data: session } = await sb.auth.getSession();
   if (!session.session) throw new AssistantUnavailableError('no_session');
-  const { goals, displayName } = usePrefs.getState().prefs;
+  const { goals, displayName, country, language, helpLines } = usePrefs.getState().prefs;
+  const lines = helpLinesFor(country, helpLines);
   const { data, error, response } = await sb.functions.invoke<AssistantReply>('assistant', {
     body: {
       conversationId: params.conversationId,
       message: params.message,
-      context: { goals, name: displayName || null, todayUsedMinutes: params.todayUsedMinutes, todayLimitMinutes: params.todayLimitMinutes },
+      context: {
+        goals,
+        name: displayName || null,
+        todayUsedMinutes: params.todayUsedMinutes,
+        todayLimitMinutes: params.todayLimitMinutes,
+        country: country || null,
+        language,
+        emergency: lines.emergency || lines.medical || null,
+        crisis: lines.crisis || null,
+        crisisName: lines.crisisName || null,
+      },
     },
   });
   if (error || !data) {

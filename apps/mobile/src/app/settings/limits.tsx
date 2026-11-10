@@ -1,7 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { FlatList, View } from 'react-native';
-import { AppBottomSheet, AppButton, AppEmptyState, AppHeader, AppInput, AppLimitCard, AppSkeleton, AppText, BrandIcon, ListRow, Screen, toast } from '@/components';
+import {
+  AppBottomSheet,
+  AppButton,
+  AppEmptyState,
+  AppHeader,
+  AppInput,
+  AppLimitCard,
+  AppSkeleton,
+  AppText,
+  BrandIcon,
+  ListRow,
+  Screen,
+  toast,
+} from '@/components';
+import { formatDurationLabel } from '@/features/limits/DurationPicker';
 import { LimitEditorSheet } from '@/features/limits/LimitEditorSheet';
 import { useLimits } from '@/hooks/queries';
 import { getInstalledApps, isNativeAvailable } from '@/native/device';
@@ -14,25 +28,40 @@ export default function LimitsSettings() {
   const [editing, setEditing] = useState<AppLimit | null>(null);
   const [picker, setPicker] = useState(false);
   const [filter, setFilter] = useState('');
-  const installed = useQuery({ queryKey: ['installed-apps'], queryFn: getInstalledApps, enabled: picker });
+  const installed = useQuery({
+    queryKey: ['installed-apps'],
+    queryFn: getInstalledApps,
+    enabled: picker,
+  });
   const total = (limits ?? []).filter((l) => l.enabled).reduce((s, l) => s + l.limitMinutes, 0);
 
   return (
     <Screen>
-      <AppHeader title="Limites de aplicações" back />
+      <AppHeader title="Apps que me distraem" back />
       <View style={{ gap: spacing.md }}>
         {isLoading
           ? [0, 1, 2].map((i) => <AppSkeleton key={i} height={60} />)
-          : limits?.map((l) => <AppLimitCard key={l.appId} appId={l.appId} name={l.name} minutes={l.limitMinutes} enabled={l.enabled} onPress={() => setEditing(l)} />)}
+          : limits?.map((l) => (
+              <AppLimitCard
+                key={l.appId}
+                appId={l.appId}
+                name={l.name}
+                minutes={l.limitMinutes}
+                enabled={l.enabled}
+                onPress={() => setEditing(l)}
+              />
+            ))}
       </View>
       <AppText variant="small" tone="muted" align="center" style={{ marginTop: spacing.lg }}>
-        Total diário: {total} minutos
+        Total diário: {formatDurationLabel(total)}
       </AppText>
       <AppButton
-        label="Adicionar aplicação"
+        label="Adicionar qualquer app"
         variant="secondary"
         style={{ marginTop: spacing.xl }}
-        onPress={() => (isNativeAvailable ? setPicker(true) : toast('A lista de aplicações instaladas só está disponível no Android.', 'error'))}
+        onPress={() =>
+          isNativeAvailable ? setPicker(true) : toast('A lista de aplicações instaladas só está disponível no Android.', 'error')
+        }
       />
       <AppText variant="caption" tone="muted" style={{ marginTop: spacing.md }}>
         Os limites reiniciam todos os dias à meia-noite (hora local). Aviso aos 80%, bloqueio aos 100%.
@@ -47,7 +76,9 @@ export default function LimitsSettings() {
         ) : installed.data?.length ? (
           <FlatList
             style={{ marginTop: spacing.md, maxHeight: 420 }}
-            data={installed.data.filter((a) => a.label.toLowerCase().includes(filter.toLowerCase()) && !limits?.some((l) => l.packageNames.includes(a.packageName)))}
+            data={installed.data.filter(
+              (a) => a.label.toLowerCase().includes(filter.toLowerCase()) && !limits?.some((l) => l.packageNames.includes(a.packageName)),
+            )}
             keyExtractor={(a) => a.packageName}
             renderItem={({ item }) => (
               <ListRow
@@ -57,7 +88,22 @@ export default function LimitsSettings() {
                 subtitle={item.packageName}
                 onPress={() => {
                   setPicker(false);
-                  setEditing({ appId: item.packageName, name: item.label, packageNames: [item.packageName], limitMinutes: 30, enabled: true, sort: 99, sinceMs: 0, managed: false });
+                  setFilter('');
+                  // No Android, abrir a segunda folha enquanto a primeira fecha faz com que não apareça.
+                  setTimeout(
+                    () =>
+                      setEditing({
+                        appId: item.packageName,
+                        name: item.label,
+                        packageNames: [item.packageName],
+                        limitMinutes: 30,
+                        enabled: true,
+                        sort: 99,
+                        sinceMs: 0,
+                        managed: false,
+                      }),
+                    350,
+                  );
                 }}
               />
             )}

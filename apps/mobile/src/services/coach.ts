@@ -72,6 +72,18 @@ export type VoiceMoment = 'intention' | 'limit' | 'relapse' | 'giveUp' | 'decisi
 export function voiceLine(moment: Exclude<VoiceMoment, 'decision'>, vars: { app?: string } = {}): string {
   const n = firstName();
   const app = vars.app ?? 'esta app';
+  if (usePrefs.getState().prefs.language === 'pt-BR') {
+    switch (moment) {
+      case 'intention':
+        return `Calma${n ? `, ${n}` : ''}. Respira. Você precisa mesmo do ${app} agora?`;
+      case 'limit':
+        return `Você chegou no seu limite${n ? `, ${n}` : ''}. Fez bem em parar. Amanhã o tempo volta.`;
+      case 'relapse':
+        return `Não desiste${n ? `, ${n}` : ''}. Uma recaída não apaga o caminho que você já fez. Amanhã é um novo dia.`;
+      case 'giveUp':
+        return `Calma${n ? `, ${n}` : ''}. Lembra por que você começou. Esse impulso passa.`;
+    }
+  }
   switch (moment) {
     case 'intention':
       return `Calma${n ? `, ${n}` : ''}. Respira. Precisas mesmo do ${app} agora?`;

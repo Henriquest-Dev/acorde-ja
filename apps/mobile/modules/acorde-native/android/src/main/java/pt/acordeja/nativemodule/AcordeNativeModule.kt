@@ -145,7 +145,7 @@ class AcordeNativeModule : Module() {
     }
 
     AsyncFunction("setAppLimit") { appId: String, packageNames: List<String>, limitMinutes: Int, enabled: Boolean ->
-      if (limitMinutes !in 1..720) throw InvalidArgumentException("O limite tem de estar entre 1 e 720 minutos")
+      if (limitMinutes !in 1..1440) throw InvalidArgumentException("O limite tem de estar entre 1 e 1440 minutos")
       val previous = store.config().limits.firstOrNull { it.appId == appId }
       store.upsertLimit(RuleStore.Limit(appId, packageNames, limitMinutes, enabled, previous?.sinceMs ?: System.currentTimeMillis()))
       if (store.enforcementEnabled) EnforcementService.start(context, invalidate = true)

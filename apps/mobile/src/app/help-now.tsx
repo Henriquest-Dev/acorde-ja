@@ -1,10 +1,11 @@
+import { HelpLinesCard } from '@/features/country/HelpLinesCard';
 import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { randomUUID } from 'expo-crypto';
 import { goBack } from '@/navigation/goBack';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Linking, View } from 'react-native';
+import { View } from 'react-native';
 import { AppButton, AppCard, AppHeader, AppRadioGroup, AppText, Screen } from '@/components';
 import { preferredStrategies, saveHelpOutcome } from '@/repositories/chat';
 import { usePrefs } from '@/stores/prefs';
@@ -147,22 +148,9 @@ export default function HelpNow() {
         </>
       )}
 
-      <AppCard style={{ marginTop: spacing.xxxl }}>
-        <AppText variant="small" weight="semibold">
-          Se estiver em perigo ou a pensar fazer-se mal
-        </AppText>
-        <AppText variant="small" tone="secondary" style={{ marginTop: spacing.xs }}>
-          Ligue 112. Para aconselhamento psicológico, contacte o SNS 24 (808 24 24 24). O offly não substitui ajuda profissional.
-        </AppText>
-        <View style={{ flexDirection: 'row', gap: spacing.lg, marginTop: spacing.md }}>
-          <AppText variant="small" style={{ textDecorationLine: 'underline' }} onPress={() => void Linking.openURL('tel:112')}>
-            Ligar 112
-          </AppText>
-          <AppText variant="small" style={{ textDecorationLine: 'underline' }} onPress={() => void Linking.openURL('tel:808242424')}>
-            Ligar SNS 24
-          </AppText>
-        </View>
-      </AppCard>
+      <View style={{ marginTop: spacing.xxxl }}>
+        <HelpLinesCard />
+      </View>
     </Screen>
   );
 }

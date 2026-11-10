@@ -11,7 +11,7 @@ export const appLimitSchema = z.object({
     .number()
     .int('Use minutos inteiros')
     .min(LIMIT_MIN_MINUTES, `Mínimo de ${LIMIT_MIN_MINUTES} minuto`)
-    .max(LIMIT_MAX_MINUTES, 'Máximo de 12 horas'),
+    .max(LIMIT_MAX_MINUTES, 'Máximo de 24 horas por dia'),
   enabled: z.boolean(),
 });
 

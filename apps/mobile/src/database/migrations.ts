@@ -158,4 +158,22 @@ export const MIGRATIONS: string[] = [
   `
   ALTER TABLE app_limits ADD COLUMN managed INTEGER NOT NULL DEFAULT 0;
   `,
+  // 5 — limite diário até 24 horas (era 12): a tabela é recriada para mudar a regra
+  `
+  CREATE TABLE app_limits_v5 (
+    app_id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    package_names TEXT NOT NULL DEFAULT '[]',
+    limit_minutes INTEGER NOT NULL CHECK (limit_minutes BETWEEN 1 AND 1440),
+    enabled INTEGER NOT NULL DEFAULT 1,
+    sort INTEGER NOT NULL DEFAULT 0,
+    updated_at INTEGER NOT NULL,
+    since_ms INTEGER NOT NULL DEFAULT 0,
+    managed INTEGER NOT NULL DEFAULT 0
+  );
+  INSERT INTO app_limits_v5 (app_id, name, package_names, limit_minutes, enabled, sort, updated_at, since_ms, managed)
+    SELECT app_id, name, package_names, limit_minutes, enabled, sort, updated_at, since_ms, managed FROM app_limits;
+  DROP TABLE app_limits;
+  ALTER TABLE app_limits_v5 RENAME TO app_limits;
+  `,
 ];

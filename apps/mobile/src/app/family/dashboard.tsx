@@ -11,13 +11,13 @@ import {
   AppErrorState,
   AppHeader,
   AppSkeleton,
-  AppSlider,
   AppText,
   BrandIcon,
   Screen,
   SectionTitle,
   toast,
 } from '@/components';
+import { DurationPicker, formatDurationLabel } from '@/features/limits/DurationPicker';
 import { clearMemberLimit, loadDashboard, removeMember, setMemberLimit, type DashboardMember } from '@/services/family';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radii, spacing } from '@/theme/tokens';
@@ -57,7 +57,7 @@ export default function FamilyDashboard() {
             <MemberCard key={m.memberId} member={m} onEditLimit={(appId) => setEditing({ member: m, appId })} onRemoved={() => void dash.refetch()} />
           ))}
           <AppText variant="caption" tone="muted">
-            Os números chegam quando cada telemóvel sincroniza (ao abrir o offly com internet). Nunca vê mensagens, conversas nem sites
+            Os números atualizam quando cada telemóvel abre o offly com internet. Nunca vê mensagens, conversas nem sites
             visitados.
           </AppText>
         </View>
@@ -142,7 +142,7 @@ function MemberCard({ member, onEditLimit, onRemoved }: { member: DashboardMembe
                 {blocked ? '  · bloqueado hoje' : ''}
               </AppText>
               <AppText variant="caption" tone={l.managed ? 'primary' : 'muted'}>
-                {l.enabled ? `${l.limitMinutes} min` : 'desligado'}
+                {l.enabled ? formatDurationLabel(l.limitMinutes) : 'desligado'}
                 {l.managed ? ' · definido por si' : ''}
               </AppText>
               <Feather name="chevron-right" size={16} color={colors.textMuted} />
@@ -193,7 +193,7 @@ function LimitSheet({ member, initialAppId, onClose, onSaved }: { member: Dashbo
     setBusy(true);
     try {
       await setMemberLimit(member.memberId, { appId: app.id, name: app.name, packageNames: [...app.androidPackages] }, minutes, true);
-      toast(`Limite de ${minutes} min no ${app.name} enviado para o telemóvel de ${member.name}.`);
+      toast(`Limite de ${formatDurationLabel(minutes)} no ${app.name} enviado para o telemóvel de ${member.name}.`);
       onSaved();
     } catch {
       toast('Não foi possível guardar o limite.', 'error');
@@ -221,10 +221,9 @@ function LimitSheet({ member, initialAppId, onClose, onSaved }: { member: Dashbo
           </Pressable>
         ))}
       </View>
-      <AppText variant="display" align="center" style={{ marginTop: spacing.lg }}>
-        {minutes} min
-      </AppText>
-      <AppSlider value={minutes} min={5} max={240} step={5} onChange={setMinutes} accessibilityLabel="Minutos por dia" formatValue={(v) => `${v} minutos`} />
+      <View style={{ marginTop: spacing.lg }}>
+        <DurationPicker value={minutes} onChange={setMinutes} />
+      </View>
       <AppButton label="Enviar limite" onPress={() => void save()} loading={busy} style={{ marginTop: spacing.lg }} testID="family-limit-save" />
       {current?.managed ? (
         <AppButton

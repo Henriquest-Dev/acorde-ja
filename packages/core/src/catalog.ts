@@ -54,4 +54,4 @@ export function findCatalogAppByPackage(pkg: string): CatalogApp | undefined {
 }
 
 export const LIMIT_MIN_MINUTES = 1;
-export const LIMIT_MAX_MINUTES = 12 * 60;
+export const LIMIT_MAX_MINUTES = 24 * 60;

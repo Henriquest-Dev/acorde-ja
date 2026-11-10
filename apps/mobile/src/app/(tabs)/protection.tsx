@@ -3,13 +3,13 @@ import { Feather } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Linking, StyleSheet, View } from 'react-native';
-import { AppCard, AppHeader, AppSwitch, AppText, FadeInItem, ListRow, PressableScale, Screen, SectionTitle, toast } from '@/components';
+import { StyleSheet, View } from 'react-native';
+import { AppHeader, AppSwitch, AppText, FadeInItem, ListRow, PressableScale, Screen, SectionTitle, toast } from '@/components';
 import { MindfulPause } from '@/components/MindfulPause';
-import { qk, useActiveChallenges, useInvalidate, useSchedules } from '@/hooks/queries';
+import { qk, useActiveChallenges, useInvalidate, useLimits, useSchedules } from '@/hooks/queries';
 import { GOAL_CATEGORY } from '@/services/challenge';
 import { sayMoment } from '@/services/coach';
-import { getCapabilities, openSystemSettings, shield } from '@/native/device';
+import { getCapabilities, shield } from '@/native/device';
 import { NIGHT_SCHEDULE_ID, upsertSchedule } from '@/repositories/limits';
 import { applyShield } from '@/services/shield';
 import { syncRulesToNative } from '@/services/usage';
@@ -17,16 +17,20 @@ import { usePrefs } from '@/stores/prefs';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 
-/** Proteção — sites e conteúdos (Digital Shield) e modo restrito. */
+/** Proteção — apps com limite, sites bloqueados e modo restrito. Só o essencial. */
 export default function Protection() {
   const { colors } = useTheme();
   const { prefs, update } = usePrefs();
   const { data: schedules } = useSchedules();
+  const { data: limits } = useLimits();
   const invalidate = useInvalidate();
   const [confirmStrictOff, setConfirmStrictOff] = useState(false);
   const status = useQuery({
     queryKey: ['shield-status'],
-    queryFn: async () => ({ caps: await getCapabilities(), stats: await shield.stats() }),
+    queryFn: async () => ({
+      caps: await getCapabilities(),
+      stats: await shield.stats(),
+    }),
   });
   const night = schedules?.find((s) => s.id === NIGHT_SCHEDULE_ID);
 
@@ -36,17 +40,25 @@ export default function Protection() {
   const lockMessage = `Desafio em curso: a protecção está trancada até ${formatDayMonth(new Date(lockedUntil - 1))}.`;
 
   const setShield = async (patch: Partial<ShieldConfig>) => {
-    const next = { ...prefs.shield, ...patch, categories: { ...prefs.shield.categories, ...patch.categories } };
+    const next = {
+      ...prefs.shield,
+      ...patch,
+      categories: { ...prefs.shield.categories, ...patch.categories },
+    };
     await update({ shield: next });
     const res = await applyShield(next);
     if (res.status === 'unsupported') toast(res.reason, 'error');
-    else if (res.status === 'permission_denied') toast('A ligação VPN local não foi autorizada. A protecção de sites está desligada.', 'error');
+    else if (res.status === 'permission_denied')
+      toast('A ligação VPN local não foi autorizada. A protecção de sites está desligada.', 'error');
     else if (res.status === 'active') toast(`Protecção activa (${res.domains} domínios).`);
     void status.refetch();
   };
 
   const setStrict = async (on: boolean) => {
-    await update((p) => ({ rules: { ...p.rules, strictMode: on }, shield: { ...p.shield, strictMode: on } }));
+    await update((p) => ({
+      rules: { ...p.rules, strictMode: on },
+      shield: { ...p.shield, strictMode: on },
+    }));
     await syncRulesToNative();
     await invalidate(qk.today);
   };
@@ -69,7 +81,11 @@ export default function Protection() {
       <AppHeader title="Proteção" back onBack={() => router.navigate('/')} />
       {lockedUntil > 0 ? (
         <FadeInItem index={0}>
-          <PressableScale onPress={() => router.push('/challenge')} accessibilityRole="button" style={[styles.lock, { borderColor: colors.text, backgroundColor: colors.card }]}>
+          <PressableScale
+            onPress={() => router.push('/challenge')}
+            accessibilityRole="button"
+            style={[styles.lock, { borderColor: colors.text, backgroundColor: colors.card }]}
+          >
             <Feather name="lock" size={18} color={colors.text} />
             <View style={{ flex: 1 }}>
               <AppText variant="bodyStrong">Protecção trancada pelo desafio</AppText>
@@ -81,6 +97,24 @@ export default function Protection() {
           </PressableScale>
         </FadeInItem>
       ) : null}
+      <View style={[styles.status, { borderColor: colors.border, backgroundColor: colors.card }]}>
+        <Feather name={shieldRunning ? 'shield' : 'shield-off'} size={18} color={colors.text} />
+        <AppText variant="small" style={{ flex: 1 }}>
+          {shieldRunning ? `Proteção ligada · ${status.data?.stats?.blockedToday ?? 0} bloqueios hoje` : 'Proteção de sites desligada'}
+        </AppText>
+      </View>
+
+      <SectionTitle>Apps</SectionTitle>
+      <ListRow
+        icon={{ set: 'mci', name: 'timer-sand' }}
+        title="Apps que me distraem"
+        subtitle={`${(limits ?? []).filter((l) => l.enabled).length} com limite · adicionar ou mudar o tempo`}
+        chevron
+        onPress={() => router.push('/settings/limits')}
+        testID="protection-apps"
+      />
+
+      <SectionTitle>Sites</SectionTitle>
       <View style={{ gap: spacing.md }}>
         <ListRow
           icon={{ set: 'mci', name: 'close-octagon-outline' }}
@@ -94,7 +128,9 @@ export default function Protection() {
                   return toast(lockMessage, 'error');
                 }
                 if (!v && prefs.shield.strictMode) return toast('O modo restrito impede desligar esta protecção.', 'error');
-                void setShield({ categories: { ...prefs.shield.categories, adult: v } });
+                void setShield({
+                  categories: { ...prefs.shield.categories, adult: v },
+                });
               }}
               accessibilityLabel="Bloquear sites adultos"
               testID="toggle-adult"
@@ -113,39 +149,23 @@ export default function Protection() {
                   return toast(lockMessage, 'error');
                 }
                 if (!v && prefs.shield.strictMode) return toast('O modo restrito impede desligar esta protecção.', 'error');
-                void setShield({ categories: { ...prefs.shield.categories, gambling: v } });
+                void setShield({
+                  categories: { ...prefs.shield.categories, gambling: v },
+                });
               }}
               accessibilityLabel="Bloquear sites de apostas"
               testID="toggle-gambling"
             />
           }
         />
-        <ListRow
-          icon={{ set: 'mci', name: 'advertisements-off' }}
-          title="Bloquear anúncios"
-          subtitle="Publicidade e rastreadores"
-          right={
-            <AppSwitch
-              value={prefs.shield.categories.ads ?? false}
-              onValueChange={(v) => void setShield({ categories: { ...prefs.shield.categories, ads: v } })}
-              accessibilityLabel="Bloquear anúncios"
-              testID="toggle-ads"
-            />
-          }
-        />
-        <ListRow icon={{ set: 'mci', name: 'tag-outline' }} title="Bloquear por categoria" chevron onPress={() => router.push('/shield/categories')} />
-        <ListRow icon={{ set: 'mci', name: 'format-list-checks' }} title="Lista personalizada" chevron onPress={() => router.push('/shield/custom')} />
-        <ListRow
-          icon={{ set: 'mci', name: 'cellphone-lock' }}
-          title="iPhone e iPad"
-          subtitle="Perfil de proteção sem App Store"
-          chevron
-          onPress={() => router.push('/shield/iphone')}
-        />
+      </View>
+
+      <SectionTitle>Mais força</SectionTitle>
+      <View style={{ gap: spacing.md }}>
         <ListRow
           icon={{ set: 'mci', name: 'timer-lock-outline' }}
           title="Modo restrito"
-          subtitle="Mais proteção"
+          subtitle="Não deixa desligar a proteção num impulso"
           right={
             <AppSwitch
               value={prefs.rules.strictMode}
@@ -160,70 +180,26 @@ export default function Protection() {
           title="Horário de bloqueio"
           subtitle={night ? `${night.start} - ${night.end}` : '22:00 - 07:00'}
           onPress={() => router.push('/settings/schedules')}
-          right={<AppSwitch value={night?.enabled ?? false} onValueChange={toggleNight} accessibilityLabel="Horário de bloqueio" testID="toggle-night" />}
+          right={
+            <AppSwitch
+              value={night?.enabled ?? false}
+              onValueChange={toggleNight}
+              accessibilityLabel="Horário de bloqueio"
+              testID="toggle-night"
+            />
+          }
         />
       </View>
 
-      <SectionTitle>Diagnóstico</SectionTitle>
-      <AppCard>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-          <Feather name={shieldRunning ? 'shield' : 'shield-off'} size={20} color={colors.text} />
-          <View style={{ flex: 1 }}>
-            <AppText variant="bodyStrong">{shieldRunning ? 'Filtro de sites activo' : 'Filtro de sites desligado'}</AppText>
-            <AppText variant="caption" tone="muted">
-              {status.data?.caps.canBlockSites === false
-                ? 'Indisponível neste dispositivo.'
-                : shieldRunning
-                  ? `${status.data?.stats?.blockedToday ?? 0} tentativas bloqueadas hoje · ${status.data?.stats?.domains ?? 0} domínios`
-                  : 'Active uma categoria ou adicione domínios à lista.'}
-            </AppText>
-            {status.data?.stats?.lastError ? (
-              <AppText variant="caption" tone="secondary">
-                Último erro: {status.data.stats.lastError}
-              </AppText>
-            ) : null}
-          </View>
-        </View>
-        <AppText variant="caption" tone="muted" style={{ marginTop: spacing.md }}>
-          Limitações: navegadores com «DNS seguro» activo, o «DNS privado» do Android em modo manual e outras VPNs podem contornar o
-          filtro. Para maior protecção, active a «VPN sempre activa» nas definições do sistema.
-        </AppText>
-        {status.data?.caps.platform === 'android' ? (
-          <View style={{ flexDirection: 'row', gap: spacing.lg, marginTop: spacing.md }}>
-            <AppText variant="small" style={{ textDecorationLine: 'underline' }} onPress={() => void openSystemSettings('vpn')}>
-              VPN sempre activa
-            </AppText>
-            <AppText variant="small" style={{ textDecorationLine: 'underline' }} onPress={() => void openSystemSettings('private_dns')}>
-              DNS privado
-            </AppText>
-          </View>
-        ) : null}
-      </AppCard>
-
-      {prefs.shield.categories.gambling || prefs.goals.includes('avoid_gambling') ? (
-        <>
-          <SectionTitle>Apoio para quem quer deixar de apostar</SectionTitle>
-          <AppCard>
-            <AppText variant="small" tone="secondary">
-              Em Portugal pode pedir a autoexclusão de todos os sites de jogo legais junto do SRIJ (Serviço de Regulação e Inspeção de
-              Jogos). É gratuita e pode escolher a duração.
-            </AppText>
-            <AppText
-              variant="small"
-              style={{ marginTop: spacing.md, textDecorationLine: 'underline' }}
-              onPress={() => void Linking.openURL('https://www.srij.turismodeportugal.pt/pt/sos-jogadores/autoexclusao-e-proibicao')}
-            >
-              Saber mais sobre a autoexclusão
-            </AppText>
-            <AppText variant="small" tone="secondary" style={{ marginTop: spacing.md }}>
-              Precisa de falar com alguém? Linha Vida 1414 (ICAD) — gratuita, anónima e confidencial, em dias úteis.
-            </AppText>
-            <AppText variant="small" style={{ marginTop: spacing.sm, textDecorationLine: 'underline' }} onPress={() => void Linking.openURL('tel:1414')}>
-              Ligar 1414
-            </AppText>
-          </AppCard>
-        </>
-      ) : null}
+      <View style={{ marginTop: spacing.xl }}>
+        <ListRow
+          icon={{ set: 'feather', name: 'life-buoy' }}
+          title="Preciso de ajuda agora"
+          subtitle="Linhas de apoio do teu país"
+          chevron
+          onPress={() => router.push('/help-now')}
+        />
+      </View>
 
       <MindfulPause
         visible={confirmStrictOff}
@@ -241,5 +217,21 @@ export default function Protection() {
 }
 
 const styles = StyleSheet.create({
-  lock: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.lg, borderRadius: 14, borderWidth: 1, marginBottom: spacing.lg },
+  status: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  lock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    padding: spacing.lg,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: spacing.lg,
+  },
 });

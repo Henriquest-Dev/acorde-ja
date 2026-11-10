@@ -14,6 +14,7 @@ type Form = z.infer<typeof signUpSchema>;
 
 const SAY: Record<string, string> = {
   idle: 'Vamos começar juntos. Leva menos de um minuto.',
+  name: 'Como te chamas? Gosto de chamar as pessoas pelo nome.',
   email: 'O teu email fica só para entrares na conta.',
   password: 'Uma palavra-passe forte. Eu fecho os olhos.',
   busy: 'A preparar tudo para ti…',
@@ -26,20 +27,27 @@ export default function SignUp() {
   const [busy, setBusy] = useState(false);
   const [state, setState] = useState<keyof typeof SAY>('idle');
   const [sentTo, setSentTo] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [nameError, setNameError] = useState<string | undefined>();
   const { control, handleSubmit, formState } = useForm<Form>({ resolver: zodResolver(signUpSchema), defaultValues: { email: '', password: '', confirm: '' } });
 
   const submit = handleSubmit(
     async (v) => {
+      if (name.trim().length < 2) {
+        setNameError('Escreve o teu nome (pelo menos 2 letras).');
+        setState('error');
+        return;
+      }
       setBusy(true);
       setState('busy');
       try {
-        const r = await signUp(v.email.trim(), v.password);
+        const r = await signUp(v.email.trim(), v.password, name);
         if (r.needsVerification) {
           setSentTo(v.email.trim());
           setState('sent');
         } else {
           setState('done');
-          afterAuth();
+          afterAuth(name);
         }
       } catch (e) {
         setState('error');
@@ -52,7 +60,7 @@ export default function SignUp() {
   );
 
   const mood: OffyMood =
-    state === 'email' ? 'listening' : state === 'password' ? 'calm' : state === 'busy' ? 'thinking' : state === 'error' ? 'anxious' : state === 'done' || state === 'sent' ? 'joy' : 'idle';
+    state === 'email' || state === 'name' ? 'listening' : state === 'password' ? 'calm' : state === 'busy' ? 'thinking' : state === 'error' ? 'anxious' : state === 'done' || state === 'sent' ? 'joy' : 'idle';
 
   if (sentTo) {
     return (
@@ -75,6 +83,20 @@ export default function SignUp() {
       subtitle="O teu primeiro passo para mais tempo livre."
       footer={<AppButton label="Já tenho conta — entrar" variant="ghost" onPress={() => router.replace('/auth/sign-in')} testID="go-sign-in" />}
     >
+      <AppInput
+        label="O teu nome"
+        value={name}
+        onChangeText={(t) => {
+          setName(t);
+          setNameError(undefined);
+        }}
+        onFocus={() => setState('name')}
+        autoCapitalize="words"
+        autoComplete="name"
+        maxLength={40}
+        error={nameError}
+        testID="sign-up-name"
+      />
       <Controller
         control={control}
         name="email"
@@ -107,7 +129,7 @@ export default function SignUp() {
       />
       <AppButton label="Criar conta" onPress={submit} loading={busy} />
       <AppText variant="caption" tone="muted" align="center">
-        Ao criar conta aceitas os Termos e a Política de Privacidade. Os teus dados só são sincronizados com o teu consentimento.
+        Ao criar conta aceitas os Termos e a Política de Privacidade, incluindo o assistente Offy.
       </AppText>
     </AuthShell>
   );

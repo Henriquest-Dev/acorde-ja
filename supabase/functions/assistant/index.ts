@@ -6,7 +6,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { chatBody } from '../_shared/coach.ts';
 import { orPost } from '../_shared/openrouter.ts';
-import { CRISIS_REPLY, SYSTEM_PROMPT, buildContextNote, detectCrisis, extractCards } from '../_shared/safety.ts';
+import { SYSTEM_PROMPT, buildContextNote, crisisReply, detectCrisis, extractCards } from '../_shared/safety.ts';
 
 const DAILY_MESSAGE_LIMIT = Number(Deno.env.get('AI_DAILY_MESSAGE_LIMIT') ?? '40');
 const HISTORY_TURNS = 12;
@@ -61,8 +61,9 @@ Deno.serve(async (req) => {
   await admin.from('ai_messages').insert({ conversation_id: conversationId, user_id: user.id, role: 'user', content: message, flagged_crisis: crisis });
 
   if (crisis) {
-    await admin.from('ai_messages').insert({ conversation_id: conversationId, user_id: user.id, role: 'assistant', content: CRISIS_REPLY, flagged_crisis: true });
-    return json({ reply: CRISIS_REPLY, conversationId, cards: ['help'], crisis: true });
+    const reply = crisisReply(body.context);
+    await admin.from('ai_messages').insert({ conversation_id: conversationId, user_id: user.id, role: 'assistant', content: reply, flagged_crisis: true });
+    return json({ reply, conversationId, cards: ['help'], crisis: true });
   }
 
   const { data: history } = await admin

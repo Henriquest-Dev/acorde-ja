@@ -1,3 +1,4 @@
+import type { HelpLines } from '@/features/country/countries';
 import { DEFAULT_RULE_SETTINGS, DEFAULT_SHIELD, type GoalId, type RuleSettings, type ShieldConfig } from '@acorde/core';
 import { create } from 'zustand';
 import { kvGet, kvSet } from '@/repositories/kv';
@@ -39,6 +40,12 @@ export interface Prefs {
   voiceCoach: boolean;
   /** Já entrou na conta neste telemóvel (o login é o primeiro ecrã; depois disso o app funciona offline). */
   signedIn: boolean;
+  /** País (ISO, ex.: PT, BR) — linhas de ajuda e variante da língua. */
+  country: string;
+  /** Português de Portugal ou do Brasil (tom e sotaque do assistente). */
+  language: 'pt-PT' | 'pt-BR';
+  /** Números confirmados ou escritos pela pessoa (sobrepõem-se aos do país). */
+  helpLines: Partial<HelpLines>;
   /** Som de fundo do ecrã de calma. */
   calmSound: 'none' | 'rain' | 'waves' | 'forest';
 }
@@ -78,6 +85,9 @@ export const DEFAULT_PREFS: Prefs = {
   voiceCoach: true,
   calmSound: 'rain',
   signedIn: false,
+  country: '',
+  language: 'pt-PT',
+  helpLines: {},
 };
 
 const KEY = 'prefs';

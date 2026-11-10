@@ -79,7 +79,7 @@ export function AppLimitCard({ appId, name, minutes, enabled = true, onPress }: 
           {name}
         </AppText>
         <AppText variant="caption" tone="muted">
-          {enabled ? `${minutes} minutos` : 'Sem limite'}
+          {enabled ? (minutes >= 60 ? `${Math.floor(minutes / 60)} h${minutes % 60 ? ` ${minutes % 60} min` : ''}` : `${minutes} minutos`) : 'Sem limite'}
         </AppText>
       </View>
       <Feather name="chevron-right" size={18} color={colors.textMuted} />

@@ -39,7 +39,7 @@ export default function Goals() {
         })}
       </View>
       <AppText variant="caption" tone="muted" style={{ marginTop: spacing.xl }}>
-        Pode escolher vários. Os objectivos ficam apenas no seu dispositivo, a menos que active a sincronização.
+        Podes escolher vários.
       </AppText>
     </Screen>
   );

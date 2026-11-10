@@ -1,8 +1,9 @@
+import { HelpLinesCard } from '@/features/country/HelpLinesCard';
 import { supportTicketSchema } from '@acorde/core';
 import { Feather } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useState } from 'react';
-import { Linking, Platform, Pressable, View } from 'react-native';
+import { Linking, Platform, View } from 'react-native';
 import { AppButton, AppCard, AppHeader, AppInput, AppText, Screen, SectionTitle, toast } from '@/components';
 import { useSession } from '@/services/auth';
 import { getSupabase } from '@/services/supabase';
@@ -91,22 +92,7 @@ export default function Help() {
       </View>
 
       <SectionTitle>Apoio especializado</SectionTitle>
-      <AppCard>
-        <AppText variant="small" tone="secondary">
-          O offly é uma ferramenta de autocontrolo e não substitui acompanhamento médico ou psicológico.
-        </AppText>
-        {[
-          { label: 'Emergência — 112', url: 'tel:112' },
-          { label: 'SNS 24 — 808 24 24 24', url: 'tel:808242424' },
-          { label: 'Linha Vida (comportamentos aditivos) — 1414', url: 'tel:1414' },
-        ].map((l) => (
-          <Pressable key={l.url} onPress={() => void Linking.openURL(l.url)} accessibilityRole="link" style={{ marginTop: spacing.md }}>
-            <AppText variant="small" style={{ textDecorationLine: 'underline' }}>
-              {l.label}
-            </AppText>
-          </Pressable>
-        ))}
-      </AppCard>
+      <HelpLinesCard />
     </Screen>
   );
 }
