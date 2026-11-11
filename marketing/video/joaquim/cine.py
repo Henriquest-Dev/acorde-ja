@@ -18,7 +18,12 @@ FONT_PATHS = [
 ]
 
 
+SHIFT = None  # (t0, dt): os instantes >= t0 atrasam dt (acerta a cena à narração sem mexer nos tempos internos)
+
+
 def F(t):
+    if SHIFT and t >= SHIFT[0]:
+        t = t + SHIFT[1]
     return 1 + int(round(t * FPS))
 
 

@@ -18,11 +18,12 @@ samples = int(sys.argv[3]) if len(sys.argv) > 3 else 32
 w = int(sys.argv[4]) if len(sys.argv) > 4 else 540
 h = int(sys.argv[5]) if len(sys.argv) > 5 else 960
 os.makedirs(out, exist_ok=True)
-D, fn = [(d, f) for n, d, f in shots.SHOTS if n == name][0]
+D, fn, shift = [(d, f, sh) for n, d, f, sh in shots.SHOTS if n == name][0]
 sc = cine.reset(w, h, samples)
 sc.render.threads_mode = 'FIXED'
 sc.render.threads = int(os.environ.get('THREADS', '4'))
-fn(D)
+cine.SHIFT = shift
+fn(D - (shift[1] if shift else 0))
 sc.frame_start, sc.frame_end = 1, int(round(D * cine.FPS))
 stills = os.environ.get('STILLS')
 t = time.time()

@@ -519,7 +519,7 @@ def s7c_dias(D):
             x, z = (c - 2.5) * 0.3, 2.05 - r * 0.3
             box(f'd{i}', (x, 0, z), (0.25, 0.05, 0.25), dark, 0.03)
             g = box(f'g{i}', (x, -0.03, z), (0.25, 0.05, 0.25), gold, 0.03)
-            t0 = 0.15 + i * 0.062
+            t0 = 0.15 + i * 0.075
             scl(g, 0, 0.001)
             scl(g, t0 - 0.02, 0.001)
             scl(g, t0 + 0.09, 1.12)
@@ -529,8 +529,8 @@ def s7c_dias(D):
     text('DIA', (-0.52, -0.05, 2.62), 0.26, tm)
     nums = [1, 4, 9, 15, 22, 30, 45, 60, 75, 90]
     for k, n in enumerate(nums):
-        a = 0.15 + k * 0.2
-        b = 0.15 + (k + 1) * 0.2 if k < len(nums) - 1 else 99
+        a = 0.15 + k * 0.25
+        b = 0.15 + (k + 1) * 0.25 if k < len(nums) - 1 else 99
         o = text(str(n), (0.38, -0.05, 2.62), 0.36 if n == 90 else 0.3, mat('cnum', (0, 0, 0), emit=6, emit_color=GOLD))
         show(o, [(0, k == 0 and a == 0), (a, True), (b, False)])
         if n == 90:
@@ -647,16 +647,18 @@ def s8_hoje(D):
              focus=[(0, 1.6), (1.5, 1.8), (4.2, 4.7), (D, 5.8)])
 
 
+# (nome, duração final, função, atraso): atraso = (t0, dt) -> os instantes >= t0 passam dt segundos mais tarde.
+# Durações acertadas à narração do ElevenLabs (60,4 s, a começar ao segundo 1,0).
 SHOTS = [
-    ('s1_escuro', 6.2, s1_escuro),
-    ('s2a_ecra', 2.8, s2a_ecra),
-    ('s2b_olhos', 3.1, s2b_olhos),
-    ('s3_apostas', 7.3, s3_apostas),
-    ('s4_bar', 5.2, s4_bar),
-    ('s5_perda', 6.7, s5_perda),
-    ('s6_virada', 7.0, s6_virada),
-    ('s7a_escudo', 3.3, s7a_escudo),
-    ('s7b_respirar', 3.4, s7b_respirar),
-    ('s7c_dias', 3.0, s7c_dias),
-    ('s8_hoje', 7.4, s8_hoje),
+    ('s1_escuro', 7.3, s1_escuro, None),
+    ('s2a_ecra', 2.8, s2a_ecra, None),
+    ('s2b_olhos', 4.3, s2b_olhos, (1.8, 1.2)),
+    ('s3_apostas', 8.2, s3_apostas, (4.4, 0.8)),
+    ('s4_bar', 5.5, s4_bar, None),
+    ('s5_perda', 6.6, s5_perda, None),
+    ('s6_virada', 7.2, s6_virada, (5.1, 0.4)),
+    ('s7a_escudo', 3.1, s7a_escudo, None),
+    ('s7b_respirar', 4.4, s7b_respirar, None),
+    ('s7c_dias', 3.3, s7c_dias, None),
+    ('s8_hoje', 7.0, s8_hoje, (0.6, 1.0)),
 ]

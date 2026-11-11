@@ -16,11 +16,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 FONT_DIR = os.path.join(HERE, '..', '..', '..', 'node_modules', '@expo-google-fonts', 'inter')
 BOLD = os.path.join(FONT_DIR, '700Bold', 'Inter_700Bold.ttf')
 MED = os.path.join(FONT_DIR, '500Medium', 'Inter_500Medium.ttf')
-FIX = {'ófale.': 'offly.', 'Ofle,': 'offly.', 'menustela.': 'Menos tela.', 'e': 'e'}
-EMPH = {'escuro', 'vídeos', 'apostas', 'recuperei', 'bebia', 'seis', 'amava', 'ajuda', 'offly', 'bloqueou', 'respirar', 'dias', 'durmo', 'presente', 'voltei', 'vida'}
+FIX = {'awfully.': 'offly.', 'Offly.': 'offly.', 'Pff,': '', '34': 'trinta e quatro', '90': 'noventa'}
+LEAD = 1.0  # a narração começa 1 s depois do início do vídeo
+EMPH = {'afundei', 'vergonha', 'filho', 'difícil', 'escuro', 'vídeos', 'apostas', 'recuperei', 'bebia', 'seis', 'amava', 'ajuda', 'offly', 'bloqueou', 'respirar', 'dias', 'durmo', 'presente', 'voltei', 'vida'}
 GOLD = '&H003DC5FF&'  # BGR de #FFC53D
-LOGO_T0 = 55.4
-TOTAL = 62.42
+LOGO_T0 = 59.1
+TOTAL = 63.4
 
 
 def ts(t):
@@ -28,7 +29,7 @@ def ts(t):
 
 
 def subs(tl, dst):
-    words = [(s, e, FIX.get(w, w)) for b in tl['blocks'] for s, e, w in b['words']]
+    words = [(s + LEAD, e + LEAD, FIX.get(w, w)) for s, e, w in tl if FIX.get(w, w)]
     out, cur = [], []
     for s, e, w in words:
         if cur and (len(cur) >= 3 or s - cur[-1][1] > 0.38 or re.search(r'[.?!,]$', cur[-1][2])):
@@ -73,10 +74,10 @@ def logo_frames(dst, dur):
     dist = np.sqrt((xx - cx) ** 2 + (yy - (cy + 40)) ** 2)
     for f in range(int(dur * FPS)):
         t = f / FPS
-        k = ease(t / 1.2)          # sol
-        kn = ease((t - 0.7) / 0.7)  # nome
-        k1 = ease((t - 1.5) / 0.5)  # Menos tela.
-        k2 = ease((t - 2.8) / 0.5)  # Mais vida.
+        k = ease(t / 0.8)          # sol
+        kn = ease((t - 0.15) / 0.6)  # nome
+        k1 = ease((t - 0.4) / 0.4)  # Menos tela.
+        k2 = ease((t - 1.2) / 0.5)  # Mais vida.
         out = ease((dur - t) / 0.8)
         glow = np.exp(-(dist / (520 + 60 * math.sin(t * 0.8))) ** 2) * (0.55 * k)
         bg = np.zeros((H, W, 3), dtype=np.float32)
@@ -144,7 +145,7 @@ def sfx(dst, cuts):
         return out * np.sin(np.pi * np.arange(m) / m) ** 2
 
     # zumbido grave e batimento na parte escura
-    dark_end = cuts['s6_virada'] + 5.6
+    dark_end = cuts['s6_virada'] + 6.0
     t = np.arange(int(dark_end * sr)) / sr
     drone = (np.sin(2 * np.pi * 48 * t) + 0.5 * np.sin(2 * np.pi * 72.5 * t + np.sin(t * 0.7))) * 0.05
     drone *= np.minimum(1, t / 3) * np.minimum(1, (dark_end - t) / 1.5)
@@ -160,26 +161,26 @@ def sfx(dst, cuts):
         add(cuts['s2a_ecra'] + off, whoosh(0.3, k % 2 == 0), 0.22)
     for i in range(15):  # moedas
         add(cuts['s3_apostas'] + 0.5 + i * 0.3, tone(2200 + 300 * (i % 3), 0.12, 0.04), 0.07, 0.3 + 0.03 * i)
-    add(cuts['s3_apostas'] + 5.3, tone(90, 1.2, 0.5), 0.5)
+    add(cuts['s3_apostas'] + 6.1, tone(90, 1.2, 0.5), 0.5)
     for i in range(5):  # copos
         add(cuts['s4_bar'] + 3.2 + i * 0.24, tone(1500 + 110 * i, 0.25, 0.07) + 0.4 * tone(3100 + 200 * i, 0.25, 0.04), 0.1, 0.25 + 0.12 * i)
     add(cuts['s5_perda'] + 6.2, tone(70, 1.0, 0.35) + 0.3 * rng.standard_normal(int(1.0 * sr)) * env(1.0, 0.002, 0.05), 0.5)  # porta
     # o Offy aparece
-    t0 = cuts['s6_virada'] + 5.85
+    t0 = cuts['s6_virada'] + 6.25
     add(t0 - 0.9, whoosh(1.0), 0.5)
     for j, f in enumerate((523.25, 659.25, 783.99, 1046.5)):
         add(t0 + j * 0.09, tone(f, 1.6, 0.6) + 0.3 * tone(f * 2, 1.6, 0.4), 0.11, 0.35 + 0.1 * j)
     for i in range(10):  # escudo
         add(cuts['s7a_escudo'] + 0.25 + i * 0.26 + 0.42, tone(300 + 40 * (i % 4), 0.25, 0.06) + 0.3 * tone(1200, 0.25, 0.03), 0.16, 0.2 + 0.06 * i)
-    m = int(3.4 * sr)  # respiração: sopro que sobe e desce
-    br = whoosh(3.4) * 0.5
+    m = int(4.4 * sr)  # respiração: sopro que sobe e desce
+    br = whoosh(4.4) * 0.5
     add(cuts['s7b_respirar'], br[:m], 0.45)
     for i in range(30):  # dias
-        add(cuts['s7c_dias'] + 0.15 + i * 0.062, tone(900 + i * 28, 0.08, 0.025), 0.07)
-    add(cuts['s7c_dias'] + 1.95, tone(1318.5, 1.0, 0.4) + tone(1567.98, 1.0, 0.4), 0.09)
+        add(cuts['s7c_dias'] + 0.15 + i * 0.075, tone(900 + i * 28, 0.08, 0.025), 0.07)
+    add(cuts['s7c_dias'] + 2.4, tone(1318.5, 1.0, 0.4) + tone(1567.98, 1.0, 0.4), 0.09)
     t0 = cuts['s8_hoje']
     for j, f in enumerate((392.0, 523.25, 659.25)):
-        add(t0 + 2.75 + j * 0.07, tone(f, 2.5, 1.0), 0.07)
+        add(t0 + 3.75 + j * 0.07, tone(f, 2.5, 1.0), 0.07)
     y = np.tanh(y * 1.2) / 1.2
     w = wave.open(dst, 'wb')
     w.setnchannels(2)
@@ -191,9 +192,9 @@ def sfx(dst, cuts):
 if __name__ == '__main__':
     work = sys.argv[1]
     sys.path.insert(0, HERE)
-    tl = json.load(open(os.path.join(work, 'timeline.json'), encoding='utf-8'))
-    durs = [('s1_escuro', 6.2), ('s2a_ecra', 2.8), ('s2b_olhos', 3.1), ('s3_apostas', 7.3), ('s4_bar', 5.2), ('s5_perda', 6.7), ('s6_virada', 7.0),
-            ('s7a_escudo', 3.3), ('s7b_respirar', 3.4), ('s7c_dias', 3.0), ('s8_hoje', 7.4)]
+    tl = json.load(open(os.path.join(work, 'words_el.json'), encoding='utf-8'))
+    import shots as _sh  # só para as durações (não precisa do Blender a correr)
+    durs = [(n, d) for n, d, _f, _s in _sh.SHOTS]
     cuts, t = {}, 0.0
     for n, d in durs:
         cuts[n] = t
