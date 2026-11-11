@@ -39,3 +39,27 @@
 
 - A história é ficção de marca: o offly é uma ferramenta de autocontrolo e a narração diz que ele também **pediu ajuda**. Não prometemos cura.
 - Música: a mesma dos episódios anteriores. Efeitos sonoros sintetizados (`post.py`).
+
+## Narração (um único bloco, ElevenLabs v3)
+
+853 caracteres de fala (1081 com etiquetas), cerca de 57 s ao ritmo dos episódios anteriores (14,8 caracteres por segundo). Pausas com reticências e linhas em branco; escrever «Ófli» para a pronúncia.
+
+```
+[quietly, tired] Meu nome é Joaquim. Eu tenho trinta e quatro anos... e durante muito tempo, eu vivi no escuro.
+
+[flat] Começou com vídeos. Só mais um. [whispers] Toda noite, só mais um... [tired] até o sol nascer sem eu ter dormido.
+
+[bitter] Depois vieram as apostas. Eu jurava que ia recuperar tudo na próxima rodada. [flat] Nunca recuperei. [exhales] Só afundei mais.
+
+[quietly] E pra esquecer... eu bebia. [flat] Um copo virava seis. E a vergonha continuava lá.
+
+[strained] Perdi dinheiro. Perdi o sono. Perdi a mim mesmo. [voice breaking] E quase perdi quem eu mais amava nesse mundo.
+
+[softly] Até que um dia, cansado de mim, eu fiz o mais difícil... [quietly] pedi ajuda. [calm] E naquela noite, eu baixei o Ófli.
+
+[calm, firm] Ele bloqueou o que me destruía. [softly] Quando a vontade vinha, ele me fazia parar... e respirar. Sem pressa. Sem culpa. [warm] Um dia de cada vez.
+
+[warm] Hoje faz noventa dias. Eu durmo. Eu estou presente. [softly, emotional] Meu filho corre pra mim... e eu estou lá. [exhales, smiling] Eu voltei.
+
+[calm, warm] Ófli. Menos tela... mais vida.
+```
