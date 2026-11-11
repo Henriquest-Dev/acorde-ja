@@ -1,0 +1,41 @@
+# Episódio 4: "Eu voltei" (o Joaquim) — 1 minuto
+
+- **Narrador:** o Joaquim, em primeira pessoa. Português do Brasil. Voz gerada com Fish Audio (um único pedido, para a voz ser a mesma do princípio ao fim).
+- **Duração:** 1:02, vertical 9:16, 24 fps (animação "a dois", 12 poses por segundo).
+- **Imagem:** personagens arredondadas tipo boneco de vinil (não cubos), Blender Cycles, profundidade de campo, luz a contar a história.
+- **Ideia visual:** cada vício tem uma cor — magenta (vídeos), verde (apostas), âmbar (álcool). No fundo do poço as três cores orbitam à volta dele. O Offy traz o azul e depois o dourado do nascer do sol.
+- **Código:** `marketing/video/joaquim/` (`cine.py` biblioteca, `shots.py` cenas, `render.py`, `render_all.sh`, `post.py`, `assemble.sh`).
+
+## Narração
+
+> Meu nome é Joaquim. E durante anos... eu vivi no escuro.
+> Começou com vídeos. Só mais um. Toda noite... só mais um.
+> Depois vieram as apostas. Eu jurava que ia recuperar tudo na próxima. Nunca recuperei.
+> E pra esquecer... eu bebia. Um copo virava seis.
+> Perdi dinheiro. Perdi o sono. E quase perdi quem eu mais amava.
+> Até que um dia, cansado de mim mesmo, eu pedi ajuda. E baixei o offly.
+> Ele bloqueou o que me destruía. E quando a vontade vinha, ele me fazia respirar. Um dia de cada vez.
+> Hoje faz noventa dias. Eu durmo. Eu estou presente. Eu voltei.
+> offly. Menos tela. Mais vida.
+
+## Cenas
+
+| Tempo | Cena | O que se vê |
+|---|---|---|
+| 0:00 a 0:06 | Quarto, 03:07 | O Joaquim na beira da cama, luar em tiras pela persiana, o telemóvel a tingir-lhe a cara de magenta. A câmara aproxima-se devagar. |
+| 0:06 a 0:09 | O ecrã | Ponto de vista: miniaturas desfocadas com selo 18+, o polegar a deslizar; o relógio salta de 03:07 para 05:10. |
+| 0:09 a 0:12 | Os olhos | Grande plano: olheiras, pálpebras a cair, o olhar a saltar. |
+| 0:12 a 0:19 | Apostas | Uma roleta enorme atrás dele, como um halo. As moedas saem-lhe do peito para a roleta; o saldo cai de R$ 2.340 para R$ 0; a luz verde morre em vermelho. |
+| 0:19 a 0:25 | Bar | Balcão, garrafas em contraluz. Bebe um copo; aparecem mais cinco; afunda-se no balcão. A câmara desliza de lado. |
+| 0:25 a 0:31 | O vazio | Sentado no chão, no escuro, com as três cores a orbitar. Ao fundo, a mulher e o filho na porta iluminada; viram-se e saem; a porta quase fecha. |
+| 0:31 a 0:38 | A viragem | Levanta a cabeça. Pede ajuda: a porta volta a abrir e a Marta espera. O telemóvel muda de cor e o Offy nasce dele; as três cores apagam-se. |
+| 0:38 a 0:42 | Bloquear | Um escudo à volta dele; os vídeos, as fichas e as garrafas desfazem-se ao bater. |
+| 0:42 a 0:45 | Respirar | Sentado, olhos fechados, com o Offy verde; um anel abre e fecha ao ritmo da respiração. |
+| 0:45 a 0:48 | Um dia de cada vez | Um calendário acende dia a dia; o contador chega a 90. |
+| 0:48 a 0:55 | Hoje | Nascer do sol. O Joaquim de barba feita e roupa clara; o filho corre para ele, ele ajoelha-se e abraça-o; a Marta chega. A câmara sobe e afasta-se. |
+| 0:55 a 1:02 | Logótipo | O sol do offly a nascer. "Menos tela. Mais vida." |
+
+## Notas
+
+- A história é ficção de marca: o offly é uma ferramenta de autocontrolo e a narração diz que ele também **pediu ajuda**. Não prometemos cura.
+- Música: a mesma dos episódios anteriores. Efeitos sonoros sintetizados (`post.py`).
