@@ -3,7 +3,7 @@
     "name": "offly",
     "slug": "acorde-ja",
     "scheme": "acordeja",
-    "version": "0.2.5",
+    "version": "0.2.6",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -29,7 +29,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "versionCode": 8,
+      "versionCode": 9,
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
