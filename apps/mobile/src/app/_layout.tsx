@@ -1,4 +1,11 @@
-import { Inter_200ExtraLight, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, useFonts } from '@expo-google-fonts/inter';
+import {
+  Inter_200ExtraLight,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  useFonts,
+} from '@expo-google-fonts/inter';
 import { QueryClient, QueryClientProvider, focusManager } from '@tanstack/react-query';
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as Network from 'expo-network';
@@ -17,6 +24,7 @@ import { ensureDefaultLimits, ensureDefaultSchedule } from '@/repositories/limit
 import { configureNotifications } from '@/services/notifications';
 import { enforceChallengeLock } from '@/services/challenge';
 import { refreshFamilyLink } from '@/services/family';
+import { refreshPlan } from '@/features/billing/access';
 import { pullProfile } from '@/services/profile';
 import { getSupabase, isBackendConfigured } from '@/services/supabase';
 import { flushSync } from '@/services/sync';
@@ -31,7 +39,11 @@ const queryClient = new QueryClient({
 });
 installDevWebHook(queryClient);
 
-AppState.addEventListener('change', (s) => focusManager.setFocused(s === 'active'));
+AppState.addEventListener('change', (s) => {
+  focusManager.setFocused(s === 'active');
+  // Ao voltar ao app, relê o plano (no máximo a cada 10 minutos).
+  if (s === 'active' && Date.now() - usePrefs.getState().prefs.plan.checkedAt > 10 * 60_000) void refreshPlan().catch(() => undefined);
+});
 
 /** Arranque: base de dados, preferências, valores por defeito e regras nativas. */
 async function bootSequence(loadPrefs: () => Promise<void>) {
@@ -111,7 +123,15 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider preference={prefs.theme}>
           <QueryClientProvider client={queryClient}>
-            <Shell bootError={bootError} onRetry={retryBoot} ready={ready && loaded} onboardingDone={prefs.onboardingDone} signedIn={prefs.signedIn} needsProfile={isBackendConfigured && prefs.signedIn && (prefs.displayName.trim().length < 2 || !prefs.country)} biometricLock={prefs.biometricLock} />
+            <Shell
+              bootError={bootError}
+              onRetry={retryBoot}
+              ready={ready && loaded}
+              onboardingDone={prefs.onboardingDone}
+              signedIn={prefs.signedIn}
+              needsProfile={isBackendConfigured && prefs.signedIn && (prefs.displayName.trim().length < 2 || !prefs.country)}
+              biometricLock={prefs.biometricLock}
+            />
           </QueryClientProvider>
         </ThemeProvider>
       </SafeAreaProvider>
@@ -176,8 +196,12 @@ function Shell({
         // Conta com sessão: sincronização automática (sem perguntar) e o perfil da conta no telemóvel.
         if (!usePrefs.getState().prefs.cloudSync) void usePrefs.getState().update({ cloudSync: true, aiConsent: true });
         void pullProfile().catch(() => undefined);
+        void refreshPlan().catch(() => undefined);
       }
-      if (event === 'SIGNED_OUT') set(false);
+      if (event === 'SIGNED_OUT') {
+        set(false);
+        void usePrefs.getState().update({ plan: { entitlements: [], until: null, checkedAt: Date.now() } });
+      }
     });
     return () => data.subscription.unsubscribe();
   }, [ready]);
@@ -240,7 +264,17 @@ function BiometricGate() {
 
   if (!locked) return null;
   return (
-    <View style={{ position: 'absolute', inset: 0, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center', gap: 20, padding: 32 }}>
+    <View
+      style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: colors.background,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 20,
+        padding: 32,
+      }}
+    >
       <AppLogo size={72} />
       <AppText variant="h2">offly</AppText>
       <AppButton label="Desbloquear" onPress={unlock} style={{ alignSelf: 'stretch' }} />

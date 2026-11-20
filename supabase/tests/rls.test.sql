@@ -230,6 +230,36 @@ select pg_temp.assert((select count(*) from public.entitlements where user_id = 
 select pg_temp.assert(public.apply_billing_event('e4', 'gw', 'lifetime.purchased', '00000000-0000-0000-0000-00000000000d', 'offly_pro_lifetime', 'ord_9', null) = 'applied', 'vitalício aplicado');
 select pg_temp.assert((select expires_at is null from public.entitlements where user_id = '00000000-0000-0000-0000-00000000000d' and entitlement = 'pro'), 'vitalício não expira');
 
+-- 11c. PayPal: só o servidor aplica; conta errada, reembolso e teste grátis repetido não desbloqueiam
+do $$ begin
+  set local role authenticated;
+  perform public.paypal_apply('00000000-0000-0000-0000-00000000000a', 'I-X1', 'offly_pro_monthly', 'active', now() + interval '30 days', 'P1', false, 'x', '{}');
+  raise exception 'FALHOU: utilizador aplicou estado PayPal';
+exception when insufficient_privilege then raise notice 'ok — utilizador não aplica estado PayPal';
+end $$;
+reset role;
+do $$ begin
+  set local role authenticated;
+  perform * from public.paypal_checkouts;
+  raise exception 'FALHOU: utilizador leu paypal_checkouts';
+exception when insufficient_privilege then raise notice 'ok — paypal_checkouts só no servidor';
+end $$;
+reset role;
+select pg_temp.assert(public.paypal_apply('00000000-0000-0000-0000-00000000000a', 'I-A1', 'offly_pro_monthly', 'active', now() + interval '30 days', 'PAYA', false, 'pp1') = 'applied', 'PayPal: pagamento aplicado');
+select pg_temp.assert((select count(*) from public.entitlements where user_id = '00000000-0000-0000-0000-00000000000a' and entitlement = 'pro') = 1, 'PayPal: Pro concedido');
+select pg_temp.assert(public.paypal_apply('00000000-0000-0000-0000-00000000000c', 'I-A1', 'offly_pro_monthly', 'active', now() + interval '30 days', 'PAYA', false, 'pp2') = 'user_mismatch', 'PayPal: subscrição de A não serve a C');
+select pg_temp.assert((select count(*) from public.entitlements where user_id = '00000000-0000-0000-0000-00000000000c') = 0, 'PayPal: C continua sem plano');
+select pg_temp.assert(public.paypal_apply('00000000-0000-0000-0000-00000000000a', 'I-A1', 'offly_pro_monthly', 'refunded', null, 'PAYA', false, 'pp3') = 'revoked', 'PayPal: reembolso retira');
+select pg_temp.assert((select count(*) from public.entitlements where user_id = '00000000-0000-0000-0000-00000000000a') = 0, 'PayPal: sem acesso após reembolso');
+select pg_temp.assert(public.paypal_apply('00000000-0000-0000-0000-00000000000a', 'I-A1', 'offly_pro_monthly', 'active', now() + interval '30 days', 'PAYA', false, 'pp4') = 'refunded_locked', 'PayPal: reembolso é definitivo');
+select pg_temp.assert(public.paypal_apply('00000000-0000-0000-0000-00000000000a', 'I-T1', 'offly_pro_yearly', 'active', now() + interval '7 days', 'PAYT', true, 'pp5') = 'applied', 'PayPal: primeiro teste grátis');
+select pg_temp.assert(public.paypal_apply('00000000-0000-0000-0000-00000000000c', 'I-T2', 'offly_pro_yearly', 'active', now() + interval '7 days', 'PAYT', true, 'pp6') = 'trial_reused', 'PayPal: mesmo PayPal noutra conta não repete o teste');
+select pg_temp.assert(public.paypal_apply('00000000-0000-0000-0000-00000000000c', 'I-T3', 'offly_pro_yearly', 'active', now() + interval '7 days', null, true, 'pp7') = 'trial_reused', 'PayPal: teste sem pagador identificado recusado');
+select pg_temp.assert(public.paypal_apply('00000000-0000-0000-0000-00000000000a', 'I-T1', 'offly_pro_yearly', 'expired', null, 'PAYT', false, 'pp8') = 'revoked', 'PayPal: expirado retira');
+select pg_temp.assert(public.paypal_apply('00000000-0000-0000-0000-00000000000a', 'I-P1', 'offly_pro_monthly', 'active', now() - interval '1 day', 'PAYA', false, 'pp9') = 'revoked', 'PayPal: período já acabado não concede');
+select pg_temp.assert((select count(*) from public.entitlements where user_id = '00000000-0000-0000-0000-00000000000a') = 0, 'PayPal: A sem acesso no fim');
+select pg_temp.assert(public.paypal_apply('00000000-0000-0000-0000-00000000000a', 'I-Z1', 'free_money', 'active', now() + interval '30 days', 'PAYA', false, 'pp10') = 'ignored', 'PayPal: produto desconhecido ignorado');
+
 -- 12. Conta eliminada: todos os dados em cascata
 delete from auth.users where id = '00000000-0000-0000-0000-00000000000b';
 select pg_temp.assert((select count(*) from public.usage_daily) = 0 and (select count(*) from public.habits) = 0

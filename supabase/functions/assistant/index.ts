@@ -41,8 +41,19 @@ Deno.serve(async (req) => {
   if (!message) return json({ error: 'empty_message' }, 400);
   const conversationId = typeof body.conversationId === 'string' && /^[0-9a-f-]{36}$/i.test(body.conversationId) ? body.conversationId : crypto.randomUUID();
 
+  // Crise primeiro: as linhas de ajuda são sempre gratuitas e sem limite.
+  const crisis = detectCrisis(message);
+  if (crisis) {
+    await admin.from('ai_conversations').upsert({ id: conversationId, user_id: user.id, last_message_at: new Date().toISOString() });
+    await admin.from('ai_messages').insert({ conversation_id: conversationId, user_id: user.id, role: 'user', content: message, flagged_crisis: true });
+    const reply = crisisReply(body.context);
+    await admin.from('ai_messages').insert({ conversation_id: conversationId, user_id: user.id, role: 'assistant', content: reply, flagged_crisis: true });
+    return json({ reply, conversationId, cards: ['help'], crisis: true });
+  }
+
+  // O assistente faz parte do plano Pro + IA (verificado aqui, nunca no telemóvel).
   if (REQUIRE_ENTITLEMENT) {
-    const { data: ent } = await admin.rpc('has_entitlement', { p_user: user.id, p_entitlement: 'premium' });
+    const { data: ent } = await admin.rpc('has_entitlement', { p_user: user.id, p_entitlement: 'pro_ai' });
     if (!ent) return json({ error: 'premium_required' }, 402);
   }
 
@@ -57,14 +68,7 @@ Deno.serve(async (req) => {
   if ((count ?? 0) >= DAILY_MESSAGE_LIMIT) return json({ error: 'rate_limited' }, 429);
 
   await admin.from('ai_conversations').upsert({ id: conversationId, user_id: user.id, last_message_at: new Date().toISOString() });
-  const crisis = detectCrisis(message);
-  await admin.from('ai_messages').insert({ conversation_id: conversationId, user_id: user.id, role: 'user', content: message, flagged_crisis: crisis });
-
-  if (crisis) {
-    const reply = crisisReply(body.context);
-    await admin.from('ai_messages').insert({ conversation_id: conversationId, user_id: user.id, role: 'assistant', content: reply, flagged_crisis: true });
-    return json({ reply, conversationId, cards: ['help'], crisis: true });
-  }
+  await admin.from('ai_messages').insert({ conversation_id: conversationId, user_id: user.id, role: 'user', content: message, flagged_crisis: false });
 
   const { data: history } = await admin
     .from('ai_messages')

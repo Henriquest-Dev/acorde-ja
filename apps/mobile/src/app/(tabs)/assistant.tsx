@@ -37,6 +37,7 @@ const OFFLINE_TEXT: Record<AssistantUnavailableError['reason'], string> = {
   rate_limited: 'Atingiu o limite de mensagens de hoje. Volte amanhã — entretanto, experimente o exercício abaixo.',
   network: 'Sem ligação à Internet. Entretanto, experimente o exercício abaixo — funciona offline.',
   server: 'O assistente está indisponível neste momento. Tente novamente daqui a pouco.',
+  premium: 'Conversar comigo faz parte do plano Pro + IA. Se for uma emergência, «Preciso de ajuda agora» é sempre gratuito.',
 };
 
 /** Assistente IA — apoio e orientação. */
@@ -164,6 +165,10 @@ export default function Assistant() {
         content: OFFLINE_TEXT[reason],
         kind: 'text',
       });
+      if (reason === 'premium') {
+        await push({ role: 'assistant', content: 'plans', kind: 'card:plans' });
+        await push({ role: 'assistant', content: 'help', kind: 'card:help' });
+      }
       if (wantsFamilyInvite(message))
         await push({
           role: 'assistant',
@@ -318,7 +323,6 @@ export default function Assistant() {
           <Feather name="send" size={16} color={colors.onAccent} style={{ marginLeft: -2 }} />
         </Pressable>
       </View>
-
     </KeyboardAvoidingView>
   );
 }
@@ -341,17 +345,23 @@ function Bubble({ message, voice, onFamily }: { message: ChatMessage; voice: boo
               sub: 'Apoio passo a passo',
               go: () => router.push('/help-now'),
             }
-          : card === 'family'
+          : card === 'plans'
             ? {
-                title: 'Adicionar telemóvel à família',
-                sub: 'Eu crio o grupo e dou-te o código',
-                go: onFamily,
+                title: 'Ver o plano Pro + IA',
+                sub: 'Assistente Offy sempre contigo',
+                go: () => router.push('/settings/billing'),
               }
-            : {
-                title: 'Exercício de respiração',
-                sub: '2 minutos',
-                go: () => router.push('/breathing'),
-              };
+            : card === 'family'
+              ? {
+                  title: 'Adicionar telemóvel à família',
+                  sub: 'Eu crio o grupo e dou-te o código',
+                  go: onFamily,
+                }
+              : {
+                  title: 'Exercício de respiração',
+                  sub: '2 minutos',
+                  go: () => router.push('/breathing'),
+                };
     return (
       <Pressable
         onPress={meta.go}

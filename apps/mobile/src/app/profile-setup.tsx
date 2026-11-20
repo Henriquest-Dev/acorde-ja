@@ -49,7 +49,7 @@ export default function ProfileSetup() {
     setSearch('');
   };
 
-  const useLocation = async () => {
+  const locate = async () => {
     setLocating(true);
     try {
       const perm = await Location.requestForegroundPermissionsAsync();
@@ -101,7 +101,7 @@ export default function ProfileSetup() {
 
         <View style={{ gap: spacing.sm }}>
           <AppText variant="bodyStrong">Onde vives?</AppText>
-          <AppButton label={locating ? 'A procurar…' : 'Usar a minha localização'} variant="secondary" trailingIcon="map-pin" loading={locating} onPress={() => void useLocation()} testID="profile-locate" />
+          <AppButton label={locating ? 'A procurar…' : 'Usar a minha localização'} variant="secondary" trailingIcon="map-pin" loading={locating} onPress={() => void locate()} testID="profile-locate" />
           {selected ? (
             <View style={[styles.selected, { borderColor: colors.text }]}>
               <Feather name="check" size={16} color={colors.text} />

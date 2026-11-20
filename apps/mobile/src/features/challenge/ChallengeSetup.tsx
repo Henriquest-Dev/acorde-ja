@@ -1,3 +1,4 @@
+import { requirePlan } from '@/features/billing/access';
 import { CHALLENGE_PRESETS, MAX_CHALLENGE_DAYS, MIN_CHALLENGE_DAYS, addDays, formatDayMonth, type ChallengeGoal } from '@acorde/core';
 import { Feather } from '@expo/vector-icons';
 import { useState } from 'react';
@@ -11,7 +12,15 @@ import { radii, spacing } from '@/theme/tokens';
  * Configuração do desafio: objectivos (pornografia / apostas) e data-limite.
  * Ao aceitar, a protecção de sites correspondente fica bloqueada até essa data.
  */
-export function ChallengeSetup({ initialGoals, onDone, onSkip }: { initialGoals: ChallengeGoal[]; onDone: () => void; onSkip?: () => void }) {
+export function ChallengeSetup({
+  initialGoals,
+  onDone,
+  onSkip,
+}: {
+  initialGoals: ChallengeGoal[];
+  onDone: () => void;
+  onSkip?: () => void;
+}) {
   const { colors } = useTheme();
   const [goals, setGoals] = useState<ChallengeGoal[]>(initialGoals.length ? initialGoals : ['avoid_porn']);
   const [days, setDays] = useState(30);
@@ -21,6 +30,7 @@ export function ChallengeSetup({ initialGoals, onDone, onSkip }: { initialGoals:
   const toggle = (g: ChallengeGoal) => setGoals((cur) => (cur.includes(g) ? cur.filter((x) => x !== g) : [...cur, g]));
 
   const accept = async () => {
+    if (!requirePlan('challenge')) return;
     setBusy(true);
     try {
       const r = await startChallenges(goals, days);
@@ -77,7 +87,14 @@ export function ChallengeSetup({ initialGoals, onDone, onSkip }: { initialGoals:
             </PressableScale>
           ))}
         </View>
-        <AppSlider value={days} min={MIN_CHALLENGE_DAYS} max={MAX_CHALLENGE_DAYS} onChange={setDays} accessibilityLabel="Duração do desafio em dias" formatValue={(v) => `${v} dias`} />
+        <AppSlider
+          value={days}
+          min={MIN_CHALLENGE_DAYS}
+          max={MAX_CHALLENGE_DAYS}
+          onChange={setDays}
+          accessibilityLabel="Duração do desafio em dias"
+          formatValue={(v) => `${v} dias`}
+        />
         <AppText variant="h3" align="center" style={{ marginTop: spacing.md }} testID="challenge-end">
           {days} dias · até {formatDayMonth(end)}
         </AppText>
@@ -90,8 +107,8 @@ export function ChallengeSetup({ initialGoals, onDone, onSkip }: { initialGoals:
             <View style={{ flex: 1, gap: 4 }}>
               <AppText variant="bodyStrong">A protecção fica trancada</AppText>
               <AppText variant="small" tone="muted">
-                Até {formatDayMonth(end)} não poderá desligar o bloqueio de sites no offly. Se desligar a VPN nas definições do
-                sistema, o offly volta a ligá-la. Todos os dias em que se mantiver firme ganha uma recompensa.
+                Até {formatDayMonth(end)} não poderá desligar o bloqueio de sites no offly. Se desligar a VPN nas definições do sistema, o
+                offly volta a ligá-la. Todos os dias em que se mantiver firme ganha uma recompensa.
               </AppText>
             </View>
           </View>

@@ -63,7 +63,12 @@ export const PLANS: Plan[] = [
       monthly: { usd: 6.99, productId: 'offly_pro_ai_monthly' },
       yearly: { usd: 44.99, productId: 'offly_pro_ai_yearly' },
     },
-    features: ['Tudo do Pro', 'Assistente IA para momentos de impulso', 'Planos de redução personalizados', 'Resumos semanais inteligentes'],
+    features: [
+      'Tudo do Pro',
+      'Assistente IA para momentos de impulso',
+      'Planos de redução personalizados',
+      'Resumos semanais inteligentes',
+    ],
   },
   {
     id: 'family',
@@ -71,13 +76,6 @@ export const PLANS: Plan[] = [
     tagline: 'Pro para até 5 pessoas',
     prices: { yearly: { usd: 49.99, productId: 'offly_family_yearly' } },
     features: ['Pro para 5 membros', 'Controlo parental transparente', 'Pedidos de tempo extra', 'Relatório familiar semanal'],
-  },
-  {
-    id: 'lifetime',
-    name: 'Vitalício',
-    tagline: 'Pague uma vez, use para sempre',
-    prices: { once: { usd: 59.99, productId: 'offly_pro_lifetime' } },
-    features: ['Tudo do Pro, para sempre', 'Sem renovações', 'Não inclui IA'],
   },
 ];
 

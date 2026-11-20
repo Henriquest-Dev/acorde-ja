@@ -14,6 +14,7 @@ import { NIGHT_SCHEDULE_ID, upsertSchedule } from '@/repositories/limits';
 import { applyShield } from '@/services/shield';
 import { syncRulesToNative } from '@/services/usage';
 import { usePrefs } from '@/stores/prefs';
+import { requirePlan } from '@/features/billing/access';
 import { useTheme } from '@/theme/ThemeProvider';
 import { spacing } from '@/theme/tokens';
 
@@ -128,6 +129,7 @@ export default function Protection() {
                   return toast(lockMessage, 'error');
                 }
                 if (!v && prefs.shield.strictMode) return toast('O modo restrito impede desligar esta protecção.', 'error');
+                if (v && !requirePlan('site_protection')) return;
                 void setShield({
                   categories: { ...prefs.shield.categories, adult: v },
                 });
@@ -149,6 +151,7 @@ export default function Protection() {
                   return toast(lockMessage, 'error');
                 }
                 if (!v && prefs.shield.strictMode) return toast('O modo restrito impede desligar esta protecção.', 'error');
+                if (v && !requirePlan('site_protection')) return;
                 void setShield({
                   categories: { ...prefs.shield.categories, gambling: v },
                 });
@@ -179,11 +182,11 @@ export default function Protection() {
           icon={{ set: 'mci', name: 'clock-outline' }}
           title="Horário de bloqueio"
           subtitle={night ? `${night.start} - ${night.end}` : '22:00 - 07:00'}
-          onPress={() => router.push('/settings/schedules')}
+          onPress={() => requirePlan('schedules') && router.push('/settings/schedules')}
           right={
             <AppSwitch
               value={night?.enabled ?? false}
-              onValueChange={toggleNight}
+              onValueChange={(v) => (v && !requirePlan('schedules') ? undefined : toggleNight(v))}
               accessibilityLabel="Horário de bloqueio"
               testID="toggle-night"
             />

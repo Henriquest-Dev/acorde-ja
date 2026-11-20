@@ -12,7 +12,7 @@ export interface AssistantReply {
 }
 
 export class AssistantUnavailableError extends Error {
-  constructor(public readonly reason: 'no_backend' | 'no_session' | 'rate_limited' | 'network' | 'server') {
+  constructor(public readonly reason: 'no_backend' | 'no_session' | 'rate_limited' | 'network' | 'server' | 'premium') {
     super(reason);
     this.name = 'AssistantUnavailableError';
   }
@@ -55,6 +55,7 @@ export async function sendToAssistant(params: {
   if (error || !data) {
     const status = response?.status;
     if (status === 429) throw new AssistantUnavailableError('rate_limited');
+    if (status === 402) throw new AssistantUnavailableError('premium');
     if (!status) throw new AssistantUnavailableError('network');
     throw new AssistantUnavailableError('server');
   }

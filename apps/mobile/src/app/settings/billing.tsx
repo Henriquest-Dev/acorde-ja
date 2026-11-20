@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppButton, AppHeader, AppText, FadeInItem, PressableScale, Screen, SectionTitle, SegmentedControl, toast } from '@/components';
 import {
+  BillingError,
   BillingNotConfiguredError,
   FamilyMemberError,
   SignInRequiredError,
@@ -14,6 +15,7 @@ import {
   restorePurchases,
 } from '@/features/billing/billing';
 import { COMPARISON, PLANS, formatUsd, yearlySavings, type BillingPeriod, type Plan, type PlanPrice } from '@/features/billing/plans';
+import { refreshPlan } from '@/features/billing/access';
 import { useTheme } from '@/theme/ThemeProvider';
 import { radii, spacing } from '@/theme/tokens';
 
@@ -49,14 +51,18 @@ export default function Billing() {
     try {
       const state = await purchase(plan.id, price.price);
       void ent.refetch();
+      void refreshPlan();
       toast(
         state.entitlements.length
           ? 'Plano activo. Obrigado!'
-          : 'Assim que o pagamento for confirmado, o plano fica activo. Toque em «Restaurar compras» para verificar.',
+          : 'Ainda não recebemos a confirmação do PayPal. Se pagaste, toca em «Restaurar compras» daqui a um minuto.',
       );
     } catch (e) {
       toast(
-        e instanceof BillingNotConfiguredError || e instanceof SignInRequiredError || e instanceof FamilyMemberError
+        e instanceof BillingError ||
+          e instanceof BillingNotConfiguredError ||
+          e instanceof SignInRequiredError ||
+          e instanceof FamilyMemberError
           ? e.message
           : 'Não foi possível abrir o pagamento.',
         'error',
@@ -301,11 +307,16 @@ export default function Billing() {
           void restorePurchases()
             .then((st) => {
               void ent.refetch();
+              void refreshPlan();
+              void refreshPlan();
               toast(st.entitlements.length ? 'Plano restaurado.' : 'Não encontrámos um plano activo nesta conta.');
             })
             .catch((e) =>
               toast(
-                e instanceof BillingNotConfiguredError || e instanceof SignInRequiredError || e instanceof FamilyMemberError
+                e instanceof BillingError ||
+                  e instanceof BillingNotConfiguredError ||
+                  e instanceof SignInRequiredError ||
+                  e instanceof FamilyMemberError
                   ? e.message
                   : 'Não foi possível restaurar.',
                 'error',

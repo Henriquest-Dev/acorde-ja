@@ -3,7 +3,9 @@ import { View } from 'react-native';
 import { AppBottomSheet, AppButton, AppSwitch, AppText, BrandIcon, toast } from '@/components';
 import { DurationPicker } from './DurationPicker';
 import { useInvalidate, qk } from '@/hooks/queries';
-import { deleteLimit, upsertLimit, type AppLimit } from '@/repositories/limits';
+import { FREE_LIMIT_APPS, requirePlan, canUse } from '@/features/billing/access';
+import { deleteLimit, listLimits, upsertLimit, type AppLimit } from '@/repositories/limits';
+import { usePrefs } from '@/stores/prefs';
 import { enqueueSync } from '@/services/sync';
 import { syncRulesToNative } from '@/services/usage';
 import { spacing } from '@/theme/tokens';
@@ -23,6 +25,11 @@ function Editor({ limit, onClose, allowDelete }: { limit: AppLimit; onClose: () 
   const invalidate = useInvalidate();
 
   const save = async () => {
+    // Plano Grátis: até 3 apps com limite activo.
+    if (enabled && !limit.managed && !canUse('unlimited_limits', usePrefs.getState().prefs.plan)) {
+      const others = (await listLimits()).filter((l) => l.enabled && l.appId !== limit.appId).length;
+      if (others >= FREE_LIMIT_APPS && !requirePlan('unlimited_limits')) return;
+    }
     setSaving(true);
     try {
       const saved = await upsertLimit({

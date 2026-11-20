@@ -1,24 +1,24 @@
 /**
- * Camada de compras com gateway EXTERNO (sem Google Play / App Store / RevenueCat).
+ * Pagamentos com PayPal Subscriptions (sem Google Play / App Store).
  *
- * Fluxo:
- * 1. O app abre EXPO_PUBLIC_CHECKOUT_URL no navegador com plan, product, uid e email.
- * 2. O cliente paga no gateway escolhido.
- * 3. O gateway (ou uma automação) envia um evento assinado para a Edge Function
- *    `billing-webhook`, que actualiza `subscriptions` e `entitlements` no Supabase.
- * 4. O app lê o plano activo com `my_entitlements()`.
- *
- * Sem EXPO_PUBLIC_CHECKOUT_URL as funções falham de forma explícita — nunca
- * simulam uma compra nem desbloqueiam funcionalidades.
+ * Fluxo, sem confiar no telemóvel:
+ * 1. O app pede à Edge Function `paypal-checkout` uma subscrição para o plano.
+ *    O servidor cria-a no PayPal já ligada a esta conta (custom_id = id do utilizador).
+ * 2. O cliente aprova e paga no PayPal (navegador seguro).
+ * 3. O app pede «confirm»: o servidor relê a subscrição na API do PayPal e só
+ *    concede o acesso pago (ou o teste grátis, uma vez por conta PayPal).
+ * 4. Renovações, cancelamentos e reembolsos chegam por `paypal-webhook`.
+ * 5. O app lê o plano activo com `my_entitlements()`.
  */
+import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import { getSupabase, isBackendConfigured } from '@/services/supabase';
 import type { PlanId, PlanPrice } from './plans';
 
-const checkoutUrl = process.env.EXPO_PUBLIC_CHECKOUT_URL ?? null;
-const portalUrl = process.env.EXPO_PUBLIC_BILLING_PORTAL_URL ?? null;
+/** Gerir ou cancelar a subscrição: pagamentos automáticos da conta PayPal. */
+const portalUrl = process.env.EXPO_PUBLIC_BILLING_PORTAL_URL ?? 'https://www.paypal.com/myaccount/autopay/';
 
-export const isBillingConfigured = Boolean(checkoutUrl && isBackendConfigured);
+export const isBillingConfigured = isBackendConfigured;
 
 export class BillingNotConfiguredError extends Error {
   constructor() {
@@ -64,18 +64,8 @@ export interface EntitlementState {
   entitlements: Entitlement[];
   /** Fim do período pago mais distante; null = vitalício ou sem plano. */
   expiresAt: number | null;
-}
-
-/** Monta o URL de checkout do gateway (exportado para testes). */
-export function buildCheckoutUrl(base: string, p: { planId: PlanId; productId: string; userId: string; email?: string | null }): string {
-  const u = new URL(base);
-  u.searchParams.set('plan', p.planId);
-  u.searchParams.set('product', p.productId);
-  // client_reference_id é o nome usado por vários gateways para «referência do cliente».
-  u.searchParams.set('client_reference_id', p.userId);
-  u.searchParams.set('uid', p.userId);
-  if (p.email) u.searchParams.set('email', p.email);
-  return u.toString();
+  /** O servidor não respondeu (sem internet): o resultado não deve substituir a cache. */
+  error?: boolean;
 }
 
 async function currentUser() {
@@ -86,28 +76,86 @@ async function currentUser() {
   return data.user;
 }
 
-/** Abre o checkout. O acesso só muda quando o webhook confirmar o pagamento. */
-export async function purchase(planId: PlanId, price: PlanPrice): Promise<EntitlementState> {
-  if (!isBillingConfigured || !checkoutUrl) throw new BillingNotConfiguredError();
-  const user = await currentUser();
+export class BillingError extends Error {
+  constructor(public code: string) {
+    super(BILLING_MESSAGES[code] ?? 'Não foi possível concluir o pagamento. Tenta de novo daqui a pouco.');
+    this.name = 'BillingError';
+  }
+}
+
+const BILLING_MESSAGES: Record<string, string> = {
+  already_subscribed: 'Já tens este plano activo.',
+  family_member: 'Estás incluído no plano da família. Só o responsável gere os pagamentos.',
+  rate_limited: 'Demasiadas tentativas. Espera um pouco e tenta de novo.',
+  not_configured: 'Os pagamentos ainda não estão ligados no servidor.',
+  paypal_unavailable: 'O PayPal não respondeu. Tenta de novo daqui a pouco.',
+};
+
+async function callCheckout<T>(body: Record<string, unknown>): Promise<T> {
+  const sb = getSupabase();
+  if (!sb) throw new BillingNotConfiguredError();
+  const { data, error } = await sb.functions.invoke<T>('paypal-checkout', { body });
+  if (error || !data) {
+    let code = 'internal';
+    try {
+      const ctx = (error as { context?: Response } | null)?.context;
+      const j = ctx ? ((await ctx.json()) as { error?: string }) : null;
+      if (j?.error) code = j.error;
+    } catch {
+      /* resposta sem JSON */
+    }
+    throw new BillingError(code);
+  }
+  return data;
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Abre o PayPal para o plano escolhido e, no regresso, pede ao servidor para confirmar.
+ * O acesso só muda se o servidor confirmar o pagamento no PayPal.
+ */
+export async function purchase(_planId: PlanId, price: PlanPrice): Promise<EntitlementState> {
+  if (!isBillingConfigured) throw new BillingNotConfiguredError();
+  await currentUser();
   const info = await fetchPlanInfo();
   if (!info.canPurchase) throw new FamilyMemberError(info.paidBy);
-  await WebBrowser.openBrowserAsync(buildCheckoutUrl(checkoutUrl, { planId, productId: price.productId, userId: user.id, email: user.email }));
+  const { approveUrl, subscriptionId } = await callCheckout<{ approveUrl: string; subscriptionId: string }>({
+    action: 'subscribe',
+    productId: price.productId,
+  });
+  await WebBrowser.openAuthSessionAsync(approveUrl, Linking.createURL('settings/billing'));
+  // A activação no PayPal pode demorar uns segundos: tenta confirmar algumas vezes.
+  for (let i = 0; i < 4; i++) {
+    try {
+      await callCheckout({ action: 'confirm', subscriptionId });
+    } catch {
+      /* tenta de novo */
+    }
+    const state = await fetchEntitlements();
+    if (state.entitlements.length) return state;
+    await sleep(2500);
+  }
   return fetchEntitlements();
 }
 
-/** «Restaurar»: relê o plano da conta no servidor. */
+/** «Restaurar»: o servidor relê no PayPal todas as subscrições desta conta. */
 export async function restorePurchases(): Promise<EntitlementState> {
   if (!isBillingConfigured) throw new BillingNotConfiguredError();
   await currentUser();
+  try {
+    await callCheckout({ action: 'sync' });
+  } catch {
+    /* mostra o que o servidor já tem */
+  }
   return fetchEntitlements();
 }
 
 export async function fetchEntitlements(): Promise<EntitlementState> {
   const sb = getSupabase();
-  if (!sb) return { entitlements: [], expiresAt: null };
+  if (!sb) return { entitlements: [], expiresAt: null, error: true };
   const { data, error } = await sb.rpc('my_entitlements');
-  if (error || !Array.isArray(data)) return { entitlements: [], expiresAt: null };
+  if (error || !Array.isArray(data)) return { entitlements: [], expiresAt: null, error: true };
   const rows = data as { entitlement: Entitlement; expires_at: string | null }[];
   const times = rows.map((r) => (r.expires_at ? Date.parse(r.expires_at) : null));
   return {

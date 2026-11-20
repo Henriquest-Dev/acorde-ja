@@ -1,3 +1,4 @@
+import { canUse } from '@/features/billing/access';
 import { MINUTE, RuleState, nextLocalMidnight } from '@acorde/core';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
@@ -61,7 +62,7 @@ export function useLauncher() {
       else toast('Disponível depois do foco.');
       return;
     }
-    if (e.limit && prefs.intentionSeconds > 0) {
+    if (e.limit && prefs.intentionSeconds > 0 && canUse('intention_pause', usePrefs.getState().prefs.plan)) {
       router.push({ pathname: '/launcher/pause', params: { pkg: e.packageName, label: e.label } });
       return;
     }

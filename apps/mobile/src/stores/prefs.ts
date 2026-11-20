@@ -48,6 +48,8 @@ export interface Prefs {
   helpLines: Partial<HelpLines>;
   /** Som de fundo do ecrã de calma. */
   calmSound: 'none' | 'rain' | 'waves' | 'forest';
+  /** Último plano confirmado pelo servidor (cache para funcionar offline). */
+  plan: { entitlements: string[]; until: number | null; checkedAt: number };
 }
 
 export interface LauncherPrefs {
@@ -88,6 +90,7 @@ export const DEFAULT_PREFS: Prefs = {
   country: '',
   language: 'pt-PT',
   helpLines: {},
+  plan: { entitlements: [], until: null, checkedAt: 0 },
 };
 
 const KEY = 'prefs';
@@ -110,7 +113,11 @@ export const usePrefs = create<PrefsState>((set, get) => ({
       ...DEFAULT_PREFS,
       ...stored,
       rules: { ...DEFAULT_PREFS.rules, ...stored.rules },
-      shield: { ...DEFAULT_PREFS.shield, ...stored.shield, categories: { ...DEFAULT_PREFS.shield.categories, ...stored.shield?.categories } },
+      shield: {
+        ...DEFAULT_PREFS.shield,
+        ...stored.shield,
+        categories: { ...DEFAULT_PREFS.shield.categories, ...stored.shield?.categories },
+      },
       notifications: { ...DEFAULT_PREFS.notifications, ...stored.notifications },
       focus: { ...DEFAULT_PREFS.focus, ...stored.focus },
       launcher: { ...DEFAULT_PREFS.launcher, ...stored.launcher },
